@@ -4,6 +4,7 @@ export interface CharStatsInterface {
     Variant?: ClassicServantEnum | SpecialServantEnum,
     Hp: number,
     Mana: number,
+    Caracteristics: CharStatsCharacteristics,
     Combat_Stats: FightStatsType
 }
 
@@ -31,6 +32,16 @@ enum SpecialServantEnum {
     Launcher,
     Avenger,
     Elder
+}
+
+type CharStatsCharacteristics = {
+    STR: string,
+    END: string,
+    AGI: string,
+    MANA: string,
+    MGK: string,
+    LUK: string,
+    SPD: string
 }
 
 type FightStatsType = {
@@ -75,3 +86,30 @@ Un jet de défense est un jet 1d100+SD.
 Un jet de coups critiques est un jet 1d50.
 Un jet de paramètre est 1d10+[valeur du paramètre]
  */
+export interface CreateCharFormInputInterface {
+    Name: string,
+    Type: CharEnum,
+    Variant?: ClassicServantEnum | SpecialServantEnum,
+    //Caracteristics
+    STR: string,
+    END: string,
+    AGI: string,
+    MANA: string,
+    MGK: string,
+    LUK: string,
+    SPD: string
+    //Combat_stats
+    Hp: number,
+    Mana: number,
+    Ini: number,
+    SA: number,
+    AA: number,
+    DMG: number,
+    PA: number,
+    SD: number,
+    AD: number,
+    ReD: number,
+    CdC: number,
+    CC: number,
+    AN: number 
+}

@@ -1,24 +1,9 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CharDataContext } from "../../context/CharDataContextProvider";
-import { CharStatsInterface } from "../../types/stats";
+import { CreateCharFormInputInterface } from "../../types/stats";
 import './CreateChar.css';
 
-type OmitedCharStats = Omit<CharStatsInterface, 'Combat_Stats'>;
-
-interface CreateCharFormInputInterface extends OmitedCharStats{
-    Ini: number,
-    SA: number,
-    AA: number,
-    DMG: number,
-    PA: number,
-    SD: number,
-    AD: number,
-    ReD: number,
-    CdC: number,
-    CC: number,
-    AN: number 
-}
 
 export function CreateChar() {
     const { charData, setCharData } = useContext( CharDataContext );
@@ -29,6 +14,13 @@ export function CreateChar() {
             Name: '',
             Hp: 0,
             Mana: 0,
+            STR: 'E',
+            END: 'E',
+            AGI: 'E',
+            MANA: 'E',
+            MGK: 'E',
+            LUK: 'E',
+            SPD: 'E',
             Ini: 0,
             SA: 0,
             AA: 0,
@@ -48,13 +40,14 @@ export function CreateChar() {
             return;
         }
 
-        const { Name, Type, Variant, Hp, Mana, ...combatStats } = data;
+        const { Name, Type, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Name,
             Type,
             Hp,
             Mana,
-            Combat_Stats: combatStats,
+            Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
+            Combat_Stats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
             ...(showVariant && { Variant })
         };
 
@@ -102,6 +95,35 @@ export function CreateChar() {
                                 </div>
                             :   <></>
                         }
+                        <div className="flex flex-row input_entry">
+                            <label htmlFor="input_str" className="input_label">STR :</label>
+                            <input type="text" {...register("STR", { required: "Enter a Valid STR Amount !" })} id="input_str" className="input_field" />
+                        </div>
+                        <div className="flex flex-row input_entry">
+                            <label htmlFor="input_end" className="input_label">END :</label>
+                            <input type="text" {...register("END", { required: "Enter a Valid END Amount !" })} id="input_end" className="input_field" />
+                        </div>
+                        <div className="flex flex-row input_entry">
+                            <label htmlFor="input_agi" className="input_label">AGI :</label>
+                            <input type="text" {...register("AGI", { required: "Enter a Valid AGI Amount !" })} id="input_agi" className="input_field" />
+                        </div>
+                        <div className="flex flex-row input_entry">
+                            <label htmlFor="input_mana1" className="input_label">MANA :</label>
+                            <input type="text" {...register("MANA", { required: "Enter a Valid MANA Amount !" })} id="input_mana1" className="input_field" />
+                        </div>
+                        <div className="flex flex-row input_entry">
+                            <label htmlFor="input_mgk" className="input_label">MGK :</label>
+                            <input type="text" {...register("MGK", { required: "Enter a Valid MGK Amount !" })} id="input_mgk" className="input_field" />
+                        </div>
+                        <div className="flex flex-row input_entry">
+                            <label htmlFor="input_luk" className="input_label">LUK :</label>
+                            <input type="text" {...register("LUK", { required: "Enter a Valid LUK Amount !" })} id="input_luk" className="input_field" />
+                        </div>
+                        <div className="flex flex-row input_entry">
+                            <label htmlFor="input_spd" className="input_label">SPD :</label>
+                            <input type="text" {...register("SPD", { required: "Enter a Valid SPD Amount !" })} id="input_spd" className="input_field" />
+                        </div>
+
                     </div>
                     {(showVariant)
                     ?   <div>
@@ -111,55 +133,55 @@ export function CreateChar() {
                     <div className="input_group">
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_hp" className="input_label">Hp :</label>
-                            <input type="number" {...register("Hp", {required: "Enter a Valid Hp Amount !"})} id="input_hp" className="indent-2 input_field" />
+                            <input type="number" {...register("Hp", {required: "Enter a Valid Hp Amount !"})} id="input_hp" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
-                            <label htmlFor="input_mana" className="input_label">Mana :</label>
-                            <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !"})} id="input_mana" className="indent-2 input_field" />
+                            <label htmlFor="input_mana2" className="input_label">Mana :</label>
+                            <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !"})} id="input_mana2" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_ini" className="input_label">Ini :</label>
-                            <input type="number" {...register("Ini", { required: "Enter a Valid Ini Amount !" })} id="input_ini" className="indent-2 input_field" />
+                            <input type="number" {...register("Ini", { required: "Enter a Valid Ini Amount !" })} id="input_ini" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_sa" className="input_label">SA :</label>
-                            <input type="number" {...register("SA", { required: "Enter a Valid SA Amount !" })} id="input_sa" className="indent-2 input_field" />
+                            <input type="number" {...register("SA", { required: "Enter a Valid SA Amount !" })} id="input_sa" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_aa" className="input_label">AA :</label>
-                            <input type="number" {...register("AA", { required: "Enter a Valid AA Amount !" })} id="input_aa" className="indent-2 input_field" />
+                            <input type="number" {...register("AA", { required: "Enter a Valid AA Amount !" })} id="input_aa" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_dmg" className="input_label">DMG :</label>
-                            <input type="number" {...register("DMG", { required: "Enter a Valid DMG Amount !" })} id="input_dmg" className="indent-2 input_field" />
+                            <input type="number" {...register("DMG", { required: "Enter a Valid DMG Amount !" })} id="input_dmg" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_pa" className="input_label">PA :</label>
-                            <input type="number" {...register("PA", { required: "Enter a Valid PA Amount !" })} id="input_pa" className="indent-2 input_field" />
+                            <input type="number" {...register("PA", { required: "Enter a Valid PA Amount !" })} id="input_pa" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_sd" className="input_label">SD :</label>
-                            <input type="number" {...register("SD", { required: "Enter a Valid SD Amount !" })} id="input_sd" className="indent-2 input_field" />
+                            <input type="number" {...register("SD", { required: "Enter a Valid SD Amount !" })} id="input_sd" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_ad" className="input_label">AD :</label>
-                            <input type="number" {...register("AD", { required: "Enter a Valid AD Amount !" })} id="input_ad" className="indent-2 input_field" />
+                            <input type="number" {...register("AD", { required: "Enter a Valid AD Amount !" })} id="input_ad" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_red" className="input_label">ReD :</label>
-                            <input type="number" {...register("ReD", { required: "Enter a Valid ReD Amount !" })} id="input_red" className="indent-2 input_field" />
+                            <input type="number" {...register("ReD", { required: "Enter a Valid ReD Amount !" })} id="input_red" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_cdc" className="input_label">CdC :</label>
-                            <input type="number" {...register("CdC", { required: "Enter a Valid CdC Amount !" })} id="input_cdc" className="indent-2 input_field" />
+                            <input type="number" {...register("CdC", { required: "Enter a Valid CdC Amount !" })} id="input_cdc" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_cc" className="input_label">CC :</label>
-                            <input type="number" {...register("CC", { required: "Enter a Valid CC Amount !" })} id="input_cc" className="indent-2 input_field" />
+                            <input type="number" {...register("CC", { required: "Enter a Valid CC Amount !" })} id="input_cc" className="input_field" />
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_an" className="input_label">AN :</label>
-                            <input type="number" {...register("AN", { required: "Enter a Valid AN Amount !" })} id="input_an" className="indent-2 input_field" />
+                            <input type="number" {...register("AN", { required: "Enter a Valid AN Amount !" })} id="input_an" className="input_field" />
                         </div>
                     </div>
                 </div>
