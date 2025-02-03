@@ -11,6 +11,10 @@ export function SaveFileControl () {
             return;
         }
 
+        if(!window.confirm(`Download le fichier des personnages ?`)){
+            return;
+        }
+
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(charData));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);

@@ -7,9 +7,9 @@ export interface CharStatsInterface {
     Combat_Stats: FightStatsType
 }
 
-enum CharEnum {
-    Servant,
+export enum CharEnum {
     Master,
+    Servant,
     PNJ
 }
 
@@ -29,7 +29,8 @@ enum SpecialServantEnum {
     Outsider,
     Monster,
     Launcher,
-    Avenger
+    Avenger,
+    Elder
 }
 
 type FightStatsType = {

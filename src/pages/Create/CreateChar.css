@@ -1,0 +1,34 @@
+.input_group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    border-collapse: collapse;
+}
+.input_entry {
+    width: 100%;
+    border: solid 1px black;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-collapse: collapse;
+}
+.input_label {
+    width: 100%;
+    background-color: #4B626E;
+    color: #F8EED6;
+    border: solid 1px black;
+    padding: 0.25em;
+    border-collapse: collapse;
+}
+.input_field {
+    width: 100%;
+    text-indent: 0.25em;
+    border: solid 1px black;
+    color: black;
+    padding: 0.25em;
+    border-collapse: collapse;
+}
+.variant_img{
+    border: 5px #4B626E solid;
+    border-radius: 10px;
+}
