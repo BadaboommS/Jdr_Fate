@@ -38,7 +38,6 @@
         font-weight: bold;
         z-index: 50;
         transition: all 0.1s;
-        transform: scale(0);
         transform-origin: left;
     }
     @media (min-width: 768px) {

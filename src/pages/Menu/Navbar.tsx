@@ -12,25 +12,25 @@ export default function Navbar () {
       <Link to='/file'>
         <div className='navbar-icon group'>
           <MdFileOpen size="32" />
-          <span className='navbar-tooltip group-hover:scale-100'><p>File</p></span>
+          <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>File</p></span>
         </div>
       </Link>
       <Link to='/create'>
-        <div className='navbar-icon'>
+        <div className='navbar-icon group'>
           <IoIosCreate size="32"/>
-          <span className='navbar-tooltip'><p>Create Character</p></span>
+          <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>Create Character</p></span>
         </div>
       </Link>
       <Link to='/list'>
-        <div className='navbar-icon'>
+        <div className='navbar-icon group'>
           <FaList size="32"/>
-          <span className='navbar-tooltip'><p>Character List</p></span>
+          <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>Character List</p></span>
         </div>
       </Link>
       <Link to='/fight'>
-        <div className='navbar-icon'>
+        <div className='navbar-icon group'>
           <LuSwords size="32"/>
-          <span className='navbar-tooltip'><p>Combat</p></span>
+          <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>Combat</p></span>
         </div>
       </Link>
     </div>
