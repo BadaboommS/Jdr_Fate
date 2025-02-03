@@ -1,4 +1,4 @@
-export default function CreateChar() {
+export function CreateChar() {
     return (
         <div>
             <h1>Create Character</h1>

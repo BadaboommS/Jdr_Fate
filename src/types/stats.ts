@@ -1,7 +1,35 @@
 export interface CharStatsInterface {
+    Name: string,
+    Type: CharEnum,
+    Variant?: ClassicServantEnum | SpecialServantEnum,
     Hp: number,
     Mana: number,
-    Stats: FightStatsType
+    Combat_Stats: FightStatsType
+}
+
+enum CharEnum {
+    Servant,
+    Master,
+    PNJ
+}
+
+enum ClassicServantEnum {
+    Archer,
+    Assassin,
+    Berserker,
+    Caster,
+    Lancer,
+    Rider,
+    Saber
+}
+
+enum SpecialServantEnum {
+    Slayer,
+    Shielder,
+    Outsider,
+    Monster,
+    Launcher,
+    Avenger
 }
 
 type FightStatsType = {

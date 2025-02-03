@@ -1,15 +1,15 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import FileContextProvider from './context/FileContextProvider';
-import FileMenu from './pages/Files/FileMenu';
-import CreateChar from './pages/Create/CreateChar';
-import FightingCalc from './pages/Fight/FightingCalc';
+import { CharDataContextProvider } from './context/CharDataContextProvider';
+import { FileMenu } from './pages/Files/FileMenu';
+import { CreateChar } from './pages/Create/CreateChar';
+import { FightingCalc } from './pages/Fight/FightingCalc';
+import { CharList } from './pages/CharList/CharList';
 import Layout from './Layout';
 import Error from './utils/Error';
-import CharList from './pages/CharList/CharList';
 
-const AdminRouter = () => {
+export function AppRouter () {
   return (
-    <FileContextProvider>
+    <CharDataContextProvider>
         <BrowserRouter>
             <Routes>
                 <Route element={<Layout />}>
@@ -24,8 +24,6 @@ const AdminRouter = () => {
                 </Route>
             </Routes>
         </BrowserRouter>
-    </FileContextProvider>
+    </CharDataContextProvider>
   )
 }
-
-export default AdminRouter
