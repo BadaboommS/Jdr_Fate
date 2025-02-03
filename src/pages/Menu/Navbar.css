@@ -21,6 +21,7 @@
         color: #ffffff; /* hover:text-white */
         border-radius: 0.75rem; /* hover:rounded-xl */
     }
+    
     .navbar-tooltip {
         display: none;
         position: absolute;
@@ -44,16 +45,5 @@
         .navbar-tooltip {
             display: block;
         }
-    }
-    .sidebar-hr {
-        background-color: #e2e8f0; /* bg-gray-200 */
-        border: 1px solid #e2e8f0; /* border-gray-200 */
-        border-radius: 9999px; /* rounded-full */
-        margin-left: 0.5rem; /* 2 * 0.25rem */
-        margin-right: 0.5rem; /* 2 * 0.25rem */
-    }
-    .dark .sidebar-hr {
-        background-color: #2d3748; /* dark:bg-gray-800 */
-        border-color: #2d3748; /* dark:border-gray-800 */
     }
 }
