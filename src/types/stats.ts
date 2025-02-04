@@ -4,7 +4,7 @@ export interface CharStatsInterface {
     Variant?: ClassicServantEnum | SpecialServantEnum,
     Hp: number,
     Mana: number,
-    Caracteristics: CharStatsCharacteristics,
+    Caracteristics: CharStatsCaracteristics,
     Combat_Stats: FightStatsType
 }
 
@@ -34,7 +34,7 @@ enum SpecialServantEnum {
     Elder
 }
 
-type CharStatsCharacteristics = {
+export type CharStatsCaracteristics = {
     STR: string,
     END: string,
     AGI: string,
@@ -43,6 +43,18 @@ type CharStatsCharacteristics = {
     LUK: string,
     SPD: string
 }
+
+export type CharStatsCaracteristicsValue = {
+    STR: number | null,
+    END: number | null,
+    AGI: number | null,
+    MANA: number | null,
+    MGK: number | null,
+    LUK: number | null,
+    SPD: number | null
+}
+
+export type StatKey = 'E' | 'D' | 'C' | 'B' | 'A' | 'EX';
 
 type FightStatsType = {
     Ini: number, // Initiative : bonus 1er tour
@@ -79,13 +91,6 @@ export enum NeutralFightningPoseEnum {
     Marm  // Marmotte
 }
 
-/* 
-Un jet d’initiative est un jet 1d10+SPD
-Un jet d’attaque est un jet 1d100+SA.
-Un jet de défense est un jet 1d100+SD.
-Un jet de coups critiques est un jet 1d50.
-Un jet de paramètre est 1d10+[valeur du paramètre]
- */
 export interface CreateCharFormInputInterface {
     Name: string,
     Type: CharEnum,
@@ -113,3 +118,11 @@ export interface CreateCharFormInputInterface {
     CC: number,
     AN: number 
 }
+
+/* 
+Un jet d’initiative est un jet 1d10+SPD
+Un jet d’attaque est un jet 1d100+SA.
+Un jet de défense est un jet 1d100+SD.
+Un jet de coups critiques est un jet 1d50.
+Un jet de paramètre est 1d10+[valeur du paramètre]
+ */

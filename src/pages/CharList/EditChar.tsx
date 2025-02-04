@@ -1,43 +1,48 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CharDataContext } from "../../context/CharDataContextProvider";
-import { CreateCharFormInputInterface } from "../../types/stats";
-import { calcFunctionService } from "./BaseStatsCalc";
-import './CreateChar.css';
+import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/stats";
 
+interface EditCharPropsInterface {
+    charStats: CharStatsInterface;
+    handleSetEdit: () => void;
+    handleCloseModal: () => void;
+}
 
-export function CreateChar() {
+export function EditChar ({ charStats, handleSetEdit, handleCloseModal }: EditCharPropsInterface) {
     const { charData, setCharData } = useContext( CharDataContext );
-    const [showVariant, setShowVariant] = useState(false);
+    const [showVariant, setShowVariant] = useState((charStats.Type as unknown as string) === "Servant" );
 
-    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({
+    const { register, handleSubmit, reset, watch} = useForm<CreateCharFormInputInterface>({
         defaultValues: {
-            Name: '',
-            Hp: 0,
-            Mana: 0,
-            STR: 'E',
-            END: 'E',
-            AGI: 'E',
-            MANA: 'E',
-            MGK: 'E',
-            LUK: 'E',
-            SPD: 'E',
-            Ini: 0,
-            SA: 0,
-            AA: 0,
-            DMG: 0,
-            PA: 0,
-            SD: 0,
-            AD: 0,
-            ReD: 0,
-            CdC: 0,
-            CC: 0,
-            AN: 0
+            Name: charStats.Name,
+            Type: charStats.Type,
+            Variant: charStats.Variant,
+            Hp: charStats.Hp,
+            Mana: charStats.Mana,
+            STR: charStats.Caracteristics.STR,
+            END: charStats.Caracteristics.END,
+            AGI: charStats.Caracteristics.AGI,
+            MANA: charStats.Caracteristics.MANA,
+            MGK: charStats.Caracteristics.MGK,
+            LUK: charStats.Caracteristics.LUK,
+            SPD: charStats.Caracteristics.SPD,
+            Ini: charStats.Combat_Stats.Ini,
+            SA: charStats.Combat_Stats.SA,
+            AA: charStats.Combat_Stats.AA,
+            DMG: charStats.Combat_Stats.DMG,
+            PA: charStats.Combat_Stats.PA,
+            SD: charStats.Combat_Stats.SD,
+            AD: charStats.Combat_Stats.AD,
+            ReD: charStats.Combat_Stats.ReD,
+            CdC: charStats.Combat_Stats.CdC,
+            CC: charStats.Combat_Stats.CC,
+            AN: charStats.Combat_Stats.AN
         }
     });
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
-        if(!window.confirm(`Valider l'ajout du personnage ?`)){
+        if(!window.confirm(`Confirmer l'Edit du character ?`)){
             return;
         }
 
@@ -55,42 +60,14 @@ export function CreateChar() {
         setCharData([...charData, newCharacterData]);
     }
     
-    function handleCalculStats(){
-        const CARACS = {
-            STR: getValues("STR"),
-            END: getValues("END"),
-            AGI: getValues("AGI"),
-            MANA: getValues("MANA"),
-            MGK: getValues("MGK"),
-            LUK: getValues("LUK"),
-            SPD: getValues("SPD")
-        }
-        const CARAC_VALUES = calcFunctionService.convertLetterToValue(CARACS);
-        console.log(CARAC_VALUES);
-        //set les values des stats de combats avec les retour des calc function
-        setValue('Hp', calcFunctionService.calculerPVMax(CARAC_VALUES));
-        setValue('Mana', 0);
-        setValue("Ini", 0);
-        setValue("SA", calcFunctionService.calculerSA(CARAC_VALUES));
-        setValue("AA", calcFunctionService.calculerAA(CARAC_VALUES));
-        setValue("DMG", calcFunctionService.calculerDegats(1, CARAC_VALUES, 1));
-        setValue("PA", 0);
-        setValue("SD", calcFunctionService.calculerSD(CARAC_VALUES));
-        setValue("AD", calcFunctionService.calculerAD(CARAC_VALUES));
-        setValue("ReD", 0);
-        setValue("CdC", 0);
-        setValue("CC", 0);
-        setValue("AN", 0);
-    }
-
     function handleReset(){
         setShowVariant(false);
         reset();
+        handleSetEdit();
     }
 
     return (
-        <div>
-            <h1 className="text-2xl text-center">Create Character</h1>
+        <>
             <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4">
                 <div className="flex justify-evenly">
                     <div className="input_group">
@@ -100,7 +77,7 @@ export function CreateChar() {
                         </div>
                         <div className="flex flex-row input_entry">
                             <label htmlFor="input_type" className="input_label">Character Type :</label>
-                            <select {...register("Type")} id="input_type" defaultValue="Master" onChange={(e) => e.target.value === "Servant"? setShowVariant(true): setShowVariant(false)} className="input_field">
+                            <select {...register("Type")} id="input_type" onChange={(e) => e.target.value === "Servant"? setShowVariant(true): setShowVariant(false)} className="input_field">
                                 <option value="Master">Master</option>
                                 <option value="Servant">Servant</option>
                                 <option value="PNJ">PNJ</option>
@@ -110,7 +87,7 @@ export function CreateChar() {
                             (showVariant)
                             ?   <div className="flex flex-row input_entry">
                                     <label htmlFor="input_variant" className="input_label">Servant Variant :</label>
-                                    <select {...register("Variant")} defaultValue="Archer" id="input_variant" className="input_field">
+                                    <select {...register("Variant")} id="input_variant" defaultValue="Archer" className="input_field">
                                         <option value="Archer">Archer</option>
                                         <option value="Assassin">Assassin</option>
                                         <option value="Berserker">Berserker</option>
@@ -131,7 +108,7 @@ export function CreateChar() {
                         }
                         <div className="input_entry">
                             <label htmlFor="input_str" className="input_label">STR :</label>
-                            <select {...register("STR")} id="input_str" defaultValue="E" className="input_field">
+                            <select {...register("STR")} id="input_str" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -142,7 +119,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_end" className="input_label">END :</label>
-                            <select {...register("END")} id="input_end" defaultValue="E" className="input_field">
+                            <select {...register("END")} id="input_end" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -153,7 +130,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_agi" className="input_label">AGI :</label>
-                            <select {...register("AGI")} id="input_agi" defaultValue="E" className="input_field">
+                            <select {...register("AGI")} id="input_agi" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -164,7 +141,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_mana1" className="input_label">MANA :</label>
-                            <select {...register("MANA")} id="input_mana1" defaultValue="E" className="input_field">
+                            <select {...register("MANA")} id="input_mana1" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -175,7 +152,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_mgk" className="input_label">MGK :</label>
-                            <select {...register("MGK")} id="input_mgk" defaultValue="E" className="input_field">
+                            <select {...register("MGK")} id="input_mgk" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -186,7 +163,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_luk" className="input_label">LUK :</label>
-                            <select {...register("LUK")} id="input_luk" defaultValue="E" className="input_field">
+                            <select {...register("LUK")} id="input_luk" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -197,7 +174,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_spd" className="input_label">SPD :</label>
-                            <select {...register("SPD")} id="input_spd" defaultValue="E" className="input_field">
+                            <select {...register("SPD")} id="input_spd" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -207,11 +184,13 @@ export function CreateChar() {
                             </select>
                         </div>
                     </div>
-                    {(showVariant)
-                    ?   <div>
-                            <img src={`./assets/servant_img/${watch("Variant") === undefined? 'Archer' : watch("Variant")}.png`} className="w-fit h-fit variant_img"/>
-                        </div>
-                    : <></>}
+                    {
+                        (showVariant)
+                        ?   <div>
+                                <img src={`./assets/servant_img/${watch("Variant") === undefined? "Archer" : watch("Variant")}.png`} className="w-fit h-fit variant_img"/>
+                            </div>
+                        : <></>
+                    }
                     <div className="input_group">
                         <div className="input_entry">
                             <label htmlFor="input_hp" className="input_label">Hp :</label>
@@ -269,12 +248,12 @@ export function CreateChar() {
                 </div>
                 <div className="flex justify-center py-5">
                     <div className="min-w-80 flex justify-around">
-                        <button type="submit" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Créer</button>
-                        <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleReset()}>Reset</button>
-                        <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleCalculStats()}>Calc</button>
+                        <button type="submit" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Update</button>
+                        <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleReset()}>Cancel Edit</button>
+                        <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleCloseModal()}>Cancel</button>
                     </div>
                 </div>
             </form>
-        </div>
+        </>
     );
-}
+};

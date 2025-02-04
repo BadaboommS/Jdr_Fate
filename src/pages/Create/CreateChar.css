@@ -9,7 +9,7 @@
     border: solid 1px black;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
     border-collapse: collapse;
 }
 .input_label {

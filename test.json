@@ -1,60 +1,87 @@
 [
     {
-        "Name": "Character 1",
-        "Hp": 85,
-        "Mana": 45,
-        "Type": "Master",
-        "Combat_Stats": {
-            "Ini": 7,
-            "SA": 56,
-            "AA": 3,
-            "DMG": 15,
-            "PA": 4,
-            "SD": 78,
-            "AD": 2,
-            "ReD": 6,
-            "CdC": 34,
-            "CC": 3,
-            "AN": 4
-        }
+      "Name": "Master Test",
+      "Type": "Master",
+      "Hp": 100,
+      "Mana": 50,
+      "Caracteristics": {
+        "STR": "B",
+        "END": "C",
+        "AGI": "A",
+        "MANA": "B",
+        "MGK": "A",
+        "LUK": "C",
+        "SPD": "B"
+      },
+      "Combat_Stats": {
+        "Ini": 15,
+        "SA": 80,
+        "AA": 3,
+        "DMG": 20,
+        "PA": 5,
+        "SD": 70,
+        "AD": 2,
+        "ReD": 10,
+        "CdC": 25,
+        "CC": 2,
+        "AN": 3
+      }
     },
     {
-        "Name": "Character 2",
-        "Hp": 72,
-        "Mana": 60,
-        "Type": "Servant",
-        "Variant": "Saber",
-        "Combat_Stats": {
-            "Ini": 5,
-            "SA": 89,
-            "AA": 2,
-            "DMG": 12,
-            "PA": 7,
-            "SD": 45,
-            "AD": 4,
-            "ReD": 3,
-            "CdC": 67,
-            "CC": 1,
-            "AN": 3
-        }
+      "Name": "Servant Test",
+      "Type": "Servant",
+      "Variant": "Assassin",
+      "Hp": 120,
+      "Mana": 60,
+      "Caracteristics": {
+        "STR": "A",
+        "END": "B",
+        "AGI": "A",
+        "MANA": "C",
+        "MGK": "B",
+        "LUK": "A",
+        "SPD": "A"
+      },
+      "Combat_Stats": {
+        "Ini": 20,
+        "SA": 90,
+        "AA": 4,
+        "DMG": 25,
+        "PA": 7,
+        "SD": 80,
+        "AD": 3,
+        "ReD": 15,
+        "CdC": 30,
+        "CC": 3,
+        "AN": 4
+      }
     },
     {
-        "Name": "Character 3",
-        "Hp": 95,
-        "Mana": 35,
-        "Type": "PNJ",
-        "Combat_Stats": {
-            "Ini": 9,
-            "SA": 23,
-            "AA": 4,
-            "DMG": 18,
-            "PA": 2,
-            "SD": 90,
-            "AD": 3,
-            "ReD": 8,
-            "CdC": 45,
-            "CC": 2,
-            "AN": 5
-        }
+      "Name": "PNJ Test",
+      "Type": "PNJ",
+      "Hp": 80,
+      "Mana": 40,
+      "Caracteristics": {
+        "STR": "C",
+        "END": "D",
+        "AGI": "B",
+        "MANA": "C",
+        "MGK": "D",
+        "LUK": "B",
+        "SPD": "C"
+      },
+      "Combat_Stats": {
+        "Ini": 10,
+        "SA": 60,
+        "AA": 2,
+        "DMG": 15,
+        "PA": 3,
+        "SD": 50,
+        "AD": 1,
+        "ReD": 5,
+        "CdC": 20,
+        "CC": 1,
+        "AN": 2
+      }
     }
   ]
