@@ -43,6 +43,7 @@ export function CreateChar() {
 
         const { Name, Type, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
+            Id: charData[0]? charData[charData.length - 1].Id + 1 : 0,
             Name,
             Type,
             Hp,
@@ -131,7 +132,7 @@ export function CreateChar() {
                         }
                         <div className="input_entry">
                             <label htmlFor="input_str" className="input_label">STR :</label>
-                            <select {...register("STR")} id="input_str" defaultValue="E" className="input_field">
+                            <select {...register("STR")} id="input_str" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -142,7 +143,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_end" className="input_label">END :</label>
-                            <select {...register("END")} id="input_end" defaultValue="E" className="input_field">
+                            <select {...register("END")} id="input_end" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -153,7 +154,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_agi" className="input_label">AGI :</label>
-                            <select {...register("AGI")} id="input_agi" defaultValue="E" className="input_field">
+                            <select {...register("AGI")} id="input_agi" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -164,7 +165,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_mana1" className="input_label">MANA :</label>
-                            <select {...register("MANA")} id="input_mana1" defaultValue="E" className="input_field">
+                            <select {...register("MANA")} id="input_mana1" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -175,7 +176,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_mgk" className="input_label">MGK :</label>
-                            <select {...register("MGK")} id="input_mgk" defaultValue="E" className="input_field">
+                            <select {...register("MGK")} id="input_mgk" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -186,7 +187,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_luk" className="input_label">LUK :</label>
-                            <select {...register("LUK")} id="input_luk" defaultValue="E" className="input_field">
+                            <select {...register("LUK")} id="input_luk" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>
@@ -197,7 +198,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_spd" className="input_label">SPD :</label>
-                            <select {...register("SPD")} id="input_spd" defaultValue="E" className="input_field">
+                            <select {...register("SPD")} id="input_spd" className="input_field">
                                 <option value="E">E</option>
                                 <option value="D">D</option>
                                 <option value="C">C</option>

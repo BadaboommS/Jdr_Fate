@@ -2,6 +2,7 @@
     {
       "Name": "Master Test",
       "Type": "Master",
+      "Id": 0,
       "Hp": 100,
       "Mana": 50,
       "Caracteristics": {
@@ -31,6 +32,7 @@
       "Name": "Servant Test",
       "Type": "Servant",
       "Variant": "Assassin",
+      "Id": 1,
       "Hp": 120,
       "Mana": 60,
       "Caracteristics": {
@@ -59,6 +61,7 @@
     {
       "Name": "PNJ Test",
       "Type": "PNJ",
+      "Id": 2,
       "Hp": 80,
       "Mana": 40,
       "Caracteristics": {

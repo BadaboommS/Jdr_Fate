@@ -1,39 +1,48 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Modal } from "../../global/Modal";
 import { EditChar } from './EditChar';
 import { CharInfo } from "./CharInfo";
 import { CharStatsInterface } from "../../types/stats";
+import { CharDataContext } from "../../context/CharDataContextProvider";
 
 interface CharItemPropsInterface {
     charStats: CharStatsInterface;
 }
 
 export function CharItem ({ charStats }: CharItemPropsInterface) {
+    const { charData, setCharData } = useContext(CharDataContext);
     const [showModal, setShowModal] = useState(false);
     const [editChar, setEditChar] = useState(false);
 
-    function handleCloseModal() {
+    function handleSetEdit(): void {
+        setEditChar(!editChar);
+    }
+
+    function handleCloseModal(): void {
         setEditChar(false);
         setShowModal(false);
     }
 
-    function handleSetEdit() {
-        setEditChar(!editChar);
+    function handleDeleteChar(charId: number): void {
+        if(!window.confirm('Delete le personnage ?')){
+            return;
+        }
+
+        setCharData(charData.filter((char: CharStatsInterface) => char.Id !== charId));
+        handleCloseModal();
     }
 
     return (
         <>
-            <div onClick={() => setShowModal(true)} className="flex justify-between gap-2 border border-black rounded">
-                <h2>{charStats.Name}</h2>
-                <p>Type: {charStats.Type}</p>
-                {charStats.Variant && <p>Variant: {charStats.Variant}</p>}
+            <div onClick={() => setShowModal(true)} className="border border-black p-2 bg-[#DFDDCF] text-black rounded cursor-pointer bg">
+                <h2>{charStats.Name} ({charStats.Type})</h2>
             </div>
             {
                 (showModal)
                 ?   <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                         {
                             (editChar)
-                            ? <EditChar charStats={charStats} handleSetEdit={handleSetEdit} handleCloseModal={handleCloseModal} />
+                            ? <EditChar charStats={charStats} handleSetEdit={handleSetEdit} handleCloseModal={handleCloseModal} handleDeleteChar={handleDeleteChar}/>
                             : <CharInfo charStats={charStats} handleSetEdit={handleSetEdit} handleCloseModal={handleCloseModal} />
                         }
                     </Modal>

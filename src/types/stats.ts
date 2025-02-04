@@ -1,4 +1,5 @@
 export interface CharStatsInterface {
+    Id: number,
     Name: string,
     Type: CharEnum,
     Variant?: ClassicServantEnum | SpecialServantEnum,
