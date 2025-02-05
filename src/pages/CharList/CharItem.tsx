@@ -35,7 +35,7 @@ export function CharItem ({ charStats }: CharItemPropsInterface) {
 
     return (
         <>
-            <div onClick={() => setShowModal(true)} className={`item_${charStats.Type} border border-black p-2 bg-[#DFDDCF] text-black rounded cursor-pointer bg`}>
+            <div onClick={() => setShowModal(true)} className={`item_${charStats.Type} border border-black p-2 bg-[#DFDDCF] text-black rounded cursor-pointer`}>
                 <h2>{charStats.Name} ({charStats.Type})</h2>
             </div>
             {

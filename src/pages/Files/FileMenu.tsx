@@ -3,7 +3,6 @@ import { DataContext } from '../../context/DataContext';
 import { CharStatsInterface } from '../../types/statsType';
 import { FilterSettingsInterface } from '../../types/filterType';
 import { FightListInterface } from '../../types/fightType';
-/* import { Login } from './Login'; */
 
 interface FileDataInterface {
     filter_data: FilterSettingsInterface[];
