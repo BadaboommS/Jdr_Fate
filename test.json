@@ -1,7 +1,15 @@
-[
+{
+  "settings": {
+    "filter": []
+  },
+  "characters_data": [
     {
       "Name": "Master Test",
       "Type": "Master",
+      "Joueur": "Hugo",
+      "Arme": "Couteau",
+      "ArmeDMG": 5,
+      "Armor": 10,
       "Id": 0,
       "Hp": 100,
       "Mana": 50,
@@ -31,6 +39,10 @@
     {
       "Name": "Servant Test",
       "Type": "Servant",
+      "Joueur": "Hugo",
+      "Arme": "Couteau",
+      "ArmeDMG": 5,
+      "Armor": 10,
       "Variant": "Assassin",
       "Id": 1,
       "Hp": 120,
@@ -61,6 +73,10 @@
     {
       "Name": "PNJ Test",
       "Type": "PNJ",
+      "Joueur": "Hugo",
+      "Arme": "Couteau",
+      "ArmeDMG": 5,
+      "Armor": 10,
       "Id": 2,
       "Hp": 80,
       "Mana": 40,
@@ -88,3 +104,4 @@
       }
     }
   ]
+}

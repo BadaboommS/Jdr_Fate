@@ -1,39 +1,21 @@
 export interface CharStatsInterface {
     Id: number,
     Name: string,
-    Type: CharEnum,
-    Variant?: ClassicServantEnum | SpecialServantEnum,
+    Joueur: string,
+    Type: string,
+    Variant?: string,
+    Arme: string,
+    ArmeDMG: number,
+    Armor: number,
     Hp: number,
     Mana: number,
     Caracteristics: CharStatsCaracteristics,
     Combat_Stats: FightStatsType
 }
 
-export enum CharEnum {
-    Master,
-    Servant,
-    PNJ
-}
-
-enum ClassicServantEnum {
-    Archer,
-    Assassin,
-    Berserker,
-    Caster,
-    Lancer,
-    Rider,
-    Saber
-}
-
-enum SpecialServantEnum {
-    Slayer,
-    Shielder,
-    Outsider,
-    Monster,
-    Launcher,
-    Avenger,
-    Elder
-}
+/* enum CharEnum { Master, Servant, PNJ };
+enum ClassicServantEnum { Archer, Assassin, Berserker, Caster, Lancer, Rider, Saber };
+enum SpecialServantEnum { Slayer, Shielder, Outsider, Monster, Launcher, Avenger, Elder }; */
 
 export type CharStatsCaracteristics = {
     STR: string,
@@ -46,13 +28,13 @@ export type CharStatsCaracteristics = {
 }
 
 export type CharStatsCaracteristicsValue = {
-    STR: number | null,
-    END: number | null,
-    AGI: number | null,
-    MANA: number | null,
-    MGK: number | null,
-    LUK: number | null,
-    SPD: number | null
+    STR: number,
+    END: number,
+    AGI: number,
+    MANA: number,
+    MGK: number,
+    LUK: number,
+    SPD: number
 }
 
 export type StatKey = 'E' | 'D' | 'C' | 'B' | 'A' | 'EX';
@@ -94,8 +76,12 @@ export enum NeutralFightningPoseEnum {
 
 export interface CreateCharFormInputInterface {
     Name: string,
-    Type: CharEnum,
-    Variant?: ClassicServantEnum | SpecialServantEnum,
+    Joueur: string,
+    Type: string,
+    Variant?: string,
+    Arme: string,
+    ArmeDMG: number,
+    Armor: number,
     //Caracteristics
     STR: string,
     END: string,

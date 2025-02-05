@@ -1,4 +1,4 @@
-import { CharStatsInterface } from "../../types/stats";
+import { CharStatsInterface } from "../../types/statsType";
 
 interface CharInfoPropsInterface {
     charStats: CharStatsInterface;
@@ -17,8 +17,24 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
                         <div className="input_field">{charStats.Name}</div>
                     </div>
                     <div className="input_entry">
+                        <div className="input_label">Joueur: </div>
+                        <div className="input_field">{charStats.Joueur}</div>
+                    </div>
+                    <div className="input_entry">
                         <div className="input_label">Type: </div>
                         <div className="input_field">{charStats.Type}</div>
+                    </div>
+                    <div className="input_entry">
+                        <div className="input_label">Arme: </div>
+                        <div className="input_field">{charStats.Arme}</div>
+                    </div>
+                    <div className="input_entry">
+                        <div className="input_label">ArmeDMG: </div>
+                        <div className="input_field">{charStats.ArmeDMG}</div>
+                    </div>
+                    <div className="input_entry">
+                        <div className="input_label">Armor: </div>
+                        <div className="input_field">{charStats.Armor}</div>
                     </div>
                     {charStats.Variant && (
                         <div className="input_entry">

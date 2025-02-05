@@ -1,51 +1,31 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CharDataContext } from "../../context/CharDataContextProvider";
-import { CreateCharFormInputInterface } from "../../types/stats";
-import { calcFunctionService } from "./BaseStatsCalc";
-import './CreateChar.css';
+import { CreateCharFormInputInterface, StatKey } from "../../types/statsType";
+import { calcFunctionService } from "../../function/BaseStatsCalc";
+import './createChar.css';
 
 
 export function CreateChar() {
     const { charData, setCharData } = useContext( CharDataContext );
     const [showVariant, setShowVariant] = useState(false);
 
-    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({
-        defaultValues: {
-            Name: '',
-            Hp: 0,
-            Mana: 0,
-            STR: 'E',
-            END: 'E',
-            AGI: 'E',
-            MANA: 'E',
-            MGK: 'E',
-            LUK: 'E',
-            SPD: 'E',
-            Ini: 0,
-            SA: 0,
-            AA: 0,
-            DMG: 0,
-            PA: 0,
-            SD: 0,
-            AD: 0,
-            ReD: 0,
-            CdC: 0,
-            CC: 0,
-            AN: 0
-        }
-    });
+    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', Arme: '', ArmeDMG: 0, Armor: 0, Hp: 0, Mana: 0, STR: 'E', END: 'E', AGI: 'E', MANA: 'E', MGK: 'E', LUK: 'E', SPD: 'E', Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0 } });
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Valider l'ajout du personnage ?`)){
             return;
         }
 
-        const { Name, Type, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, Arme, ArmeDMG, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Id: charData[0]? charData[charData.length - 1].Id + 1 : 0,
             Name,
+            Joueur,
             Type,
+            Arme,
+            ArmeDMG,
+            Armor,
             Hp,
             Mana,
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
@@ -57,30 +37,22 @@ export function CreateChar() {
     }
     
     function handleCalculStats(){
-        const CARACS = {
-            STR: getValues("STR"),
-            END: getValues("END"),
-            AGI: getValues("AGI"),
-            MANA: getValues("MANA"),
-            MGK: getValues("MGK"),
-            LUK: getValues("LUK"),
-            SPD: getValues("SPD")
-        }
+        const CARACS = { STR: getValues("STR"), END: getValues("END"), AGI: getValues("AGI"), MANA: getValues("MANA"), MGK: getValues("MGK"), LUK: getValues("LUK"), SPD: getValues("SPD") };
         const CARAC_VALUES = calcFunctionService.convertLetterToValue(CARACS);
-        console.log(CARAC_VALUES);
+        
         //set les values des stats de combats avec les retour des calc function
-        setValue('Hp', calcFunctionService.calculerPVMax(CARAC_VALUES));
-        setValue('Mana', 0);
-        setValue("Ini", 0);
-        setValue("SA", calcFunctionService.calculerSA(CARAC_VALUES));
-        setValue("AA", calcFunctionService.calculerAA(CARAC_VALUES));
-        setValue("DMG", calcFunctionService.calculerDegats(1, CARAC_VALUES, 1));
+        setValue('Hp', calcFunctionService.calculerPVMax(CARACS.END as StatKey)); // END
+        setValue('Mana', CARAC_VALUES.MANA);
+        setValue("Ini", calcFunctionService.calculerIni(CARAC_VALUES.SPD));
+        setValue("SA", calcFunctionService.calculerSA(CARAC_VALUES.STR, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
+        setValue("AA", calcFunctionService.calculerAA(CARAC_VALUES.STR, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
+        setValue("DMG", calcFunctionService.calculerDMG(CARAC_VALUES.STR));
         setValue("PA", 0);
-        setValue("SD", calcFunctionService.calculerSD(CARAC_VALUES));
-        setValue("AD", calcFunctionService.calculerAD(CARAC_VALUES));
-        setValue("ReD", 0);
-        setValue("CdC", 0);
-        setValue("CC", 0);
+        setValue("SD", calcFunctionService.calculerSD(CARAC_VALUES.END, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
+        setValue("AD", calcFunctionService.calculerAD(CARAC_VALUES.END, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
+        setValue("ReD", calcFunctionService.calculerReD(CARAC_VALUES.END, parseInt(getValues("Armor").toString())));
+        setValue("CdC", calcFunctionService.calculerCC(CARAC_VALUES.LUK));
+        setValue("CC", (getValues('Variant')?.toString() === "Assassin") ? 3 : 2);
         setValue("AN", 0);
     }
 
@@ -95,11 +67,15 @@ export function CreateChar() {
             <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4">
                 <div className="flex justify-evenly">
                     <div className="input_group">
-                        <div className="flex flex-row input_entry">
+                        <div className="input_entry">
                             <label htmlFor="input_name" className="input_label">Name :</label>
                             <input {...register("Name", {required: "Enter a Name !"})} id="input_name" placeholder="Nom" className="input_field" />
                         </div>
-                        <div className="flex flex-row input_entry">
+                        <div className="input_entry">
+                            <label htmlFor="input_joueur" className="input_label">Joueur :</label>
+                            <input {...register("Joueur", {required: "Enter a Joueur !"})} id="input_joueur" placeholder="Joueur" className="input_field" />
+                        </div>
+                        <div className="input_entry">
                             <label htmlFor="input_type" className="input_label">Character Type :</label>
                             <select {...register("Type")} id="input_type" defaultValue="Master" onChange={(e) => e.target.value === "Servant"? setShowVariant(true): setShowVariant(false)} className="input_field">
                                 <option value="Master">Master</option>
@@ -109,7 +85,7 @@ export function CreateChar() {
                         </div>
                         {
                             (showVariant)
-                            ?   <div className="flex flex-row input_entry">
+                            ?   <div className="input_entry">
                                     <label htmlFor="input_variant" className="input_label">Servant Variant :</label>
                                     <select {...register("Variant")} defaultValue="Archer" id="input_variant" className="input_field">
                                         <option value="Archer">Archer</option>
@@ -130,6 +106,18 @@ export function CreateChar() {
                                 </div>
                             :   <></>
                         }
+                        <div className="input_entry">
+                            <label htmlFor="input_arme" className="input_label">Arme :</label>
+                            <input {...register("Arme", {required: "Enter a Valid Arme !"})} placeholder="Arme" id="input_arme" className="input_field" />
+                        </div>
+                        <div className="input_entry">
+                            <label htmlFor="input_ArmeDMG" className="input_label">Dégâts arme :</label>
+                            <input type="number" {...register("ArmeDMG", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_ArmeDMG" className="input_field" />
+                        </div>
+                        <div className="input_entry">
+                            <label htmlFor="input_Armor" className="input_label">Armure :</label>
+                            <input type="number" {...register("Armor", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_Armor" className="input_field" />
+                        </div>
                         <div className="input_entry">
                             <label htmlFor="input_str" className="input_label">STR :</label>
                             <select {...register("STR")} id="input_str" className="input_field">
@@ -272,7 +260,7 @@ export function CreateChar() {
                     <div className="min-w-80 flex justify-around">
                         <button type="submit" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Créer</button>
                         <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleReset()}>Reset</button>
-                        <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleCalculStats()}>Calc</button>
+                        <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleCalculStats()}>Init Stats</button>
                     </div>
                 </div>
             </form>

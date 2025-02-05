@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { CharDataContext } from "../../context/CharDataContextProvider";
-import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/stats";
+import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/statsType";
 
 interface EditCharPropsInterface {
     charStats: CharStatsInterface;
@@ -12,13 +12,17 @@ interface EditCharPropsInterface {
 
 export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDeleteChar }: EditCharPropsInterface) {
     const { charData, setCharData } = useContext( CharDataContext );
-    const [showVariant, setShowVariant] = useState((charStats.Type as unknown as string) === "Servant");
+    const [showVariant, setShowVariant] = useState(charStats.Type === "Servant");
 
     const { register, handleSubmit, reset, watch} = useForm<CreateCharFormInputInterface>({
         defaultValues: {
             Name: charStats.Name,
+            Joueur: charStats.Joueur,
             Type: charStats.Type,
             Variant: charStats.Variant,
+            Arme: charStats.Arme,
+            ArmeDMG: charStats.ArmeDMG,
+            Armor: charStats.Armor,
             Hp: charStats.Hp,
             Mana: charStats.Mana,
             STR: charStats.Caracteristics.STR,
@@ -47,11 +51,15 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             return;
         }
 
-        const { Name, Type, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, Arme, ArmeDMG, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Id: charStats.Id,
             Name,
+            Joueur,
             Type,
+            Arme,
+            ArmeDMG,
+            Armor,
             Hp,
             Mana,
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
@@ -59,7 +67,7 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             ...(showVariant && { Variant })
         };
 
-        setCharData([...charData, newCharacterData]);
+        setCharData(charData.map(char => char.Id === charStats.Id ? newCharacterData : char));
     }
     
     function handleReset(){
@@ -73,11 +81,15 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             <div className="flex flex-col gap-2 items-center">
                 <button type="button" className="bg-red-500 hover:bg-white text-white hover:text-red-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer transition-all" onClick={() => handleDeleteChar(charStats.Id)}>Delete</button>
                 <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4">
-                    <div className="flex justify-evenly">
+                    <div className="flex gap-2 justify-evenly">
                         <div className="input_group">
                             <div className="flex flex-row input_entry">
                                 <label htmlFor="input_name" className="input_label">Name :</label>
                                 <input {...register("Name", {required: "Enter a Name !"})} id="input_name" placeholder="Nom" className="input_field" />
+                            </div>
+                            <div className="flex flex-row input_entry">
+                                <label htmlFor="input_joueur" className="input_label">Joueur :</label>
+                                <input {...register("Joueur", {required: "Enter a Joueur !"})} id="input_joueur" placeholder="Joueur" className="input_field" />
                             </div>
                             <div className="flex flex-row input_entry">
                                 <label htmlFor="input_type" className="input_label">Character Type :</label>
@@ -110,6 +122,18 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
                                     </div>
                                 :   <></>
                             }
+                            <div className="input_entry">
+                                <label htmlFor="input_arme" className="input_label">Arme :</label>
+                                <input {...register("Arme", {required: "Enter a Valid Arme !"})} placeholder="Arme" id="input_arme" className="input_field" />
+                            </div>
+                            <div className="input_entry">
+                                <label htmlFor="input_ArmeDMG" className="input_label">Dégâts arme :</label>
+                                <input type="number" {...register("ArmeDMG", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_ArmeDMG" className="input_field" />
+                            </div>
+                            <div className="input_entry">
+                                <label htmlFor="input_Armor" className="input_label">Armure :</label>
+                                <input type="number" {...register("Armor", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_Armor" className="input_field" />
+                            </div>
                             <div className="input_entry">
                                 <label htmlFor="input_str" className="input_label">STR :</label>
                                 <select {...register("STR")} id="input_str" className="input_field">
