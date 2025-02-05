@@ -8,4 +8,12 @@
         -ms-overflow-style: none;  /* IE and Edge */
         scrollbar-width: none;  /* Firefox */
     }
+    /* Set background color to transparent when autocomplete is active */
+    /* Change the white to any color */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    input:-webkit-autofill:active{
+        -webkit-box-shadow: 0 0 0 30px #DFDDCF inset !important;
+    }
 }

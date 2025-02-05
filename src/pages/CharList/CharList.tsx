@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { CharDataContext } from "../../context/CharDataContext";
+import { DataContext } from "../../context/DataContext";
 import { CharStatsInterface } from "../../types/statsType";
 import { CharItem } from "./CharItem";
 import { SearchBar } from "./CharListFilter/SearchBar";
 
 export function CharList() {
-    const { charData } = useContext(CharDataContext);
+    const { charData } = useContext(DataContext);
     const [sortQuery, setSortQuery] = useState('');
 
     const [ sortedPasswordList, setSortedPasswordList ] = useState<CharStatsInterface[]>([]);

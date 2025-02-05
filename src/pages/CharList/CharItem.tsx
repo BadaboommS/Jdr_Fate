@@ -3,7 +3,7 @@ import { Modal } from "../../global/Modal";
 import { EditChar } from './EditChar';
 import { CharInfo } from "./CharInfo";
 import { CharStatsInterface } from "../../types/statsType";
-import { CharDataContext } from "../../context/CharDataContext";
+import { DataContext } from "../../context/DataContext";
 import './charItem.css';
 
 interface CharItemPropsInterface {
@@ -11,7 +11,7 @@ interface CharItemPropsInterface {
 }
 
 export function CharItem ({ charStats }: CharItemPropsInterface) {
-    const { charData, setCharData } = useContext(CharDataContext);
+    const { charData, setCharData } = useContext(DataContext);
     const [showModal, setShowModal] = useState(false);
     const [editChar, setEditChar] = useState(false);
 

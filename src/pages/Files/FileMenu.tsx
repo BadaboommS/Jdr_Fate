@@ -1,16 +1,20 @@
 import React, { useContext, useRef } from 'react';
-import { CharDataContext } from '../../context/CharDataContext';
+import { DataContext } from '../../context/DataContext';
 import { CharStatsInterface } from '../../types/statsType';
-import { SettingsInterface } from '../../types/settingsType';
+import { FilterSettingsInterface } from '../../types/filterType';
+import { FightListInterface } from '../../types/fightType';
+/* import { Login } from './Login'; */
 
 interface FileDataInterface {
-    settings: SettingsInterface;
+    filter_data: FilterSettingsInterface[];
     characters_data: CharStatsInterface[];
+    fight_data: FightListInterface[];
+    player_data: string[];
 }
 
 export function FileMenu () {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { setCharData, setSettingsData } = useContext(CharDataContext);
+    const { setCharData, setFilterData, setFightData, setPlayerData } = useContext(DataContext);
 
     function handleFileImport(event: React.ChangeEvent<HTMLInputElement>) {
         const file = event.target.files?.[0];
@@ -23,10 +27,14 @@ export function FileMenu () {
                         const json: FileDataInterface = JSON.parse(content as string);
 
                         const char_data = json.characters_data;
-                        const settings_data = json.settings;
+                        const filter_data = json.filter_data;
+                        const fight_data = json.fight_data;
+                        const player_data = json.player_data;
 
                         setCharData(char_data);
-                        setSettingsData(settings_data);
+                        setFilterData(filter_data);
+                        setFightData(fight_data);
+                        setPlayerData(player_data);
                     } catch (error) {
                         console.error('Error parsing JSON:', error);
                     }
@@ -38,7 +46,6 @@ export function FileMenu () {
 
     return (
         <div>
-            <h1>Import JSON File or Create New File</h1>
             <input
                 type="file"
                 accept=".json"
@@ -46,7 +53,7 @@ export function FileMenu () {
                 onChange={handleFileImport}
                 style={{ display: 'none' }}
             />
-            <button onClick={() => fileInputRef.current?.click()}>Import JSON File</button>
+            <button className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => fileInputRef.current?.click()}>Import JSON File</button>
         </div>
     );
 };

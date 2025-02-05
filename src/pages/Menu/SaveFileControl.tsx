@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
-import { CharDataContext } from "../../context/CharDataContext";
+import { DataContext } from "../../context/DataContext";
 import { MdSave } from "react-icons/md";
 
 export function SaveFileControl () {
-    const { charData } = useContext(CharDataContext);
+    const { charData } = useContext(DataContext);
     const [downloadTimeout, setDownloadTimeout] = useState(false);
 
     const handleDownload = () => {

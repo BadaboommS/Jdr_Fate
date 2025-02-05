@@ -5,6 +5,7 @@ import { IoIosCreate } from "react-icons/io";
 import { FaList } from "react-icons/fa";
 import { SaveFileControl } from './SaveFileControl';
 import './Navbar.css';
+import { PlayerListControl } from './PlayerListControls';
 
 export function Navbar () {
   return (
@@ -33,6 +34,7 @@ export function Navbar () {
           <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>Combat</p></span>
         </div>
       </Link>
+      <PlayerListControl />
       <SaveFileControl />
     </div>
   )

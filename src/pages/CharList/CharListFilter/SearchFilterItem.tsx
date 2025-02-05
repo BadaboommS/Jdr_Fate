@@ -1,4 +1,4 @@
-import { FilterSettingsInterface } from "../../../types/settingsType";
+import { FilterSettingsInterface } from "../../../types/filterType";
 import { RxCross1 } from "react-icons/rx";
 
 

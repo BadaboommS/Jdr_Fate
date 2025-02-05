@@ -1,15 +1,15 @@
 export interface CharStatsInterface {
-    Id: number,
-    Name: string,
-    Joueur: string,
-    Type: string,
-    Variant?: string,
-    Arme: string,
-    ArmeDMG: number,
-    Armor: number,
-    Hp: number,
-    Mana: number,
-    Caracteristics: CharStatsCaracteristics,
+    Id: number;
+    Name: string;
+    Joueur: string;
+    Type: string;
+    Variant?: string;
+    Arme: string;
+    ArmeDMG: number;
+    Armor: number;
+    Hp: number;
+    Mana: number;
+    Caracteristics: CharStatsCaracteristics;
     Combat_Stats: FightStatsType
 }
 
@@ -75,35 +75,35 @@ export enum NeutralFightningPoseEnum {
 }
 
 export interface CreateCharFormInputInterface {
-    Name: string,
-    Joueur: string,
-    Type: string,
-    Variant?: string,
-    Arme: string,
-    ArmeDMG: number,
-    Armor: number,
+    Name: string;
+    Joueur: string;
+    Type: string;
+    Variant?: string;
+    Arme: string;
+    ArmeDMG: number;
+    Armor: number;
     //Caracteristics
-    STR: string,
-    END: string,
-    AGI: string,
-    MANA: string,
-    MGK: string,
-    LUK: string,
+    STR: string;
+    END: string;
+    AGI: string;
+    MANA: string;
+    MGK: string;
+    LUK: string;
     SPD: string
     //Combat_stats
-    Hp: number,
-    Mana: number,
-    Ini: number,
-    SA: number,
-    AA: number,
-    DMG: number,
-    PA: number,
-    SD: number,
-    AD: number,
-    ReD: number,
-    CdC: number,
-    CC: number,
-    AN: number 
+    Hp: number;
+    Mana: number;
+    Ini: number;
+    SA: number;
+    AA: number;
+    DMG: number;
+    PA: number;
+    SD: number;
+    AD: number;
+    ReD: number;
+    CdC: number;
+    CC: number;
+    AN: number;
 }
 
 /* 

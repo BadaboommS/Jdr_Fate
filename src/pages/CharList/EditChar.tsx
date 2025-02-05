@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { CharDataContext } from "../../context/CharDataContext";
+import { DataContext } from "../../context/DataContext";
 import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/statsType";
 
 interface EditCharPropsInterface {
@@ -11,7 +11,7 @@ interface EditCharPropsInterface {
 }
 
 export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDeleteChar }: EditCharPropsInterface) {
-    const { charData, setCharData } = useContext( CharDataContext );
+    const { charData, setCharData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(charStats.Type === "Servant");
 
     const { register, handleSubmit, reset, watch} = useForm<CreateCharFormInputInterface>({

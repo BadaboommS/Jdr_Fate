@@ -1,7 +1,14 @@
 {
-  "settings": {
-    "filter": []
-  },
+  "filter_data": [
+    {"id": 0, "filterName": "Master", "filterString": "Master"}, 
+    {"id": 1, "filterName": "Servant", "filterString": "Servant"}, 
+    {"id": 2, "filterName": "PNJ", "filterString": "PNJ"},
+    {"id": 3, "filterName": "Hugo", "filterString": "Hugo"},
+    {"id": 4, "filterName": "Thib", "filterString": "Thib"},
+    {"id": 5, "filterName": "Test", "filterString": "Test"}
+  ],
+  "fight_data": [],
+  "player_data": ["Hugo", "Thib", "Test"],
   "characters_data": [
     {
       "Name": "Master Test",
