@@ -46,16 +46,23 @@ export function PlayerListControl() {
                 ?   <Modal isOpen={showAddModal} onClose={() => handleModalClose()}>
                         <div className='flex flex-col gap-2 justify-center'>
                             <h2 className='text-2xl text-center'>Liste des joueurs :</h2>
-                            <div className='flex flex-row gap-2 flex-wrap'>
-                                {(playerData.map((player: string, index: number) => {
-                                    return (
-                                        <div key={index} className='flex gap-2 border border-black rounded p-1'>
-                                            <p>{player}</p>
-                                            <button onClick={() => handlePlayerDelete(player)} className='cursor-pointer'><RxCross1 size={12} /></button>
-                                        </div>
-                                )
-                                }))}
-                            </div>
+                            {
+                                (playerData[0])
+                                    ?   <>
+                                            <div className='flex flex-row gap-2 flex-wrap'>
+                                                {(playerData.map((player: string, index: number) => {
+                                                    return (
+                                                        <div key={index} className='flex gap-2 border border-black rounded p-1'>
+                                                            <p>{player}</p>
+                                                            <button onClick={() => handlePlayerDelete(player)} className='cursor-pointer'><RxCross1 size={12} /></button>
+                                                        </div>
+                                                )
+                                                }))}
+                                            </div>
+                                        </>
+                                : <p className='flex justify-center'>Pas de joueurs !</p>
+                            }
+                            
                             <div className='flex justify-end py-2 gap-2'>
                                 <input type="text" placeholder='Nouveau Joueur' id="input_new_player" className='indent-2'/>
                                 <button className='bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer' onClick={() => handlePlayerAdd()}>Ajouter</button>
