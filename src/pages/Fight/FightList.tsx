@@ -37,8 +37,8 @@ export function FightList() {
             <div className="p-5 w-full h-full flex gap-2 flex-wrap">
                 {
                     (fightData[0])
-                    ?   fightData.map((fight: FightListInterface, index: number) => {
-                            return <FightItem key={index} fightData={fight} setActiveFight={setActiveFight} handleDeleteFight={handleDeleteFight} />
+                    ?   fightData.map((fight: FightListInterface) => {
+                            return <FightItem key={`${fight.fightName}_${fight.fightId}`} fightData={fight} setActiveFight={setActiveFight} handleDeleteFight={handleDeleteFight} />
                         })
                     : <p>No Fight Data available.</p>
                 }

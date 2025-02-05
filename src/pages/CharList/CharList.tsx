@@ -33,8 +33,8 @@ export function CharList() {
                 <div className="p-5 w-full h-full flex gap-2 flex-wrap">
                     {
                         (sortedPasswordList.length > 0)
-                        ? sortedPasswordList.map((char, i) => {
-                            return <CharItem charStats={char} key={i} />
+                        ? sortedPasswordList.map((char) => {
+                            return <CharItem charStats={char} key={`${char.Name}_${char.Joueur}`} />
                         })
                         : <p>No character Data found.</p>
                     }

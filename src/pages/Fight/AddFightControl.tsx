@@ -12,7 +12,7 @@ type FightFormInput = {
 
 export function AddFightControl() {
     const [showAddModal, setShowAddModal] = useState(false);
-    const { fightData, setFightData, playerData } = useContext(DataContext);
+    const { fightData, setFightData, charData } = useContext(DataContext);
 
     const { register, handleSubmit, reset} = useForm<FightFormInput>({ 
         defaultValues: {
@@ -22,7 +22,7 @@ export function AddFightControl() {
     });
 
     const onSubmit: SubmitHandler<FightFormInput> = (data) => {
-        if(!window.confirm('Ajouter le filtre ?')){ return };
+        if(!window.confirm('Ajouter le Fight ?')){ return };
         const newFight = {
             fightId : fightData[0] ? fightData[fightData.length - 1].fightId + 1: 0,
             fightName: data.fightName,
@@ -54,14 +54,14 @@ export function AddFightControl() {
                             <div className='flex flex-col gap-1'>
                                 <p>Participants :</p>
                                 <div className="flex flex-row gap-2 flex-wrap">
-                                    {playerData.map((player, index) => (
-                                        <div key={index} className="flex gap-2 border border-black rounded p-1">
-                                            <label htmlFor={`player_${index}`}>{player.toString()}</label>
+                                    {charData.map((character) => (
+                                        <div key={`${character.Joueur}_${character.Name}`} className="flex gap-2 border border-black rounded p-1">
+                                            <label htmlFor={`${character.Joueur}_${character.Name}`}>{character.Name}</label>
                                             <input 
                                                 type="checkbox"
-                                                value={player.toString()}
+                                                value={character.Name}
                                                 {...register("fightMembers")} 
-                                                id={`player_${index}`} 
+                                                id={`${character.Joueur}_${character.Name}`} 
                                             />
                                         </div>
                                     ))}

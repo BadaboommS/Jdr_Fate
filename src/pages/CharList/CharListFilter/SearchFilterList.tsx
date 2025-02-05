@@ -31,9 +31,9 @@ export function SearchFilterList({ changeQuery }: SearchFilterListPropsInterface
             <div className='flex flex-col text-black gap-2'>
                 {
                     (filterData[0])
-                    ?   filterData.map((filter, key) => {
+                    ?   filterData.map((filter) => {
                             return <SearchFilterItem
-                                key={key}
+                                key={`${filter.filterName}_${filter.filterString}`}
                                 filter={filter} 
                                 handleFilterUse={(filterString: string) => handleFilterUse(filterString)} 
                                 handleDeleteFilter={(filterId: number) => handleDeleteFilter(filterId)} />

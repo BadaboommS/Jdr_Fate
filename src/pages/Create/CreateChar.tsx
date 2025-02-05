@@ -7,7 +7,7 @@ import './createChar.css';
 
 
 export function CreateChar() {
-    const { charData, setCharData } = useContext( DataContext );
+    const { charData, setCharData, playerData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(false);
 
     const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', Arme: '', ArmeDMG: 0, Armor: 0, Hp: 0, Mana: 0, STR: 'E', END: 'E', AGI: 'E', MANA: 'E', MGK: 'E', LUK: 'E', SPD: 'E', Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0 } });
@@ -67,13 +67,18 @@ export function CreateChar() {
             <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4">
                 <div className="flex justify-evenly">
                     <div className="input_group">
+                        <h3 className="input_label">Base Info :</h3>
                         <div className="input_entry">
                             <label htmlFor="input_name" className="input_label">Name :</label>
                             <input {...register("Name", {required: "Enter a Name !"})} id="input_name" placeholder="Nom" className="input_field" autoComplete="false" />
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_joueur" className="input_label">Joueur :</label>
-                            <input {...register("Joueur", {required: "Enter a Joueur !"})} id="input_joueur" placeholder="Joueur" className="input_field" autoComplete="false"/>
+                            <select {...register("Joueur")} defaultValue="" id="input_joueur" className="input_field !indent-1">
+                                {(playerData.map((player: string) => {
+                                    return <option value={player} key={player}>{player}</option>
+                                }))}
+                            </select>
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_type" className="input_label">Character Type :</label>
@@ -118,6 +123,7 @@ export function CreateChar() {
                             <label htmlFor="input_Armor" className="input_label">Armure :</label>
                             <input type="number" {...register("Armor", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_Armor" className="input_field" />
                         </div>
+                        <h3 className="input_label">Caracteristics :</h3>
                         <div className="input_entry">
                             <label htmlFor="input_str" className="input_label">STR :</label>
                             <select {...register("STR")} id="input_str" className="input_field">
@@ -202,6 +208,7 @@ export function CreateChar() {
                         </div>
                     : <></>}
                     <div className="input_group">
+                        <h3 className="input_label">Combat Stats :</h3>
                         <div className="input_entry">
                             <label htmlFor="input_hp" className="input_label">Hp :</label>
                             <input type="number" {...register("Hp", {required: "Enter a Valid Hp Amount !"})} id="input_hp" className="input_field" />
