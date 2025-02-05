@@ -3,7 +3,7 @@ import { Modal } from "../../global/Modal";
 import { EditChar } from './EditChar';
 import { CharInfo } from "./CharInfo";
 import { CharStatsInterface } from "../../types/statsType";
-import { CharDataContext } from "../../context/CharDataContextProvider";
+import { CharDataContext } from "../../context/CharDataContext";
 import './charItem.css';
 
 interface CharItemPropsInterface {

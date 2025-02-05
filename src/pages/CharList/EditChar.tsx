@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { CharDataContext } from "../../context/CharDataContextProvider";
+import { CharDataContext } from "../../context/CharDataContext";
 import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/statsType";
 
 interface EditCharPropsInterface {

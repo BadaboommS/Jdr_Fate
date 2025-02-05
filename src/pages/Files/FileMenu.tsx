@@ -1,5 +1,5 @@
 import React, { useContext, useRef } from 'react';
-import { CharDataContext } from '../../context/CharDataContextProvider';
+import { CharDataContext } from '../../context/CharDataContext';
 import { CharStatsInterface } from '../../types/statsType';
 import { SettingsInterface } from '../../types/settingsType';
 

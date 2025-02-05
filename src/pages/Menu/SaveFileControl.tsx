@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { CharDataContext } from "../../context/CharDataContextProvider";
+import { CharDataContext } from "../../context/CharDataContext";
 import { MdSave } from "react-icons/md";
 
 export function SaveFileControl () {

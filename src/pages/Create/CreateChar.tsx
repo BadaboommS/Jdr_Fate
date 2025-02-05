@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { CharDataContext } from "../../context/CharDataContextProvider";
+import { CharDataContext } from "../../context/CharDataContext";
 import { CreateCharFormInputInterface, StatKey } from "../../types/statsType";
 import { calcFunctionService } from "../../function/BaseStatsCalc";
 import './createChar.css';

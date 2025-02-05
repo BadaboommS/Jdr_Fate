@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 import { BsBookmarkPlusFill } from "react-icons/bs";
-import { CharDataContext } from '../../../context/CharDataContextProvider';
+import { CharDataContext } from '../../../context/CharDataContext';
 import { SearchFilterItem } from './SearchFilterItem';
 import { Modal } from '../../../global/Modal';
 
