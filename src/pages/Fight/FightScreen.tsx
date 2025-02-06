@@ -1,10 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { MdSave, MdSettings } from "react-icons/md";
 import { DataContext } from "../../context/DataContext";
 import { FightActorStatsDisplay } from "./FightActorStatsDisplay";
 import { CharStatsInterface } from "../../types/statsType";
 import { FightListInterface } from "../../types/fightType";
 import { Modal } from "../../global/Modal";
+import { Terminal } from "./Terminal";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -14,41 +15,44 @@ interface FightScreenPropsInterface {
 
 export function FightScreen ({ activeFightData, handleModalClose, saveFightData }: FightScreenPropsInterface) {
     const { charData } = useContext(DataContext);
-    const [activeData, setActiveData] = useState(activeFightData);
+    const [activeData, setActiveData] = useState<FightListInterface>(activeFightData);
     const [actorAData, setActorAData] = useState<CharStatsInterface | null>(null);
     const [actorBData, setActorBData] = useState<CharStatsInterface | null>(null);
-    const [fightSettingsModal, setFightSettingsModal] = useState(false);
+    const [fightSettingsModal, setFightSettingsModal] = useState<boolean>(false);
 
-    function handleChangeActorA(selectedChar: string){
+    function handleChangeActorA(selectedChar: string): void{
         setActorAData(charData[charData.findIndex((char) => char.Name === selectedChar)]);
     };
 
-    function handleChangeActorB(selectedChar: string){
+    function handleChangeActorB(selectedChar: string): void{
         setActorBData(charData[charData.findIndex((char) => char.Name === selectedChar)]);
     };
 
-    function handleFightStateChange() {
+    function handleFightStateChange(): void {
         setActiveData(prevState => ({...prevState, fightState: !prevState.fightState}));
     }
 
-    function handleMemberListChange(name: string){
-        setActiveData(prevdata => ({
-            ...prevdata,
-            fightMembers: prevdata.fightMembers.includes(name)
-                ? prevdata.fightMembers.filter(m => m !== name)
-                : [...prevdata.fightMembers, name]
+    function handleMemberListChange(name: string): void{
+        setActiveData(prevState => ({
+            ...prevState,
+            fightMembers: prevState.fightMembers.includes(name)
+                ? prevState.fightMembers.filter(m => m !== name)
+                : [...prevState.fightMembers, name]
         }));
     }
 
-    function handleFightModalClose(){
+    function handleFightModalClose(): void{
         saveFightData(activeData);
         setFightSettingsModal(false);
-        console.log("test")
     }
 
-    useEffect(() => {
-        console.log(activeData);
-    }, [activeData]);
+    function handleHistoryEventAdd(newHistoryEntry: string): void{
+        setActiveData(prevState => ({
+            ...prevState,
+            fightHistory: [...prevState.fightHistory, newHistoryEntry]
+        }))
+        saveFightData(activeData);      
+    }
 
     return (
         <div className="w-screen h-screen">
@@ -63,7 +67,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                         {
                             (fightSettingsModal)
                                 ?   <Modal isOpen={fightSettingsModal} onClose={() => handleFightModalClose()}>
-                                        <div className="flex flex-col justify-center gap-4 items-center">
+                                        <div className="grid flex-col justify-center gap-4 items-center">
                                             <div className="flex flex-col gap-2">
                                                 <p className="text-center">Etat du combat: {activeData.fightState? 'En cours' : "Fini"}</p>
                                                 <button onClick={() => handleFightStateChange()} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Changer Fight State</button>
@@ -98,10 +102,10 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                         </div>
                     </div>
                 </nav>
-                <div className="flex justify-around w-screen">
-                    <div className="flex flex-col h-screen">
+                <div className="flex grid grid-cols-3 w-screen h-screen">
+                    <div className="flex flex-col items-center">
                         <h2 className="text-xl text-center">Acteur A: </h2>
-                        <select onChange={(e) => handleChangeActorA(e.currentTarget.value)} className="text-lg text-center bg-white p-2 my-2 border border-black rounded">
+                        <select onChange={(e) => handleChangeActorA(e.currentTarget.value)} className="text-lg bg-white p-2 my-2 border border-black rounded">
                             {
                                 (activeData.fightMembers.length > 1) &&
                                     (activeData.fightMembers.map((member, index) => {
@@ -111,12 +115,13 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                         </select>
                         {(actorAData !== null) && <FightActorStatsDisplay characterData={actorAData}/>}
                     </div>
-                    <div className="flex flex-col h-screen w-50">
-                        Log
+                    <div className="flex flex-col items-center">
+                        <Terminal fightHistory={activeData.fightHistory}/>
+                        <button onClick={() => handleHistoryEventAdd('testegigjeg')}>Test history</button>
                     </div>
-                    <div className="flex flex-col h-screen">
+                    <div className="flex flex-col items-center">
                         <h2 className="text-xl text-center">Acteur B: </h2>
-                        <select onChange={(e) => handleChangeActorB(e.currentTarget.value)} className="text-lg text-center bg-white p-2 my-2 border border-black rounded">
+                        <select onChange={(e) => handleChangeActorB(e.currentTarget.value)} className="text-lg bg-white p-2 my-2 border border-black rounded">
                             {
                                 (activeData.fightMembers.length > 1) &&
                                     (activeData.fightMembers.map((member, index) => {

@@ -7,7 +7,7 @@ interface FightActorStatsDisplayInterface {
 export function FightActorStatsDisplay({ characterData }: FightActorStatsDisplayInterface){
     return (
         //<div className="flex flex-col">
-            <div className="flex gap-2 items-start">
+            <div className="grid grid-cols-2 gap-2 items-start">
                 <div className="input_group min-w-[200px]">
                     <h3 className="input_label">Base Info :</h3>
                     <div className="input_entry">
@@ -48,8 +48,6 @@ export function FightActorStatsDisplay({ characterData }: FightActorStatsDisplay
                         <div className="input_label">Mana: </div>
                         <div className="input_field">{characterData.Mana}</div>
                     </div>
-                </div>
-                <div className="input_group min-w-[200px]">
                     <h3 className="input_label">Caracteristics :</h3>
                     {Object.entries(characterData.Caracteristics).map(([key, value]) => (
                         <div key={key} className="input_entry">
