@@ -4,18 +4,39 @@ export interface CharStatsInterface {
     Joueur: string;
     Type: string;
     Variant?: string;
-    Arme: string;
-    ArmeDMG: number;
+    Weapon: WeaponType;
     Armor: number;
     Hp: number;
     Mana: number;
     Caracteristics: CharStatsCaracteristics;
-    Combat_Stats: FightStatsType
+    CombatStats: FightStatsType;
+    InitCaracteristics: CharStatsCaracteristics;
+    InitCombatStats: FightStatsType;
+    BuffsList: BuffListType[];
+    DebuffsList: DebuffType[];
+}
+
+export type DebuffType = {
+    Name: string,
+    Desc: string,
+    Effect: string
+}
+
+export type BuffListType = {
+    Name: string,
+    Desc: string,
+    Effect: string
 }
 
 /* enum CharEnum { Master, Servant, PNJ };
 enum ClassicServantEnum { Archer, Assassin, Berserker, Caster, Lancer, Rider, Saber };
 enum SpecialServantEnum { Slayer, Shielder, Outsider, Monster, Launcher, Avenger, Elder }; */
+
+type WeaponType = {
+    WeaponName: string,
+    WeaponDmg: number,
+    WeaponType: string,
+}
 
 export type CharStatsCaracteristics = {
     STR: string,
@@ -79,8 +100,9 @@ export interface CreateCharFormInputInterface {
     Joueur: string;
     Type: string;
     Variant?: string;
-    Arme: string;
-    ArmeDMG: number;
+    WeaponName: string;
+    WeaponDmg: number;
+    WeaponType: string;
     Armor: number;
     //Caracteristics
     STR: string;

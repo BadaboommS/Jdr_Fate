@@ -14,8 +14,11 @@
       "Name": "Master Test",
       "Type": "Master",
       "Joueur": "Hugo",
-      "Arme": "Couteau",
-      "ArmeDMG": 5,
+      "Weapon": {
+        "WeaponName": "Couteau",
+        "WeaponDmg": 5,
+        "WeaponType": "Contondant"
+      },
       "Armor": 10,
       "Id": 0,
       "Hp": 100,
@@ -41,14 +44,19 @@
         "CdC": 25,
         "CC": 2,
         "AN": 3
-      }
+      },
+      "BuffsList": [],
+      "DebuffsList": []
     },
     {
       "Name": "Servant Test",
       "Type": "Servant",
       "Joueur": "Hugo",
-      "Arme": "Couteau",
-      "ArmeDMG": 5,
+      "Weapon": {
+        "WeaponName": "Couteau",
+        "WeaponDmg": 5,
+        "WeaponType": "Contondant"
+      },
       "Armor": 10,
       "Variant": "Assassin",
       "Id": 1,
@@ -75,14 +83,19 @@
         "CdC": 30,
         "CC": 3,
         "AN": 4
-      }
+      },
+      "BuffsList": [],
+      "DebuffsList": []
     },
     {
       "Name": "PNJ Test",
       "Type": "PNJ",
       "Joueur": "Hugo",
-      "Arme": "Couteau",
-      "ArmeDMG": 5,
+      "Weapon": {
+        "WeaponName": "Couteau",
+        "WeaponDmg": 5,
+        "WeaponType": "Contondant"
+      },
       "Armor": 10,
       "Id": 2,
       "Hp": 80,
@@ -108,7 +121,9 @@
         "CdC": 20,
         "CC": 1,
         "AN": 2
-      }
+      },
+      "BuffsList": [],
+      "DebuffsList": []
     }
   ]
 }

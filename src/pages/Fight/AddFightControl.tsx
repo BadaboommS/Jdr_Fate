@@ -7,7 +7,6 @@ import { Modal } from "../../global/Modal";
 type FightFormInput = {
     fightName : string;
     fightMembers : string[];
-    fightHistory: string[];
 }
 
 export function AddFightControl() {
@@ -27,7 +26,12 @@ export function AddFightControl() {
             fightId : fightData[0] ? fightData[fightData.length - 1].fightId + 1: 0,
             fightName: data.fightName,
             fightMembers : data.fightMembers,
-            fightHistory : [],
+            fightHistory : [
+                { historyMsg: `--------------------`, msgType: 'Text'},
+                { historyMsg: `Membre présents: ${data.fightMembers.join(', ')}`, msgType: 'Info'},
+                { historyMsg: `Fight ${data.fightName} crée ${new Date().toLocaleString()} .`, msgType: "Info"},
+                { historyMsg: `--------------------`, msgType: 'Text'}
+            ],
             fightState : true,
         }
         setFightData([...fightData, newFight]);

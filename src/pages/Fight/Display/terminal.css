@@ -1,0 +1,15 @@
+.terminal_Info {
+    color: rgb(151, 151, 151);
+}
+.terminal_Text {
+    color: white;
+}
+.terminal_Atk {
+    color: rgb(250, 116, 116);
+}
+.terminal_Def {
+    color: rgb(160, 231, 255)
+}
+.terminal_CC {
+    color: rgb(255, 255, 131);
+}

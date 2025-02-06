@@ -27,11 +27,11 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
                     </div>
                     <div className="input_entry">
                         <div className="input_label">Arme: </div>
-                        <div className="input_field">{charStats.Arme}</div>
+                        <div className="input_field cursor-help" title={charStats.Weapon.WeaponType}>{charStats.Weapon.WeaponName}</div>
                     </div>
                     <div className="input_entry">
-                        <div className="input_label">ArmeDMG: </div>
-                        <div className="input_field">{charStats.ArmeDMG}</div>
+                        <div className="input_label">Arme Dmg: </div>
+                        <div className="input_field">{charStats.Weapon.WeaponDmg}</div>
                     </div>
                     <div className="input_entry">
                         <div className="input_label">Armor: </div>
@@ -66,12 +66,36 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
                     : <></>}
                 <div className="input_group min-w-[200px]">
                     <h3 className="input_label">Combat Stats :</h3>
-                    {Object.entries(charStats.Combat_Stats).map(([key, value]) => (
+                    {Object.entries(charStats.CombatStats).map(([key, value]) => (
                         <div key={key} className="input_entry">
                             <span className="input_label">{key}: </span>
                             <span className="input_field">{value}</span>
                         </div>
                     ))}
+                    {
+                        (charStats.BuffsList.length > 0)
+                            ?   <>
+                                    <h3 className="input_label">Buffs List :</h3>
+                                    {Object.entries(charStats.BuffsList).map(([key, value]) => (
+                                        <div key={key} className="input_entry">
+                                            <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
+                                        </div>
+                                    ))}
+                                </>
+                            : <></>
+                    }
+                    {
+                        (charStats.DebuffsList.length > 0)
+                            ?   <>
+                                    <h3 className="input_label">Debuffs List :</h3>
+                                    {Object.entries(charStats.DebuffsList).map(([key, value]) => (
+                                        <div key={key} className="input_entry">
+                                            <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
+                                        </div>
+                                    ))}
+                                </>
+                            : <></>
+                    }
                 </div>
             </div>
             <div className="flex justify-center py-5">

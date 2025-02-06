@@ -20,8 +20,9 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             Joueur: charStats.Joueur,
             Type: charStats.Type,
             Variant: charStats.Variant,
-            Arme: charStats.Arme,
-            ArmeDMG: charStats.ArmeDMG,
+            WeaponName: charStats.Weapon.WeaponName,
+            WeaponDmg: charStats.Weapon.WeaponDmg,
+            WeaponType: charStats.Weapon.WeaponType,
             Armor: charStats.Armor,
             Hp: charStats.Hp,
             Mana: charStats.Mana,
@@ -32,17 +33,17 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             MGK: charStats.Caracteristics.MGK,
             LUK: charStats.Caracteristics.LUK,
             SPD: charStats.Caracteristics.SPD,
-            Ini: charStats.Combat_Stats.Ini,
-            SA: charStats.Combat_Stats.SA,
-            AA: charStats.Combat_Stats.AA,
-            DMG: charStats.Combat_Stats.DMG,
-            PA: charStats.Combat_Stats.PA,
-            SD: charStats.Combat_Stats.SD,
-            AD: charStats.Combat_Stats.AD,
-            ReD: charStats.Combat_Stats.ReD,
-            CdC: charStats.Combat_Stats.CdC,
-            CC: charStats.Combat_Stats.CC,
-            AN: charStats.Combat_Stats.AN
+            Ini: charStats.CombatStats.Ini,
+            SA: charStats.CombatStats.SA,
+            AA: charStats.CombatStats.AA,
+            DMG: charStats.CombatStats.DMG,
+            PA: charStats.CombatStats.PA,
+            SD: charStats.CombatStats.SD,
+            AD: charStats.CombatStats.AD,
+            ReD: charStats.CombatStats.ReD,
+            CdC: charStats.CombatStats.CdC,
+            CC: charStats.CombatStats.CC,
+            AN: charStats.CombatStats.AN
         }
     });
 
@@ -51,19 +52,22 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             return;
         }
 
-        const { Name, Joueur, Type, Arme, ArmeDMG, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Id: charStats.Id,
             Name,
             Joueur,
             Type,
-            Arme,
-            ArmeDMG,
+            Weapon: { WeaponName, WeaponDmg, WeaponType },
             Armor,
             Hp,
             Mana,
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
-            Combat_Stats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
+            CombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
+            InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
+            InitCombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
+            BuffsList: [], //add remove edit buff & debuff
+            DebuffsList: [],
             ...(showVariant && { Variant })
         };
 
@@ -123,12 +127,20 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
                                 :   <></>
                             }
                             <div className="input_entry">
-                                <label htmlFor="input_arme" className="input_label">Arme :</label>
-                                <input {...register("Arme", {required: "Enter a Valid Arme !"})} placeholder="Arme" id="input_arme" className="input_field" />
+                                <label htmlFor="input_weapon_name" className="input_label">Arme :</label>
+                                <input {...register("WeaponName", {required: "Enter a Valid Arme !"})} placeholder="Nom arme" id="input_weapon_name" className="input_field" autoComplete="false"/>
                             </div>
                             <div className="input_entry">
-                                <label htmlFor="input_ArmeDMG" className="input_label">Dégâts arme :</label>
-                                <input type="number" {...register("ArmeDMG", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_ArmeDMG" className="input_field" />
+                                <label htmlFor="input_weapon_type" className="input_label">Type Arme :</label>
+                                <select {...register("WeaponType")} id="input_weapon_type" defaultValue='Contondant' className="input_field">
+                                    <option value="Contondant">Contondant</option>
+                                    <option value="Perçant">Perçant</option>
+                                    <option value="Tranchant">Tranchant</option>
+                                </select>
+                            </div>
+                            <div className="input_entry">
+                                <label htmlFor="input_weapon_dmg" className="input_label">Arme Dmg :</label>
+                                <input type="number" {...register("WeaponDmg", {required: "Enter a Valid WeaponDmg Amount !"})} id="input_weapon_dmg" className="input_field" />
                             </div>
                             <div className="input_entry">
                                 <label htmlFor="input_Armor" className="input_label">Armure :</label>

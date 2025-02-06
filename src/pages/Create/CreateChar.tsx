@@ -10,26 +10,29 @@ export function CreateChar() {
     const { charData, setCharData, playerData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(false);
 
-    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', Arme: '', ArmeDMG: 0, Armor: 0, Hp: 0, Mana: 0, STR: 'E', END: 'E', AGI: 'E', MANA: 'E', MGK: 'E', LUK: 'E', SPD: 'E', Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0 } });
+    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', WeaponName: '', WeaponType: '', WeaponDmg: 0, Armor: 0, Hp: 0, Mana: 0, STR: 'E', END: 'E', AGI: 'E', MANA: 'E', MGK: 'E', LUK: 'E', SPD: 'E', Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0 } });
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Valider l'ajout du personnage ?`)){
             return;
         }
 
-        const { Name, Joueur, Type, Arme, ArmeDMG, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Id: charData[0]? charData[charData.length - 1].Id + 1 : 0,
             Name,
             Joueur,
             Type,
-            Arme,
-            ArmeDMG,
+            Weapon: { WeaponName, WeaponDmg, WeaponType },
             Armor,
             Hp,
             Mana,
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
-            Combat_Stats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
+            CombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
+            InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
+            InitCombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
+            BuffsList: [],
+            DebuffsList: [],
             ...(showVariant && { Variant })
         };
 
@@ -112,16 +115,24 @@ export function CreateChar() {
                             :   <></>
                         }
                         <div className="input_entry">
-                            <label htmlFor="input_arme" className="input_label">Arme :</label>
-                            <input {...register("Arme", {required: "Enter a Valid Arme !"})} placeholder="Arme" id="input_arme" className="input_field" autoComplete="false"/>
+                            <label htmlFor="input_weapon_name" className="input_label">Arme :</label>
+                            <input {...register("WeaponName", {required: "Enter a Valid Arme !"})} placeholder="Nom arme" id="input_weapon_name" className="input_field" autoComplete="false"/>
                         </div>
                         <div className="input_entry">
-                            <label htmlFor="input_ArmeDMG" className="input_label">Dégâts arme :</label>
-                            <input type="number" {...register("ArmeDMG", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_ArmeDMG" className="input_field" />
+                            <label htmlFor="input_weapon_type" className="input_label">Type Arme :</label>
+                            <select {...register("WeaponType")} id="input_weapon_type" defaultValue='Contondant' className="input_field">
+                                <option value="Contondant">Contondant</option>
+                                <option value="Perçant">Perçant</option>
+                                <option value="Tranchant">Tranchant</option>
+                            </select>
+                        </div>
+                        <div className="input_entry">
+                            <label htmlFor="input_weapon_dmg" className="input_label">Dégâts arme :</label>
+                            <input type="number" {...register("WeaponDmg", {required: "Enter a Valid WeaponDmg Amount !"})} id="input_weapon_dmg" className="input_field" />
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_Armor" className="input_label">Armure :</label>
-                            <input type="number" {...register("Armor", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_Armor" className="input_field" />
+                            <input type="number" {...register("Armor", {required: "Enter a Valid Armor Amount !"})} id="input_Armor" className="input_field" />
                         </div>
                         <h3 className="input_label">Caracteristics :</h3>
                         <div className="input_entry">
