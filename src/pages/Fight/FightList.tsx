@@ -4,7 +4,7 @@ import { AddFightControl } from "./AddFightControl";
 import { FightListInterface } from "../../types/fightType";
 import { FightItem } from "./FightItem";
 import { Modal } from "../../global/Modal";
-import { FightScreen } from "./FightScreen";
+import { FightScreen } from "./FightScreen/FightScreen";
 
 export function FightList() {
     const { fightData, setFightData } = useContext(DataContext);

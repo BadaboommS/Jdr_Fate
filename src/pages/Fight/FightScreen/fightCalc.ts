@@ -1,6 +1,6 @@
-import { CharStatsInterface, DebuffType } from "../../types/statsType";
-import { rollDice } from "../../function/GlobalFunction";
-import { CCDebuffList } from "../../types/fightType";
+import { CharStatsInterface, DebuffType } from "../../../types/statsType";
+import { rollDice } from "../../../function/GlobalFunction";
+import { CCDebuffList } from "../../../types/fightType";
 
 const DEBUG = false;
 
@@ -20,7 +20,7 @@ export function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsI
     if(atkSuccess > 0){ //Echec atk
         if(DEBUG) console.log('echec atk: ', atkSuccess);
         const dmg = 0;
-        const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: Echec`, msgType: 'Def'}];
+        const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: Echec`, msgType: 'Def', msgTitle: `JetAtk: ${atkJet} | JetDef: ${defJet}`}];
         return({ dmg: dmg, msg: msgArray });
     }
     if(DEBUG) console.log('succès atk: ', atkSuccess);
@@ -46,25 +46,25 @@ export function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsI
     const finalDmg = Math.floor(Dmg + armorPierce);
     if(DEBUG) console.log('finalDmg: ', finalDmg);
 
-    const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: ${finalDmg} Dmg`, msgType: 'Atk'}];
+    const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: ${finalDmg} Dmg`, msgType: 'Atk', msgTitle: `JetAtk: ${atkJet} | JetDef: ${defJet}`}];
 
     // Calcul CC
     const CCDiceRoll = rollDice(50);
     let debuff: DebuffType | null = null;
 
     if(CCDiceRoll < Attacker.CombatStats.CdC){
-        msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC'});
+        msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
         
         // Select debuff
         const weaponTypeDebuffList = CCDebuffList[CCDebuffList.findIndex(debuff => debuff.Type === Attacker.Weapon.WeaponType)];
 
         if(Defender.DebuffsList.length > 5){
-            msgArray.push({ historyMsg: `${Defender.Name} a trop de debuff !`, msgType: 'CC'});
+            msgArray.push({ historyMsg: `${Defender.Name} a trop de debuff !`, msgType: 'CC', msgTitle: ''});
         }else{
             do{
                 debuff = weaponTypeDebuffList.Debuffs[rollDice(6) - 1];
             }while(Defender.DebuffsList.some(d => d.Name === debuff?.Name));
-            msgArray.push({ historyMsg: `${Defender.Name} reçoit ${debuff.Name}`, msgType: 'CC'});
+            msgArray.push({ historyMsg: `${Defender.Name} reçoit ${debuff.Name}`, msgType: 'CC', msgTitle: ''});
         }
     }
 

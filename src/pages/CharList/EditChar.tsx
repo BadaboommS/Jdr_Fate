@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
 import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/statsType";
 
@@ -14,45 +14,26 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
     const { charData, setCharData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(charStats.Type === "Servant");
 
-    const { register, handleSubmit, reset, watch} = useForm<CreateCharFormInputInterface>({
+    const { register, handleSubmit, reset, watch, control } = useForm<CreateCharFormInputInterface>({
         defaultValues: {
-            Name: charStats.Name,
-            Joueur: charStats.Joueur,
-            Type: charStats.Type,
-            Variant: charStats.Variant,
-            WeaponName: charStats.Weapon.WeaponName,
-            WeaponDmg: charStats.Weapon.WeaponDmg,
-            WeaponType: charStats.Weapon.WeaponType,
-            Armor: charStats.Armor,
-            Hp: charStats.Hp,
-            Mana: charStats.Mana,
-            STR: charStats.Caracteristics.STR,
-            END: charStats.Caracteristics.END,
-            AGI: charStats.Caracteristics.AGI,
-            MANA: charStats.Caracteristics.MANA,
-            MGK: charStats.Caracteristics.MGK,
-            LUK: charStats.Caracteristics.LUK,
-            SPD: charStats.Caracteristics.SPD,
-            Ini: charStats.CombatStats.Ini,
-            SA: charStats.CombatStats.SA,
-            AA: charStats.CombatStats.AA,
-            DMG: charStats.CombatStats.DMG,
-            PA: charStats.CombatStats.PA,
-            SD: charStats.CombatStats.SD,
-            AD: charStats.CombatStats.AD,
-            ReD: charStats.CombatStats.ReD,
-            CdC: charStats.CombatStats.CdC,
-            CC: charStats.CombatStats.CC,
-            AN: charStats.CombatStats.AN
+            Name: charStats.Name, Joueur: charStats.Joueur, Type: charStats.Type, Variant: charStats.Variant,
+            WeaponName: charStats.Weapon.WeaponName, WeaponDmg: charStats.Weapon.WeaponDmg, WeaponType: charStats.Weapon.WeaponType,
+            Armor: charStats.Armor, Hp: charStats.Hp, Mana: charStats.Mana,
+            STR: charStats.Caracteristics.STR, END: charStats.Caracteristics.END, AGI: charStats.Caracteristics.AGI, MANA: charStats.Caracteristics.MANA, MGK: charStats.Caracteristics.MGK, LUK: charStats.Caracteristics.LUK, SPD: charStats.Caracteristics.SPD,
+            Ini: charStats.CombatStats.Ini, SA: charStats.CombatStats.SA, AA: charStats.CombatStats.AA, DMG: charStats.CombatStats.DMG, PA: charStats.CombatStats.PA, SD: charStats.CombatStats.SD, AD: charStats.CombatStats.AD, ReD: charStats.CombatStats.ReD, CdC: charStats.CombatStats.CdC, CC: charStats.CombatStats.CC, AN: charStats.CombatStats.AN,
+            BuffsList: charStats.BuffsList, DebuffsList: charStats.DebuffsList            
         }
     });
+
+    const { fields: buffs, remove: removeBuff } = useFieldArray({ control, name: "BuffsList" });
+    const { fields: debuffs, remove: removeDebuff } = useFieldArray({ control, name: "DebuffsList" });
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Confirmer l'Edit du character ?`)){
             return;
         }
 
-        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN, BuffsList, DebuffsList } = data;
         const newCharacterData = {
             Id: charStats.Id,
             Name,
@@ -66,14 +47,14 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             CombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
             InitCombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
-            BuffsList: [], //add remove edit buff & debuff
-            DebuffsList: [],
+            BuffsList: BuffsList, //add remove edit buff & debuff
+            DebuffsList: DebuffsList,
             ...(showVariant && { Variant })
         };
 
         setCharData(charData.map(char => char.Id === charStats.Id ? newCharacterData : char));
     }
-    
+
     function handleReset(){
         setShowVariant(false);
         reset();
@@ -85,11 +66,11 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             <div className="flex flex-col gap-2 items-center">
                 <button type="button" className="bg-red-500 hover:bg-white text-white hover:text-red-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer transition-all" onClick={() => handleDeleteChar(charStats.Id)}>Delete</button>
                 <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4">
-                    <div className="flex gap-2 justify-evenly">
+                    <div className="grid grid-cols-3 gap-2">
                         <div className="input_group">
                             <div className="flex flex-row input_entry">
                                 <label htmlFor="input_name" className="input_label">Name :</label>
-                                <input {...register("Name", {required: "Enter a Name !"})} id="input_name" placeholder="Nom" className="input_field" />
+                                <input {...register("Name", {required: "Enter a Name !"})} id="input_name" placeholder="Nom" className="input_field" autoComplete="false"/>
                             </div>
                             <div className="flex flex-row input_entry">
                                 <label htmlFor="input_joueur" className="input_label">Joueur :</label>
@@ -108,20 +89,9 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
                                 ?   <div className="flex flex-row input_entry">
                                         <label htmlFor="input_variant" className="input_label">Servant Variant :</label>
                                         <select {...register("Variant")} id="input_variant" defaultValue="Archer" className="input_field">
-                                            <option value="Archer">Archer</option>
-                                            <option value="Assassin">Assassin</option>
-                                            <option value="Berserker">Berserker</option>
-                                            <option value="Caster">Caster</option>
-                                            <option value="Lancer">Lancer</option>
-                                            <option value="Rider">Rider</option>
-                                            <option value="Saber">Saber</option>
-                                            <option value="Slayer">Slayer</option>
-                                            <option value="Shielder">Shielder</option>
-                                            <option value="Outsider">Outsider</option>
-                                            <option value="Monster">Monster</option>
-                                            <option value="Launcher">Launcher</option>
-                                            <option value="Avenger">Avenger</option>
-                                            <option value="Elder">Elder</option>
+                                            {["Archer", "Assassin", "Berserker", "Caster", "Lancer", "Rider", "Saber", "Slayer", "Shielder", "Outsider", "Monster", "Launcher", "Avenger", "Elder"].map(variant => (
+                                                <option key={variant} value={variant}>{variant}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 :   <></>
@@ -146,83 +116,16 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
                                 <label htmlFor="input_Armor" className="input_label">Armure :</label>
                                 <input type="number" {...register("Armor", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_Armor" className="input_field" />
                             </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_str" className="input_label">STR :</label>
-                                <select {...register("STR")} id="input_str" className="input_field">
-                                    <option value="E">E</option>
-                                    <option value="D">D</option>
-                                    <option value="C">C</option>
-                                    <option value="B">B</option>
-                                    <option value="A">A</option>
-                                    <option value="EX">EX</option>
-                                </select>
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_end" className="input_label">END :</label>
-                                <select {...register("END")} id="input_end" className="input_field">
-                                    <option value="E">E</option>
-                                    <option value="D">D</option>
-                                    <option value="C">C</option>
-                                    <option value="B">B</option>
-                                    <option value="A">A</option>
-                                    <option value="EX">EX</option>
-                                </select>
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_agi" className="input_label">AGI :</label>
-                                <select {...register("AGI")} id="input_agi" className="input_field">
-                                    <option value="E">E</option>
-                                    <option value="D">D</option>
-                                    <option value="C">C</option>
-                                    <option value="B">B</option>
-                                    <option value="A">A</option>
-                                    <option value="EX">EX</option>
-                                </select>
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_mana1" className="input_label">MANA :</label>
-                                <select {...register("MANA")} id="input_mana1" className="input_field">
-                                    <option value="E">E</option>
-                                    <option value="D">D</option>
-                                    <option value="C">C</option>
-                                    <option value="B">B</option>
-                                    <option value="A">A</option>
-                                    <option value="EX">EX</option>
-                                </select>
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_mgk" className="input_label">MGK :</label>
-                                <select {...register("MGK")} id="input_mgk" className="input_field">
-                                    <option value="E">E</option>
-                                    <option value="D">D</option>
-                                    <option value="C">C</option>
-                                    <option value="B">B</option>
-                                    <option value="A">A</option>
-                                    <option value="EX">EX</option>
-                                </select>
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_luk" className="input_label">LUK :</label>
-                                <select {...register("LUK")} id="input_luk" className="input_field">
-                                    <option value="E">E</option>
-                                    <option value="D">D</option>
-                                    <option value="C">C</option>
-                                    <option value="B">B</option>
-                                    <option value="A">A</option>
-                                    <option value="EX">EX</option>
-                                </select>
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_spd" className="input_label">SPD :</label>
-                                <select {...register("SPD")} id="input_spd" className="input_field">
-                                    <option value="E">E</option>
-                                    <option value="D">D</option>
-                                    <option value="C">C</option>
-                                    <option value="B">B</option>
-                                    <option value="A">A</option>
-                                    <option value="EX">EX</option>
-                                </select>
-                            </div>
+                            {["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"].map(stat => (
+                                <div key={stat} className="input_entry">
+                                    <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
+                                    <select {...register(stat as keyof CreateCharFormInputInterface)} id={`input_${stat.toLowerCase()}`} className="input_field">
+                                        {["E", "D", "C", "B", "A", "EX"].map(level => (
+                                            <option key={level} value={level}>{level}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ))}
                         </div>
                         {
                             (showVariant)
@@ -240,50 +143,44 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
                                 <label htmlFor="input_mana2" className="input_label">Mana :</label>
                                 <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !"})} id="input_mana2" className="input_field" />
                             </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_ini" className="input_label">Ini :</label>
-                                <input type="number" {...register("Ini", { required: "Enter a Valid Ini Amount !" })} id="input_ini" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_sa" className="input_label">SA :</label>
-                                <input type="number" {...register("SA", { required: "Enter a Valid SA Amount !" })} id="input_sa" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_aa" className="input_label">AA :</label>
-                                <input type="number" {...register("AA", { required: "Enter a Valid AA Amount !" })} id="input_aa" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_dmg" className="input_label">DMG :</label>
-                                <input type="number" {...register("DMG", { required: "Enter a Valid DMG Amount !" })} id="input_dmg" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_pa" className="input_label">PA :</label>
-                                <input type="number" {...register("PA", { required: "Enter a Valid PA Amount !" })} id="input_pa" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_sd" className="input_label">SD :</label>
-                                <input type="number" {...register("SD", { required: "Enter a Valid SD Amount !" })} id="input_sd" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_ad" className="input_label">AD :</label>
-                                <input type="number" {...register("AD", { required: "Enter a Valid AD Amount !" })} id="input_ad" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_red" className="input_label">ReD :</label>
-                                <input type="number" {...register("ReD", { required: "Enter a Valid ReD Amount !" })} id="input_red" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_cdc" className="input_label">CdC :</label>
-                                <input type="number" {...register("CdC", { required: "Enter a Valid CdC Amount !" })} id="input_cdc" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_cc" className="input_label">CC :</label>
-                                <input type="number" {...register("CC", { required: "Enter a Valid CC Amount !" })} id="input_cc" className="input_field" />
-                            </div>
-                            <div className="input_entry">
-                                <label htmlFor="input_an" className="input_label">AN :</label>
-                                <input type="number" {...register("AN", { required: "Enter a Valid AN Amount !" })} id="input_an" className="input_field" />
-                            </div>
+                            {["Ini", "SA", "AA", "DMG", "PA", "SD", "AD", "ReD", "CdC", "CC", "AN"].map(stat => (
+                                <div key={stat} className="input_entry">
+                                    <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
+                                    <input type="number" {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} id={`input_${stat.toLowerCase()}`} className="input_field" />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="input_group">
+                            {
+                                (charStats.BuffsList.length > 0)
+                                ?   <>
+                                        <h3 className="input_label">Buffs List :</h3>
+                                        {buffs.map((buff, index) => (
+                                            <div key={buff.id} className="input_entry">
+                                                <input {...register(`BuffsList.${index}.Name`)} placeholder="Buff Name" className="input_field" />
+                                                <button type="button" onClick={() => removeBuff(index)} className="bg-red-500 text-white p-2 rounded">Remove</button>
+                                            </div>
+                                        ))}
+                                        {/* possibilité de append un buff avec nClick={() => appendDebuff({ })}*/}
+                                    </>
+                                : <></>
+                            }
+                        </div>
+                        <div className="input_group">
+                            {
+                                (charStats.DebuffsList.length > 0)
+                                ?   <>
+                                        <h3 className="input_label">Debuffs List :</h3>
+                                        {debuffs.map((debuff, index) => (
+                                            <div key={debuff.id} className="input_entry">
+                                                <input {...register(`DebuffsList.${index}.Name`)} placeholder="Debuff Name" className="input_field" />
+                                                <button type="button" onClick={() => removeDebuff(index)} className="bg-red-500 text-white p-2 rounded">Remove</button>
+                                            </div>
+                                        ))}
+                                        {/* possibilité de append un buff avec nClick={() => appendDebuff({ })}*/}
+                                    </>
+                                : <></>
+                            }
                         </div>
                     </div>
                     <div className="flex justify-center py-5">

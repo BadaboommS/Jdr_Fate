@@ -9,6 +9,7 @@ export interface FightListInterface {
 export type fightHistoryType = {
     historyMsg: string;
     msgType: string;
+    msgTitle: string;
 }
 
 export const CCDebuffList = [

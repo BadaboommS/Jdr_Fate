@@ -1,12 +1,13 @@
 import { useContext, useState } from "react";
 import { MdSave, MdSettings } from "react-icons/md";
-import { DataContext } from "../../context/DataContext";
-import { FightActorStatsDisplay } from "./Display/FightActorStatsDisplay";
-import { CharStatsInterface } from "../../types/statsType";
-import { FightListInterface } from "../../types/fightType";
-import { Terminal } from "./Display/Terminal";
-import { Modal } from "../../global/Modal";
+import { DataContext } from "../../../context/DataContext";
+import { FightActorStatsDisplay } from "../FightDisplay/FightActorStatsDisplay";
+import { CharStatsInterface } from "../../../types/statsType";
+import { FightListInterface } from "../../../types/fightType";
+import { Terminal } from "../FightDisplay/Terminal";
+import { Modal } from "../../../global/Modal";
 import { handleDmgCalc } from "./fightCalc";
+import { FightSettingsModal } from "./FightSettingsModal";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -21,51 +22,6 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     const [displayActorBData, setDisplayActorBData] = useState<CharStatsInterface | null>(null);
     const [fightSettingsModal, setFightSettingsModal] = useState<boolean>(false);
 
-    function handleSetDisplayActorData(actorType: string, charName: string): void {
-        if(charName === 'None' && actorType === 'A') { setDisplayActorAData(null); return; }
-        if(charName === 'None' && actorType === 'B') { setDisplayActorBData(null); return; }
-        if(actorType === 'A') { setDisplayActorAData(charData[charData.findIndex((char) => char.Name === charName)]); return; }
-        if(actorType === 'B') { setDisplayActorBData(charData[charData.findIndex((char) => char.Name === charName)]); return; }
-    }
-
-    function handleFightStateChange(): void {
-        setActiveData(prevState => ({...prevState, fightState: !prevState.fightState}));
-        handleHistoryEventAdd(`Le combat ${activeData.fightState ? 'est en fini / en pause.' : 'reprends.'}`, 'Info');
-        saveFightData(activeData);
-    }
-
-    function handleMemberListChange(name: string): void {
-        const memberListChangeMsg = (activeData.fightMembers.includes(name)) ? 'a quitté le combat.' : 'a rejoint le combat.';
-        setActiveData(prevState => ({
-            ...prevState,
-            fightMembers: prevState.fightMembers.includes(name)
-                ? prevState.fightMembers.filter(m => m !== name)
-                : [...prevState.fightMembers, name]
-        }));
-        handleHistoryEventAdd(`${name} ${memberListChangeMsg}`, 'Info');
-    }
-
-    function handleHistoryEventAdd(newHistoryEntry: string, newMsgType: string): void {
-        setActiveData(prevState => ({
-            ...prevState,
-            fightHistory: [{historyMsg: newHistoryEntry, msgType: newMsgType}, ...prevState.fightHistory]
-        }))
-    }
-
-    function handleFightModalClose(): void {
-        saveFightData(activeData);
-        setFightSettingsModal(false);
-    }
-
-    function handleDeleteBuff(charId: number, buffName: string): void {
-        setCharData(charData.map((char) => char.Id === charId ? {...char, BuffsList: char.BuffsList.filter(buff => buff.Name !== buffName)} : char));
-    }
-
-    function handleDeleteDebuff(charId: number, debuffName: string): void {
-        setCharData(charData.map((char) => char.Id === charId ? {...char, BuffsList: char.DebuffsList.filter(debuff => debuff.Name !== debuffName)} : char));
-    }
-
-
     function handleFightAtk(attackerId: number | null, defenderId: number | null, nbAtk?: number): void {
         if(attackerId === null || defenderId === null) { return; }
 
@@ -78,7 +34,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         for(let i = 0; i < atkCount; i ++){
             const combatRes = handleDmgCalc(attackerData, defenderData, i);
 
-            combatRes.msg.map((msg) => handleHistoryEventAdd(msg.historyMsg, msg.msgType)); // display all turn info
+            combatRes.msg.map((msg) => handleHistoryEventAdd(msg.historyMsg, msg.msgType, msg.msgTitle)); // display all turn info
 
             if(combatRes.debuff !== null && combatRes.debuff !== undefined){ 
                 defenderData = { ...defenderData, DebuffsList: [...defenderData.DebuffsList, combatRes.debuff]}
@@ -101,6 +57,36 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         if(displayActorBData?.Id === defenderId) { setDisplayActorBData(defenderData); }
     }
 
+    function handleSetDisplayActorData(actorType: string, charName: string): void {
+        const selectedChar = charData.find((char) => char.Name === charName) || null;
+        if (actorType === 'A') { setDisplayActorAData(selectedChar) } else { setDisplayActorBData(selectedChar) }
+    }
+
+    function handleFightStateChange(): void {
+        setActiveData(prevState => ({...prevState, fightState: !prevState.fightState}));
+        handleHistoryEventAdd(`Le combat ${activeData.fightState ? 'est en fini / en pause.' : 'reprends.'}`, 'Info');
+    }
+
+    function handleMemberListChange(name: string): void {
+        const memberListChangeMsg = (activeData.fightMembers.includes(name)) ? 'a quitté le combat.' : 'a rejoint le combat.';
+        setActiveData(prevState => ({
+            ...prevState,
+            fightMembers: prevState.fightMembers.includes(name)
+                ? prevState.fightMembers.filter(m => m !== name)
+                : [...prevState.fightMembers, name]
+        }));
+        handleHistoryEventAdd(`${name} ${memberListChangeMsg}`, 'Info');
+    }
+
+    function handleDeleteBuff(charId: number, buffName: string): void { setCharData(charData.map((char) => char.Id === charId ? {...char, BuffsList: char.BuffsList.filter(buff => buff.Name !== buffName)} : char)); };
+    function handleDeleteDebuff(charId: number, debuffName: string): void { setCharData(charData.map((char) => char.Id === charId ? {...char, BuffsList: char.DebuffsList.filter(debuff => debuff.Name !== debuffName)} : char)); };
+    function handleHistoryEventAdd(newHistoryEntry: string, newMsgType: string, msgTitle: string = ''): void { setActiveData(prevState => ({ ...prevState, fightHistory: [{historyMsg: newHistoryEntry, msgType: newMsgType, msgTitle: msgTitle}, ...prevState.fightHistory]})); };
+    
+    function handleFightModalClose(): void {
+        saveFightData(activeData);
+        setFightSettingsModal(false);
+    }
+
     return (
         <div className="w-screen h-screen">
             <div className="flex flex-col items-center gap-2 border border-black p-2 bg-[#DFDDCF] text-black rounded">
@@ -119,35 +105,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                         {
                             (fightSettingsModal)
                                 ?   <Modal isOpen={fightSettingsModal} onClose={() => handleFightModalClose()}>
-                                        <div className="grid flex-col justify-center gap-4 items-center">
-                                            <div className="flex flex-col gap-2">
-                                                <p className="text-center">Etat du combat: {activeData.fightState? 'En cours' : "Fini"}</p>
-                                                <button onClick={() => handleFightStateChange()} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Changer Fight State</button>
-                                            </div>
-                                            <div className='flex flex-col gap-1'>
-                                                <p className="text-center">Participants :</p>
-                                                <div className="flex flex-row gap-2 flex-wrap">
-                                                    {
-                                                        (charData.length > 0)
-                                                        ?   (charData.map((character) => (
-                                                                <div key={`${character.Joueur}_${character.Name}`} className="flex gap-2 border border-black rounded p-1">
-                                                                    <label htmlFor={`${character.Joueur}_${character.Name}`}>{character.Name}</label>
-                                                                    <input 
-                                                                        type="checkbox"
-                                                                        value={character.Name}
-                                                                        id={`${character.Joueur}_${character.Name}`}
-                                                                        checked={activeData.fightMembers.includes(character.Name)}
-                                                                        onChange={() => handleMemberListChange(character.Name)}
-                                                                    />
-                                                                </div>)))
-                                                        : <p>Pas de Joueur.</p>
-                                                    }
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2 justify-end">
-                                                <button onClick={() => handleFightModalClose()} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Retour</button>
-                                            </div>
-                                        </div>
+                                        <FightSettingsModal charData={charData} activeData={activeData} handleFightStateChange={handleFightStateChange} handleMemberListChange={handleMemberListChange} handleSettingsModalClose={handleFightModalClose} />
                                     </Modal>
                                 :   <></>
                         }

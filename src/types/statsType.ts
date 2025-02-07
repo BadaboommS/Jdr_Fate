@@ -12,7 +12,7 @@ export interface CharStatsInterface {
     CombatStats: FightStatsType;
     InitCaracteristics: CharStatsCaracteristics;
     InitCombatStats: FightStatsType;
-    BuffsList: BuffListType[];
+    BuffsList: BuffType[];
     DebuffsList: DebuffType[];
 }
 
@@ -22,7 +22,7 @@ export type DebuffType = {
     Effect: string
 }
 
-export type BuffListType = {
+export type BuffType = {
     Name: string,
     Desc: string,
     Effect: string
@@ -126,6 +126,8 @@ export interface CreateCharFormInputInterface {
     CdC: number;
     CC: number;
     AN: number;
+    BuffsList: BuffType[];
+    DebuffsList: DebuffType[];
 }
 
 /* 

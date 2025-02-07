@@ -7,7 +7,20 @@
     {"id": 4, "filterName": "Thib", "filterString": "Thib"},
     {"id": 5, "filterName": "Test", "filterString": "Test"}
   ],
-  "fight_data": [],
+  "fight_data": [
+    {
+      "fightId" : 0,
+      "fightName": "Fight Test",
+      "fightMembers" : ["Master Test", "Servant Test", "PNJ Test"],
+      "fightHistory" : [
+          { "historyMsg": "--------------------", "msgType": "Text", "msgTitle": ""},
+          { "historyMsg": "Membre présents: - Hugo -- Thib -- Test -", "msgType": "Info", "msgTitle": ""},
+          { "historyMsg": "Fight Fight Test crée 07/02/2025.", "msgType": "Info", "msgTitle": ""},
+          { "historyMsg": "--------------------", "msgType": "Text", "msgTitle": ""}
+      ],
+      "fightState" : true
+    }
+  ],
   "player_data": ["Hugo", "Thib", "Test"],
   "characters_data": [
     {
@@ -32,7 +45,29 @@
         "LUK": "C",
         "SPD": "B"
       },
-      "Combat_Stats": {
+      "InitCaracteristics": {
+        "STR": "B",
+        "END": "C",
+        "AGI": "A",
+        "MANA": "B",
+        "MGK": "A",
+        "LUK": "C",
+        "SPD": "B"
+      },
+      "CombatStats": {
+        "Ini": 15,
+        "SA": 80,
+        "AA": 3,
+        "DMG": 20,
+        "PA": 5,
+        "SD": 70,
+        "AD": 2,
+        "ReD": 10,
+        "CdC": 25,
+        "CC": 2,
+        "AN": 3
+      },
+      "InitCombatStats": {
         "Ini": 15,
         "SA": 80,
         "AA": 3,
@@ -71,7 +106,29 @@
         "LUK": "A",
         "SPD": "A"
       },
-      "Combat_Stats": {
+      "InitCaracteristics": {
+        "STR": "A",
+        "END": "B",
+        "AGI": "A",
+        "MANA": "C",
+        "MGK": "B",
+        "LUK": "A",
+        "SPD": "A"
+      },
+      "CombatStats": {
+        "Ini": 20,
+        "SA": 90,
+        "AA": 4,
+        "DMG": 25,
+        "PA": 7,
+        "SD": 80,
+        "AD": 3,
+        "ReD": 15,
+        "CdC": 30,
+        "CC": 3,
+        "AN": 4
+      },
+      "InitCombatStats": {
         "Ini": 20,
         "SA": 90,
         "AA": 4,
@@ -109,7 +166,29 @@
         "LUK": "B",
         "SPD": "C"
       },
-      "Combat_Stats": {
+      "InitCaracteristics": {
+        "STR": "C",
+        "END": "D",
+        "AGI": "B",
+        "MANA": "C",
+        "MGK": "D",
+        "LUK": "B",
+        "SPD": "C"
+      },
+      "CombatStats": {
+        "Ini": 10,
+        "SA": 60,
+        "AA": 2,
+        "DMG": 15,
+        "PA": 3,
+        "SD": 50,
+        "AD": 1,
+        "ReD": 5,
+        "CdC": 20,
+        "CC": 1,
+        "AN": 2
+      },
+      "InitCombatStats": {
         "Ini": 10,
         "SA": 60,
         "AA": 2,

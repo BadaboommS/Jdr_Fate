@@ -27,10 +27,10 @@ export function AddFightControl() {
             fightName: data.fightName,
             fightMembers : data.fightMembers,
             fightHistory : [
-                { historyMsg: `--------------------`, msgType: 'Text'},
-                { historyMsg: `Membre présents: ${data.fightMembers.join(', ')}`, msgType: 'Info'},
-                { historyMsg: `Fight ${data.fightName} crée ${new Date().toLocaleString()} .`, msgType: "Info"},
-                { historyMsg: `--------------------`, msgType: 'Text'}
+                { historyMsg: `--------------------`, msgType: 'Text', msgTitle: ''},
+                { historyMsg: `Membre présents: ${data.fightMembers.join(', ')}`, msgType: 'Info', msgTitle: ''},
+                { historyMsg: `Fight ${data.fightName} crée ${new Date().toLocaleString()} .`, msgType: "Info", msgTitle: ''},
+                { historyMsg: `--------------------`, msgType: 'Text', msgTitle: ''}
             ],
             fightState : true,
         }
