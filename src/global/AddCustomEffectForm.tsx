@@ -17,6 +17,7 @@ export function AddCustomEffectForm ({ toUpdateCharData }: AddCustomEffectFormPr
     const { register, handleSubmit, reset } = useForm<EffectFormInputInterface>({ defaultValues: { Name: '', Desc: '', STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0, Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0, Dot: 0, Hot: 0 } })
 
     const onSubmit: SubmitHandler<EffectFormInputInterface> = (data) => {
+        if(!window.confirm(`Confirmer l'atout de ${data.Name} ?`)){ return charData; };
         const effectList = (effectType === "Buff")? toUpdateCharData.BuffsList : toUpdateCharData.DebuffsList;
         const newEffect: CharBuffInterface = {
             Id: effectList[0]? effectList[effectList.length - 1].Id + 1 : 0,
@@ -29,8 +30,8 @@ export function AddCustomEffectForm ({ toUpdateCharData }: AddCustomEffectFormPr
         const newEffectCombatStats = { Ini: Number(data.Ini), SA: Number(data.SA), AA: Number(data.AA), DMG: Number(data.DMG), PA: Number(data.PA), SD: Number(data.SD), AD: Number(data.AD), ReD: Number(data.ReD), CdC: Number(data.CdC), CC: Number(data.CC), AN: Number(data.AN) };
         const charCaracStock = Object.fromEntries(Object.entries(newEffectCharCarac).filter(([, value]) => value !== 0));
         const combatStatsStock = Object.fromEntries(Object.entries(newEffectCombatStats).filter(([, value]) => value !== 0));
-        const dotStock = data.Dot !== 0 ? data.Dot : null;
-        const hotStock = data.Hot !== 0 ? data.Hot : null;
+        const dotStock = Number(data.Dot) !== 0 ? Number(data.Dot) : null;
+        const hotStock = Number(data.Hot) !== 0 ? Number(data.Hot) : null;
 
         if (Object.keys(charCaracStock).length > 0 || Object.keys(combatStatsStock).length > 0 || dotStock !== null || hotStock !== null) {
             newEffect.Effect = {

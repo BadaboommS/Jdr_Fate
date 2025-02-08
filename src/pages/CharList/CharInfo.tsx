@@ -16,6 +16,7 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
     const { charData, setCharData } = useContext(DataContext);
 
     function handleRemoveEffect(charD: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: "Buff" | "Debuff"){
+        if(!window.confirm(`Confirmer la suppression de ${effect.Name} ?`)){ return charData; };
         setCharData(charData.map((char) => char.Id === charD.Id? removeEffect(charD, effect, effectType) : char));
     }
 

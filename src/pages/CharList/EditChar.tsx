@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
 import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/statsType";
+import { applyEffect } from "../Fight/FightScreen/FightHandlers/fightCalc";
 
 interface EditCharPropsInterface {
     charStats: CharStatsInterface;
@@ -29,8 +30,8 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
             return;
         }
 
-        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
-        const newCharacterData = {
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD } = data;
+        const newCharacterData: CharStatsInterface = {
             Id: charStats.Id,
             Name,
             Joueur,
@@ -39,16 +40,20 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
             Armor,
             Hp,
             Mana,
-            Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
-            CombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
-            InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
-            InitCombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
-            BuffsList: charStats.BuffsList, //add remove edit buff & debuff
-            DebuffsList: charStats.DebuffsList,
+            InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
+            InitCombatStats: { Ini: Number(data.Ini), SA: Number(data.SA), AA: Number(data.AA), DMG: Number(data.DMG), PA: Number(data.PA), SD: Number(data.SD), AD: Number(data.AD), ReD: Number(data.ReD), CdC: Number(data.CdC), CC: Number(data.CC), AN: Number(data.AN) },
+            Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
+            CombatStats: { Ini: Number(data.Ini), SA: Number(data.SA), AA: Number(data.AA), DMG: Number(data.DMG), PA: Number(data.PA), SD: Number(data.SD), AD: Number(data.AD), ReD: Number(data.ReD), CdC: Number(data.CdC),
+            CC: Number(data.CC), AN: Number(data.AN) },
+            BuffsList: charStats.BuffsList.map(buff => ({ ...buff, Applied: false })), // remove applied from all buffs
+            DebuffsList: charStats.DebuffsList.map(debuff => ({ ...debuff, Applied: false })), // remove applied from all debuffs
             ...(showVariant && { Variant })
         };
 
-        setCharData(charData.map(char => char.Id === charStats.Id ? newCharacterData : char));
+        const buffUpdatedCharData = applyEffect(newCharacterData, "Buff");
+        const defbuffUpddatedCharData = applyEffect(buffUpdatedCharData, "Debuff");
+
+        setCharData(charData.map(char => char.Id === charStats.Id ? defbuffUpddatedCharData : char));
     }
 
     function handleReset(){

@@ -121,7 +121,6 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
 }
 
 export function addEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{
-    if(!window.confirm(`Confirmer l'ajout de ${effect.Name} ?`)){ return charData; };
     const effectList = effectType === 'Buff' ? charData.BuffsList : charData.DebuffsList;
     const updatedEffectList = [...effectList, effect];
     const updatedcharData = { ...charData, BuffsList: effectType === 'Buff' ? updatedEffectList : charData.BuffsList, DebuffsList: effectType === 'Debuff' ? updatedEffectList : charData.DebuffsList};
@@ -130,7 +129,6 @@ export function addEffect(charData: CharStatsInterface, effect: CharBuffInterfac
 }
 
 export function removeEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{
-    if(!window.confirm(`Confirmer la suppression de ${effect.Name} ?`)){ return charData; };
     const effectList = effectType === 'Buff' ? charData.BuffsList : charData.DebuffsList;
     const updatedEffectList = effectList.filter((e) => e.Id !== effect.Id);
     const updatedcharData = { ...charData, BuffsList: effectType === 'Buff' ? updatedEffectList : charData.BuffsList, DebuffsList: effectType === 'Debuff' ? updatedEffectList : charData.DebuffsList};
@@ -164,6 +162,7 @@ export function applyEffect(charData: CharStatsInterface, effectType: 'Buff' | '
                     });
                 }
             }
+            effect.Applied = true;
         }
     })
 
@@ -172,7 +171,7 @@ export function applyEffect(charData: CharStatsInterface, effectType: 'Buff' | '
 
 export function unapplyEffect(charData: CharStatsInterface, effectData: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
     if (!effectData) { return charData; }
-    if (!effectData.Applied) {
+    if (effectData.Applied) {
         if (effectData.Effect) {
             // Effect Carac  VOIR AVEC HUGO RANG
             /* const effectCaracs = effect.Effect.CharCaracteristics || null; 
@@ -192,6 +191,7 @@ export function unapplyEffect(charData: CharStatsInterface, effectData: CharBuff
                 });
             }
         }
+        effectData.Applied = false;
     }
     return charData;
 }
