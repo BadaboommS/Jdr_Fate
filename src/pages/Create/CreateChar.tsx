@@ -10,7 +10,7 @@ export function CreateChar() {
     const { charData, setCharData, playerData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(false);
 
-    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', WeaponName: '', WeaponType: '', WeaponDmg: 0, Armor: 0, Hp: 0, Mana: 0, STR: 'E', END: 'E', AGI: 'E', MANA: 'E', MGK: 'E', LUK: 'E', SPD: 'E', Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0 } });
+    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', WeaponName: '', WeaponType: '', WeaponDmg: 0, Armor: 0, Hp: 0, Mana: 0 }});
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Valider l'ajout du personnage ?`)){
@@ -19,18 +19,14 @@ export function CreateChar() {
 
         const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
-            Id: charData[0]? charData[charData.length - 1].Id + 1 : 0,
-            Name,
-            Joueur,
-            Type,
-            Weapon: { WeaponName, WeaponDmg, WeaponType },
-            Armor,
-            Hp,
-            Mana,
-            Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
-            CombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
-            InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
-            InitCombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
+            Id: charData[0] ? charData[charData.length - 1].Id + 1 : 0,
+            Name, Joueur, Type,
+            Weapon: { WeaponName, WeaponDmg: Number(WeaponDmg), WeaponType },
+            Armor: Number(Armor), Hp: Number(Hp), Mana: Number(Mana),
+            Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
+            CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
+            InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
+            InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             BuffsList: [],
             DebuffsList: [],
             ...(showVariant && { Variant })
@@ -77,7 +73,7 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_joueur" className="input_label">Joueur :</label>
-                            <select {...register("Joueur")} defaultValue="" id="input_joueur" className="input_field !indent-1">
+                            <select {...register("Joueur")} id="input_joueur" className="input_field !indent-1">
                                 {(playerData.map((player: string) => {
                                     return <option value={player} key={player}>{player}</option>
                                 }))}
@@ -135,83 +131,16 @@ export function CreateChar() {
                             <input type="number" {...register("Armor", {required: "Enter a Valid Armor Amount !"})} id="input_Armor" className="input_field" />
                         </div>
                         <h3 className="input_label">Caracteristics :</h3>
-                        <div className="input_entry">
-                            <label htmlFor="input_str" className="input_label">STR :</label>
-                            <select {...register("STR")} id="input_str" className="input_field">
-                                <option value="E">E</option>
-                                <option value="D">D</option>
-                                <option value="C">C</option>
-                                <option value="B">B</option>
-                                <option value="A">A</option>
-                                <option value="EX">EX</option>
-                            </select>
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_end" className="input_label">END :</label>
-                            <select {...register("END")} id="input_end" className="input_field">
-                                <option value="E">E</option>
-                                <option value="D">D</option>
-                                <option value="C">C</option>
-                                <option value="B">B</option>
-                                <option value="A">A</option>
-                                <option value="EX">EX</option>
-                            </select>
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_agi" className="input_label">AGI :</label>
-                            <select {...register("AGI")} id="input_agi" className="input_field">
-                                <option value="E">E</option>
-                                <option value="D">D</option>
-                                <option value="C">C</option>
-                                <option value="B">B</option>
-                                <option value="A">A</option>
-                                <option value="EX">EX</option>
-                            </select>
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_mana1" className="input_label">MANA :</label>
-                            <select {...register("MANA")} id="input_mana1" className="input_field">
-                                <option value="E">E</option>
-                                <option value="D">D</option>
-                                <option value="C">C</option>
-                                <option value="B">B</option>
-                                <option value="A">A</option>
-                                <option value="EX">EX</option>
-                            </select>
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_mgk" className="input_label">MGK :</label>
-                            <select {...register("MGK")} id="input_mgk" className="input_field">
-                                <option value="E">E</option>
-                                <option value="D">D</option>
-                                <option value="C">C</option>
-                                <option value="B">B</option>
-                                <option value="A">A</option>
-                                <option value="EX">EX</option>
-                            </select>
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_luk" className="input_label">LUK :</label>
-                            <select {...register("LUK")} id="input_luk" className="input_field">
-                                <option value="E">E</option>
-                                <option value="D">D</option>
-                                <option value="C">C</option>
-                                <option value="B">B</option>
-                                <option value="A">A</option>
-                                <option value="EX">EX</option>
-                            </select>
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_spd" className="input_label">SPD :</label>
-                            <select {...register("SPD")} id="input_spd" className="input_field">
-                                <option value="E">E</option>
-                                <option value="D">D</option>
-                                <option value="C">C</option>
-                                <option value="B">B</option>
-                                <option value="A">A</option>
-                                <option value="EX">EX</option>
-                            </select>
-                        </div>
+                        {["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"].map((stat) => (
+                            <div className="input_entry" key={stat}>
+                                <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
+                                <select {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} defaultValue={'E'} id={`input_${stat.toLowerCase()}`} className="input_field">
+                                    {["E", "D", "C", "B", "A", "EX"].map((value) => (
+                                        <option value={value} key={value}>{value}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        ))}
                     </div>
                     {(showVariant)
                     ?   <div>
@@ -228,50 +157,12 @@ export function CreateChar() {
                             <label htmlFor="input_mana2" className="input_label">Mana :</label>
                             <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !"})} id="input_mana2" className="input_field" />
                         </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_ini" className="input_label">Ini :</label>
-                            <input type="number" {...register("Ini", { required: "Enter a Valid Ini Amount !" })} id="input_ini" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_sa" className="input_label">SA :</label>
-                            <input type="number" {...register("SA", { required: "Enter a Valid SA Amount !" })} id="input_sa" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_aa" className="input_label">AA :</label>
-                            <input type="number" {...register("AA", { required: "Enter a Valid AA Amount !" })} id="input_aa" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_dmg" className="input_label">DMG :</label>
-                            <input type="number" {...register("DMG", { required: "Enter a Valid DMG Amount !" })} id="input_dmg" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_pa" className="input_label">PA :</label>
-                            <input type="number" {...register("PA", { required: "Enter a Valid PA Amount !" })} id="input_pa" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_sd" className="input_label">SD :</label>
-                            <input type="number" {...register("SD", { required: "Enter a Valid SD Amount !" })} id="input_sd" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_ad" className="input_label">AD :</label>
-                            <input type="number" {...register("AD", { required: "Enter a Valid AD Amount !" })} id="input_ad" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_red" className="input_label">ReD :</label>
-                            <input type="number" {...register("ReD", { required: "Enter a Valid ReD Amount !" })} id="input_red" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_cdc" className="input_label">CdC :</label>
-                            <input type="number" {...register("CdC", { required: "Enter a Valid CdC Amount !" })} id="input_cdc" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_cc" className="input_label">CC :</label>
-                            <input type="number" {...register("CC", { required: "Enter a Valid CC Amount !" })} id="input_cc" className="input_field" />
-                        </div>
-                        <div className="input_entry">
-                            <label htmlFor="input_an" className="input_label">AN :</label>
-                            <input type="number" {...register("AN", { required: "Enter a Valid AN Amount !" })} id="input_an" className="input_field" />
-                        </div>
+                        {["Ini", "SA", "AA", "DMG", "PA", "SD", "AD", "ReD", "CdC", "CC", "AN"].map((stat) => (
+                            <div className="input_entry" key={stat}>
+                                <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
+                                <input type="number" {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} defaultValue={0} id={`input_${stat.toLowerCase()}`} className="input_field" />
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div className="flex justify-center py-5">

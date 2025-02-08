@@ -1,12 +1,12 @@
-import { useContext, useState } from "react";
-import { MdSave, MdSettings } from "react-icons/md";
+import { useContext, useEffect, useState } from "react";
+import { MdSettings } from "react-icons/md";
 import { DataContext } from "../../../context/DataContext";
-import { FightActorStatsDisplay } from "../FightDisplay/FightActorStatsDisplay";
-import { CharStatsInterface } from "../../../types/statsType";
+import { FightActorStatsDisplay } from "./FightDisplay/FightActorStatsDisplay";
+import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../../../types/statsType";
 import { FightListInterface } from "../../../types/fightType";
-import { Terminal } from "../FightDisplay/Terminal";
+import { Terminal } from "./FightDisplay/Terminal";
 import { Modal } from "../../../global/Modal";
-import { handleDmgCalc } from "./fightCalc";
+import { handleFightAtk, removeEffect } from "./FightHandlers/fightCalc";
 import { FightSettingsModal } from "./FightSettingsModal";
 
 interface FightScreenPropsInterface {
@@ -18,48 +18,18 @@ interface FightScreenPropsInterface {
 export function FightScreen ({ activeFightData, handleModalClose, saveFightData }: FightScreenPropsInterface) {
     const { charData, setCharData } = useContext(DataContext);
     const [activeData, setActiveData] = useState<FightListInterface>(activeFightData);
-    const [displayActorAData, setDisplayActorAData] = useState<CharStatsInterface | null>(null);
-    const [displayActorBData, setDisplayActorBData] = useState<CharStatsInterface | null>(null);
+    const [displayActorAData, setDisplayActorAData] = useState<CharStatsInterface | null>(charData.find((char) => char.Name === activeFightData.activeActorA) || null);
+    const [displayActorBData, setDisplayActorBData] = useState<CharStatsInterface | null>(charData.find((char) => char.Name === activeFightData.activeActorB) || null);
     const [fightSettingsModal, setFightSettingsModal] = useState<boolean>(false);
 
-    function handleFightAtk(attackerId: number | null, defenderId: number | null, nbAtk?: number): void {
-        if(attackerId === null || defenderId === null) { return; }
-
-        const attackerData = charData[charData.findIndex((char) => char.Id === attackerId)];
-        let defenderData = charData[charData.findIndex((char) => char.Id === defenderId)];
-        const atkCount = (nbAtk) ? nbAtk :  attackerData.CombatStats.AA;
-
-        handleHistoryEventAdd(`-- ${attackerData.Name} attaque ${defenderData.Name} --`, 'Text');
-
-        for(let i = 0; i < atkCount; i ++){
-            const combatRes = handleDmgCalc(attackerData, defenderData, i);
-
-            combatRes.msg.map((msg) => handleHistoryEventAdd(msg.historyMsg, msg.msgType, msg.msgTitle)); // display all turn info
-
-            if(combatRes.debuff !== null && combatRes.debuff !== undefined){ 
-                defenderData = { ...defenderData, DebuffsList: [...defenderData.DebuffsList, combatRes.debuff]}
-            }
-
-            // setData
-            //attackerData = {...attackerData, Hp: attackerData.Hp - combatRes.dmg};
-            defenderData = {...defenderData, Hp: defenderData.Hp - combatRes.dmg};
-        }
-
-        handleHistoryEventAdd(`-- Fin de l'attaque --`, 'Text');
-
-        //setCharData(charData.map((char) => char.Id === attackerData.Id ? attackerData : char));
-        setCharData(charData.map((char) => char.Id === defenderData.Id ? defenderData : char));
-
-        // reload state for display
-        if(displayActorAData?.Id === attackerId) { setDisplayActorAData(attackerData); }
-        if(displayActorAData?.Id === defenderId) { setDisplayActorAData(defenderData); }
-        if(displayActorBData?.Id === attackerId) { setDisplayActorBData(attackerData); }
-        if(displayActorBData?.Id === defenderId) { setDisplayActorBData(defenderData); }
-    }
-
-    function handleSetDisplayActorData(actorType: string, charName: string): void {
+    function handleSetDisplayActorData (actorType: string, charName: string): void {
         const selectedChar = charData.find((char) => char.Name === charName) || null;
-        if (actorType === 'A') { setDisplayActorAData(selectedChar) } else { setDisplayActorBData(selectedChar) }
+        if (actorType === 'A') { setDisplayActorAData(selectedChar); setActiveData(prevState => ({ ...prevState, activeActorA: charName })); };
+        if (actorType === 'B') { setDisplayActorBData(selectedChar); setActiveData(prevState => ({ ...prevState, activeActorB: charName })); };
+    };
+
+    function handleRemoveEffect(charD: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: "Buff" | "Debuff"){
+        setCharData(charData.map((char) => char.Id === charD.Id? removeEffect(charD, effect, effectType) : char));
     }
 
     function handleFightStateChange(): void {
@@ -69,8 +39,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
 
     function handleMemberListChange(name: string): void {
         const memberListChangeMsg = (activeData.fightMembers.includes(name)) ? 'a quitté le combat.' : 'a rejoint le combat.';
-        setActiveData(prevState => ({
-            ...prevState,
+        setActiveData(prevState => ({ ...prevState,
             fightMembers: prevState.fightMembers.includes(name)
                 ? prevState.fightMembers.filter(m => m !== name)
                 : [...prevState.fightMembers, name]
@@ -78,27 +47,34 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         handleHistoryEventAdd(`${name} ${memberListChangeMsg}`, 'Info');
     }
 
-    function handleDeleteBuff(charId: number, buffName: string): void { setCharData(charData.map((char) => char.Id === charId ? {...char, BuffsList: char.BuffsList.filter(buff => buff.Name !== buffName)} : char)); };
-    function handleDeleteDebuff(charId: number, debuffName: string): void { setCharData(charData.map((char) => char.Id === charId ? {...char, BuffsList: char.DebuffsList.filter(debuff => debuff.Name !== debuffName)} : char)); };
     function handleHistoryEventAdd(newHistoryEntry: string, newMsgType: string, msgTitle: string = ''): void { setActiveData(prevState => ({ ...prevState, fightHistory: [{historyMsg: newHistoryEntry, msgType: newMsgType, msgTitle: msgTitle}, ...prevState.fightHistory]})); };
-    
+
     function handleFightModalClose(): void {
-        saveFightData(activeData);
         setFightSettingsModal(false);
     }
+
+    // auto save
+    useEffect(() => {
+        saveFightData(activeData);
+    }, [activeData, saveFightData]);
+
+    useEffect(() => {
+        setDisplayActorAData(charData.find((char) => char.Name === activeData.activeActorA) || null);
+        setDisplayActorBData(charData.find((char) => char.Name === activeData.activeActorB) || null);
+    }, [charData, activeData]);
 
     return (
         <div className="w-screen h-screen">
             <div className="flex flex-col items-center gap-2 border border-black p-2 bg-[#DFDDCF] text-black rounded">
-                <nav className="flex justify-around px-2 items-center gap-3 py-4 w-screen">
-                    <div className="text-xl">
-                        <p>Combat N°{activeData.fightId}: {activeData.fightName}</p>
-                        <p>Participants: {
+                <nav className="flex justify p-2 items-center justify-around gap-3 w-screen">
+                    <div className="flex gap-3 items-center text-2xl">
+                        <p className="text-bold">{activeData.fightName} : </p>
+                        {/* <p className="text-lg">Participants: {
                             (activeData.fightMembers.length > 0)
                                 ?   activeData.fightMembers.map((member: string) => <span key={member}>- {member} -</span>)
                                 :   <span>Pas de participants.</span>
-                        }</p>
-                        <p>Combat <span className={`text-xl ${activeData.fightState? 'text-green-500' : 'text-gray-500'}`}>{activeData.fightState? 'Actif' :'Fini'}</span>.</p>
+                        }</p> */}
+                        <p className={`${activeData.fightState? 'text-green-500' : 'text-gray-500'}`}>{activeData.fightState? 'En Cours' : 'Fini'}</p>
                     </div>
                     <div className="flex gap-2 items-center">
                         <button onClick={() => setFightSettingsModal(true)} className="cursor-pointer" title="Fight Settings"><MdSettings size={32} /></button>
@@ -109,7 +85,6 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                                     </Modal>
                                 :   <></>
                         }
-                        <button onClick={() => saveFightData(activeData)} className="cursor-pointer" title="Save"><MdSave size={32} /></button>
                         <div className='flex justify-end gap-2 py-2'>
                             <button title="Cancel" className='bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer' onClick={() => handleModalClose()}>Cancel</button>
                         </div>
@@ -118,23 +93,23 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                 <div className="flex grid grid-cols-3 w-full min-h-[90vh]">
                     <div className="flex flex-col items-center">
                         <h2 className="text-xl text-center">Acteur A: </h2>
-                        <select onChange={(e) => handleSetDisplayActorData('A', e.currentTarget.value)} name="actorASelect" defaultValue="None" className="text-lg bg-white p-2 my-2 border border-black rounded">
+                        <select onChange={(e) => handleSetDisplayActorData('A', e.currentTarget.value)} name="actorASelect" defaultValue={displayActorAData?.Name || 'None'} className="text-lg bg-white p-2 my-2 border border-black rounded">
                             <option value="None">None</option>
                             {
                                 (activeData.fightMembers.length > 0) &&
                                     (activeData.fightMembers.map((member, index) => {
-                                        return <option  key={`${member}_${index}`} value={member}>{member}</option>
+                                        return <option key={`${member}_${index}`} value={member}>{member}</option>
                                     }))
                             }
                         </select>
-                        {(displayActorAData !== null) && <FightActorStatsDisplay characterData={displayActorAData} handleDeleteBuff={handleDeleteBuff} handleDeleteDebuff={handleDeleteDebuff} />}
+                        {(displayActorAData !== null) && <FightActorStatsDisplay characterData={displayActorAData} handleRemoveEffect={handleRemoveEffect}/>}
                     </div>
                     <div className="flex flex-col items-center justify-around">
                         <div className="flex flex-col items-center gap-2">
                             <h2 className="input_label">Controles de combat: </h2>
                             <div className="flex flex-row gap-2">
-                                <button onClick={() => handleFightAtk(displayActorAData?.Id?? null, displayActorBData?.Id?? null)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A attaque B</button>
-                                <button onClick={() => handleFightAtk(displayActorBData?.Id?? null, displayActorAData?.Id?? null)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">B attaque A</button>
+                                <button onClick={() => handleFightAtk(displayActorAData?.Id?? null, displayActorBData?.Id?? null, charData, setCharData, displayActorAData, setDisplayActorAData, displayActorBData, setDisplayActorBData, handleHistoryEventAdd)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A attaque B</button>
+                                <button onClick={() => handleFightAtk(displayActorBData?.Id?? null, displayActorAData?.Id?? null, charData, setCharData, displayActorAData, setDisplayActorAData, displayActorBData, setDisplayActorBData, handleHistoryEventAdd)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">B attaque A</button>
                             </div>
                             <div className="flex flex-col items-center gap-2">
                                 <h2 className="input_label">Compétences activables :</h2>
@@ -163,7 +138,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                     </div>
                     <div className="flex flex-col items-center">
                         <h2 className="text-xl text-center">Acteur B: </h2>
-                        <select onChange={(e) => handleSetDisplayActorData('B', e.currentTarget.value)} name="actorBSelect" defaultValue="None" className="text-lg bg-white p-2 my-2 border border-black rounded">
+                        <select onChange={(e) => handleSetDisplayActorData('B', e.currentTarget.value)} name="actorBSelect" defaultValue={displayActorBData?.Name || 'None'} className="text-lg bg-white p-2 my-2 border border-black rounded">
                             <option value="None">None</option>
                             {
                                 (activeData.fightMembers.length > 1) &&
@@ -172,7 +147,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                                     }))
                             }
                         </select>
-                        {(displayActorBData !== null) && <FightActorStatsDisplay characterData={displayActorBData} handleDeleteBuff={handleDeleteBuff} handleDeleteDebuff={handleDeleteDebuff} />}
+                        {(displayActorBData !== null) && <FightActorStatsDisplay characterData={displayActorBData} handleRemoveEffect={handleRemoveEffect}/>}
                     </div>
                 </div>
             </div>

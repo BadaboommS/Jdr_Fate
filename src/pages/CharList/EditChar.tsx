@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
 import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/statsType";
 
@@ -14,26 +14,22 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
     const { charData, setCharData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(charStats.Type === "Servant");
 
-    const { register, handleSubmit, reset, watch, control } = useForm<CreateCharFormInputInterface>({
+    const { register, handleSubmit, reset, watch } = useForm<CreateCharFormInputInterface>({
         defaultValues: {
             Name: charStats.Name, Joueur: charStats.Joueur, Type: charStats.Type, Variant: charStats.Variant,
             WeaponName: charStats.Weapon.WeaponName, WeaponDmg: charStats.Weapon.WeaponDmg, WeaponType: charStats.Weapon.WeaponType,
             Armor: charStats.Armor, Hp: charStats.Hp, Mana: charStats.Mana,
             STR: charStats.Caracteristics.STR, END: charStats.Caracteristics.END, AGI: charStats.Caracteristics.AGI, MANA: charStats.Caracteristics.MANA, MGK: charStats.Caracteristics.MGK, LUK: charStats.Caracteristics.LUK, SPD: charStats.Caracteristics.SPD,
-            Ini: charStats.CombatStats.Ini, SA: charStats.CombatStats.SA, AA: charStats.CombatStats.AA, DMG: charStats.CombatStats.DMG, PA: charStats.CombatStats.PA, SD: charStats.CombatStats.SD, AD: charStats.CombatStats.AD, ReD: charStats.CombatStats.ReD, CdC: charStats.CombatStats.CdC, CC: charStats.CombatStats.CC, AN: charStats.CombatStats.AN,
             BuffsList: charStats.BuffsList, DebuffsList: charStats.DebuffsList            
         }
     });
-
-    const { fields: buffs, remove: removeBuff } = useFieldArray({ control, name: "BuffsList" });
-    const { fields: debuffs, remove: removeDebuff } = useFieldArray({ control, name: "DebuffsList" });
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Confirmer l'Edit du character ?`)){
             return;
         }
 
-        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN, BuffsList, DebuffsList } = data;
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Id: charStats.Id,
             Name,
@@ -47,8 +43,8 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
             CombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD},
             InitCombatStats: {Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN},
-            BuffsList: BuffsList, //add remove edit buff & debuff
-            DebuffsList: DebuffsList,
+            BuffsList: charStats.BuffsList, //add remove edit buff & debuff
+            DebuffsList: charStats.DebuffsList,
             ...(showVariant && { Variant })
         };
 
@@ -143,45 +139,37 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
                                 <label htmlFor="input_mana2" className="input_label">Mana :</label>
                                 <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !"})} id="input_mana2" className="input_field" />
                             </div>
-                            {["Ini", "SA", "AA", "DMG", "PA", "SD", "AD", "ReD", "CdC", "CC", "AN"].map(stat => (
-                                <div key={stat} className="input_entry">
-                                    <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
-                                    <input type="number" {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} id={`input_${stat.toLowerCase()}`} className="input_field" />
+                            {Object.entries(charStats.InitCombatStats).map(([key, value]) => (
+                                <div key={key} className="input_entry">
+                                    <label htmlFor={`input_${key.toLowerCase()}`} className="input_label">{key} :</label>
+                                    <input type="number" {...register(key as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${key} Amount !` })} defaultValue={value} id={`input_${key.toLowerCase()}`} className="input_field" />
                                 </div>
                             ))}
                         </div>
-                        <div className="input_group">
-                            {
-                                (charStats.BuffsList.length > 0)
-                                ?   <>
+                        {
+                            (charStats.BuffsList.length > 0)
+                                ?   <div className="input_group">
                                         <h3 className="input_label">Buffs List :</h3>
-                                        {buffs.map((buff, index) => (
-                                            <div key={buff.id} className="input_entry">
-                                                <input {...register(`BuffsList.${index}.Name`)} placeholder="Buff Name" className="input_field" />
-                                                <button type="button" onClick={() => removeBuff(index)} className="bg-red-500 text-white p-2 rounded">Remove</button>
+                                        {Object.entries(charStats.BuffsList).map(([key, value]) => (
+                                            <div key={key} className="input_entry">
+                                                <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
                                             </div>
                                         ))}
-                                        {/* possibilité de append un buff avec nClick={() => appendDebuff({ })}*/}
-                                    </>
+                                    </div>
                                 : <></>
-                            }
-                        </div>
-                        <div className="input_group">
-                            {
-                                (charStats.DebuffsList.length > 0)
-                                ?   <>
+                        }
+                        {
+                            (charStats.DebuffsList.length > 0)
+                                ?   <div className="input_group">
                                         <h3 className="input_label">Debuffs List :</h3>
-                                        {debuffs.map((debuff, index) => (
-                                            <div key={debuff.id} className="input_entry">
-                                                <input {...register(`DebuffsList.${index}.Name`)} placeholder="Debuff Name" className="input_field" />
-                                                <button type="button" onClick={() => removeDebuff(index)} className="bg-red-500 text-white p-2 rounded">Remove</button>
+                                        {Object.entries(charStats.DebuffsList).map(([key, value]) => (
+                                            <div key={key} className="input_entry">
+                                                <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
                                             </div>
                                         ))}
-                                        {/* possibilité de append un buff avec nClick={() => appendDebuff({ })}*/}
-                                    </>
+                                    </div>
                                 : <></>
-                            }
-                        </div>
+                        }
                     </div>
                     <div className="flex justify-center py-5">
                         <div className="min-w-80 flex justify-around">

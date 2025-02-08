@@ -1,13 +1,14 @@
-import { CharStatsInterface } from "../../../types/statsType";
+import { CharStatsInterface } from "../../../../types/statsType";
 import { RxCross1 } from "react-icons/rx";
+import { CharBuffInterface, CharDebuffInterface } from "../../../../types/statsType";
+import { AddCustomEffectForm } from "../../../../global/AddCustomEffectForm";
 
 interface FightActorStatsDisplayInterface {
     characterData: CharStatsInterface;
-    handleDeleteBuff: (charId: number, debuffName: string) => void;
-    handleDeleteDebuff: (charId: number, debuffName: string) => void;
+    handleRemoveEffect: (charD: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: "Buff" | "Debuff") => void;
 }
 
-export function FightActorStatsDisplay({ characterData, handleDeleteDebuff, handleDeleteBuff }: FightActorStatsDisplayInterface){
+export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: FightActorStatsDisplayInterface){
     return (
         //<div className="flex flex-col">
             <div className="grid grid-cols-2 gap-2 items-start">
@@ -64,7 +65,7 @@ export function FightActorStatsDisplay({ characterData, handleDeleteDebuff, hand
                     {Object.entries(characterData.CombatStats).map(([key, value]) => (
                         <div key={key} className="input_entry">
                             <span className="input_label">{key}: </span>
-                            <span className="input_field">{value}</span>
+                            <span className={`input_field ${value < characterData.InitCombatStats[key as keyof typeof characterData.CombatStats] ? '!text-red-500' : ''}${value > characterData.InitCombatStats[key as keyof typeof characterData.CombatStats] ? '!text-blue-500' : ''}`}>{value}</span>
                         </div>
                     ))}
                     {
@@ -74,7 +75,7 @@ export function FightActorStatsDisplay({ characterData, handleDeleteDebuff, hand
                                     {Object.entries(characterData.BuffsList).map(([key, value]) => (
                                         <div key={key} className="input_entry">
                                             <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
-                                            <button onClick={() => handleDeleteBuff(characterData.Id, value.Name)} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all"><RxCross1 size={20}/></button>
+                                            <button onClick={() => handleRemoveEffect(characterData, value, "Buff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all"><RxCross1 size={20}/></button>
                                         </div>
                                     ))}
                                 </>
@@ -87,13 +88,14 @@ export function FightActorStatsDisplay({ characterData, handleDeleteDebuff, hand
                                     {Object.entries(characterData.DebuffsList).map(([key, value]) => (
                                         <div key={key} className="input_entry">
                                             <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
-                                            <button onClick={() => handleDeleteDebuff(characterData.Id, value.Name)} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all"><RxCross1 size={20}/></button>
+                                            <button onClick={() => handleRemoveEffect(characterData, value, "Debuff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all"><RxCross1 size={20}/></button>
                                         </div>
                                     ))}
                                 </>
                             : <></>
                     }
                 </div>
+                <AddCustomEffectForm toUpdateCharData={characterData} />
             </div>
             //{(characterData.Variant) && <div><img src={`./assets/servant_img/${characterData.Variant}.png`} className="w-fit h-fit variant_img"/></div>}
         //</div>

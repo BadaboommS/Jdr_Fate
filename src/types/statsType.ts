@@ -8,24 +8,43 @@ export interface CharStatsInterface {
     Armor: number;
     Hp: number;
     Mana: number;
-    Caracteristics: CharStatsCaracteristics;
+    Caracteristics: CharStatsCaracteristicsType;
     CombatStats: FightStatsType;
-    InitCaracteristics: CharStatsCaracteristics;
+    InitCaracteristics: CharStatsCaracteristicsType;
     InitCombatStats: FightStatsType;
-    BuffsList: BuffType[];
-    DebuffsList: DebuffType[];
+    BuffsList: CharBuffInterface[];
+    DebuffsList: CharDebuffInterface[];
+}
+
+export interface CharDebuffInterface extends DebuffType {
+    Applied: boolean;
+    Id: number,
+}
+
+export interface CharBuffInterface extends BuffType {
+    Applied: boolean;
+    Id: number,
 }
 
 export type DebuffType = {
     Name: string,
     Desc: string,
-    Effect: string
+    Dmg?: number,
+    Effect?: EffectType,
 }
 
 export type BuffType = {
+    Id: number;
     Name: string,
     Desc: string,
-    Effect: string
+    Effect?: EffectType,
+}
+
+type EffectType = {
+    CharCaracteristics?: Partial<CaracteristicsValueType>,
+    CombatStats?: Partial<FightStatsType>,
+    Dot?: number,
+    Hot?: number
 }
 
 /* enum CharEnum { Master, Servant, PNJ };
@@ -38,7 +57,7 @@ type WeaponType = {
     WeaponType: string,
 }
 
-export type CharStatsCaracteristics = {
+export type CharStatsCaracteristicsType = {
     STR: string,
     END: string,
     AGI: string,
@@ -48,7 +67,17 @@ export type CharStatsCaracteristics = {
     SPD: string
 }
 
-export type CharStatsCaracteristicsValue = {
+export type CaracteristicsValueType = {
+    STR: number,
+    END: number,
+    AGI: number,
+    MANA: number,
+    MGK: number,
+    LUK: number,
+    SPD: number
+}
+
+export type CharStatsCaracteristicsValueType = {
     STR: number,
     END: number,
     AGI: number,
@@ -60,7 +89,7 @@ export type CharStatsCaracteristicsValue = {
 
 export type StatKey = 'E' | 'D' | 'C' | 'B' | 'A' | 'EX';
 
-type FightStatsType = {
+export type FightStatsType = {
     Ini: number, // Initiative : bonus 1er tour
     SA: number,  // Score Atk : précision
     AA: number,  // Actions Atk : nombre atk en 1 tour
@@ -126,8 +155,33 @@ export interface CreateCharFormInputInterface {
     CdC: number;
     CC: number;
     AN: number;
-    BuffsList: BuffType[];
-    DebuffsList: DebuffType[];
+    BuffsList: CharBuffInterface[];
+    DebuffsList: CharDebuffInterface[];
+}
+
+export interface EffectFormInputInterface {
+    Name: string;
+    Desc: string;
+    STR?: number;
+    END?: number;
+    AGI?: number;
+    MANA?: number;
+    MGK?: number;
+    LUK?: number;
+    SPD?: number;
+    Ini?: number;
+    SA?: number;
+    AA?: number;
+    DMG?: number;
+    PA?: number;
+    SD?: number;
+    AD?: number;
+    ReD?: number;
+    CdC?: number;
+    CC?: number;
+    AN?: number;
+    Dot?: number;
+    Hot?: number;
 }
 
 /* 

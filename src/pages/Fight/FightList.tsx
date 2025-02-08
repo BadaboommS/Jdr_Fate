@@ -23,12 +23,8 @@ export function FightList() {
     }
 
     function setActiveFight(activeFightData: FightListInterface): void{
-        saveFightData(activeFightData);
+        setActiveFightData(activeFightData);
         setShowFightModal(true);
-    }
-
-    function saveFightData(data?: FightListInterface): void {
-        setActiveFightData(data? data : activeFightData);
     }
 
     return (
@@ -46,7 +42,7 @@ export function FightList() {
             {
                 (showFightModal && activeFightData)
                     ?   <Modal isOpen={showFightModal} onClose={() => handleModalClose()}>
-                            <FightScreen activeFightData={activeFightData} handleModalClose={handleModalClose} saveFightData={saveFightData}/>
+                            <FightScreen activeFightData={activeFightData} handleModalClose={handleModalClose} saveFightData={setActiveFightData}/>
                         </Modal>
                     : <></>
             }

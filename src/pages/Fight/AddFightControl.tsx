@@ -22,10 +22,11 @@ export function AddFightControl() {
 
     const onSubmit: SubmitHandler<FightFormInput> = (data) => {
         if(!window.confirm('Ajouter le Fight ?')){ return };
+        const { fightName, fightMembers } = data;
         const newFight = {
             fightId : fightData[0] ? fightData[fightData.length - 1].fightId + 1: 0,
-            fightName: data.fightName,
-            fightMembers : data.fightMembers,
+            fightName: fightName,
+            fightMembers : fightMembers,
             fightHistory : [
                 { historyMsg: `--------------------`, msgType: 'Text', msgTitle: ''},
                 { historyMsg: `Membre présents: ${data.fightMembers.join(', ')}`, msgType: 'Info', msgTitle: ''},
@@ -33,6 +34,8 @@ export function AddFightControl() {
                 { historyMsg: `--------------------`, msgType: 'Text', msgTitle: ''}
             ],
             fightState : true,
+            activeActorA: null,
+            activeActorB: null,
         }
         setFightData([...fightData, newFight]);
         handleModalClose();

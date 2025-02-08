@@ -1,7 +1,7 @@
-import { CharStatsCaracteristics, StatKey } from "../types/statsType";
+import { CharStatsCaracteristicsType, StatKey } from "../types/statsType";
 import { rollDice } from "./GlobalFunction";
 
-function convertLetterToValue(caracs: CharStatsCaracteristics) {
+function convertLetterToValue(caracs: CharStatsCaracteristicsType) {
     const STRValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
     const ENDValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
     const AGIValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };

@@ -18,7 +18,9 @@
           { "historyMsg": "Fight Fight Test crée 07/02/2025.", "msgType": "Info", "msgTitle": ""},
           { "historyMsg": "--------------------", "msgType": "Text", "msgTitle": ""}
       ],
-      "fightState" : true
+      "fightState" : true,
+      "activeActorA": "Master Test",
+      "activeActorB": "Servant Test"
     }
   ],
   "player_data": ["Hugo", "Thib", "Test"],

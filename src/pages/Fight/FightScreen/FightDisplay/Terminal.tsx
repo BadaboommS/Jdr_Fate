@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fightHistoryType } from "../../../types/fightType";
+import { fightHistoryType } from "../../../../types/fightType";
 import "./terminal.css";
 
 interface TerminalPropsInterface{
