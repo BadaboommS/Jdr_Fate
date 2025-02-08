@@ -2,6 +2,7 @@ import { CharStatsInterface } from "../../../../types/statsType";
 import { RxCross1 } from "react-icons/rx";
 import { CharBuffInterface, CharDebuffInterface } from "../../../../types/statsType";
 import { AddCustomEffectForm } from "../../../../global/AddCustomEffectForm";
+import { FightEditCharModal } from "./FightEditCharModal";
 
 interface FightActorStatsDisplayInterface {
     characterData: CharStatsInterface;
@@ -95,7 +96,10 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                             : <></>
                     }
                 </div>
-                <AddCustomEffectForm toUpdateCharData={characterData} />
+                <div className="flex justify-around">
+                    <AddCustomEffectForm toUpdateCharData={characterData} />
+                    <FightEditCharModal toEditCharData={characterData} />
+                </div>
             </div>
             //{(characterData.Variant) && <div><img src={`./assets/servant_img/${characterData.Variant}.png`} className="w-fit h-fit variant_img"/></div>}
         //</div>

@@ -5,12 +5,12 @@ import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/st
 
 interface EditCharPropsInterface {
     charStats: CharStatsInterface;
-    handleSetEdit: () => void;
+    handleSetEdit?: () => void | undefined;
     handleCloseModal: () => void;
-    handleDeleteChar: (charId: number) => void;
+    handleDeleteChar?: (charId: number) => void | undefined;
 }
 
-export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDeleteChar }: EditCharPropsInterface) {
+export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseModal, handleDeleteChar = undefined }: EditCharPropsInterface) {
     const { charData, setCharData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(charStats.Type === "Servant");
 
@@ -54,13 +54,13 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
     function handleReset(){
         setShowVariant(false);
         reset();
-        handleSetEdit();
+        if(handleSetEdit) { handleSetEdit(); };
     }
 
     return (
         <>
             <div className="flex flex-col gap-2 items-center">
-                <button type="button" className="bg-red-500 hover:bg-white text-white hover:text-red-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer transition-all" onClick={() => handleDeleteChar(charStats.Id)}>Delete</button>
+                {(handleDeleteChar !== undefined && <button type="button" className="bg-red-500 hover:bg-white text-white hover:text-red-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer transition-all" onClick={() => handleDeleteChar(charStats.Id)}>Delete</button>)}
                 <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4">
                     <div className="grid grid-cols-3 gap-2">
                         <div className="input_group">
@@ -112,7 +112,7 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
                                 <label htmlFor="input_Armor" className="input_label">Armure :</label>
                                 <input type="number" {...register("Armor", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_Armor" className="input_field" />
                             </div>
-                            {["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"].map(stat => (
+                            {["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"].map((stat) => (
                                 <div key={stat} className="input_entry">
                                     <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
                                     <select {...register(stat as keyof CreateCharFormInputInterface)} id={`input_${stat.toLowerCase()}`} className="input_field">
@@ -174,7 +174,7 @@ export function EditChar ({ charStats, handleSetEdit, handleCloseModal, handleDe
                     <div className="flex justify-center py-5">
                         <div className="min-w-80 flex justify-around">
                             <button type="submit" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Update</button>
-                            <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleReset()}>Cancel Edit</button>
+                            {(handleSetEdit !== undefined && <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleReset()}>Cancel Edit</button>)}
                             <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleCloseModal()}>Cancel</button>
                         </div>
                     </div>
