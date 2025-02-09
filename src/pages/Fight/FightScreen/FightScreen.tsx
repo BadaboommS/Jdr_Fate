@@ -6,13 +6,20 @@ import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../.
 import { FightListInterface } from "../../../types/fightType";
 import { Terminal } from "./FightDisplay/Terminal";
 import { Modal } from "../../../global/Modal";
-import { handleFightAtk, removeEffect } from "./FightHandlers/fightCalc";
+import { handleFightAtk, removeEffect } from "../../../function/FightCalc";
 import { FightSettingsModal } from "./FightSettingsModal";
+import { rollDice } from "../../../function/GlobalFunction";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
     handleModalClose: () => void;
     saveFightData: (activeFightData: FightListInterface) => void;
+}
+
+interface IniBuffInterface {
+    SA: number;
+    SD: number;
+    CdC: number;
 }
 
 export function FightScreen ({ activeFightData, handleModalClose, saveFightData }: FightScreenPropsInterface) {
@@ -21,6 +28,68 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     const [displayActorAData, setDisplayActorAData] = useState<CharStatsInterface | null>(charData.find((char) => char.Name === activeFightData.activeActorA) || null);
     const [displayActorBData, setDisplayActorBData] = useState<CharStatsInterface | null>(charData.find((char) => char.Name === activeFightData.activeActorB) || null);
     const [fightSettingsModal, setFightSettingsModal] = useState<boolean>(false);
+
+    function handleTurnPrep(actorA: CharStatsInterface | null, actorB: CharStatsInterface | null): void{
+        if(actorA === null || actorB === null){ return; };
+
+        // Initiative
+        const actorAIni = actorA.CombatStats.Ini + rollDice(10);
+        const actorBIni = actorB.CombatStats.Ini + rollDice(10);
+
+        const initiativeDifference = Math.abs(actorAIni - actorBIni);
+        let bonus: IniBuffInterface = { SA: 0, SD: 0, CdC: 0 };
+
+        if (initiativeDifference >= 2 && initiativeDifference <= 3) {
+            bonus = { SA: 15, SD: 15, CdC: 0 };
+        } else if (initiativeDifference >= 4) {
+            bonus = { SA: 30, SD: 30, CdC: 2 };
+        }
+
+        if (actorAIni > actorBIni) {
+            handleHistoryEventAdd(`${actorA.Name} a l'initiative sur ${actorB.Name}.`, 'Info', `Ini A : ${actorAIni} |  Ini B : ${actorBIni}`);
+            handleTurn(actorA, actorB, bonus, initiativeDifference);
+        } else if (actorBIni > actorAIni) {
+            handleHistoryEventAdd(`${actorB.Name} a l'initiative sur ${actorA.Name}.`, 'Info', `Ini A : ${actorAIni} |  Ini B : ${actorBIni}`);
+            handleTurn(actorB, actorA, bonus, initiativeDifference);
+        }
+    }
+
+    function handleTurn(firstActor: CharStatsInterface, secondActor: CharStatsInterface, bonus: IniBuffInterface, iniDiff: number){
+        handleHistoryEventAdd(`
+            La différence d'Ini est de ${iniDiff}.
+            ${bonus.SA !== 0 ? `${firstActor.Name} gagne SA: ${bonus.SA}` : ''}
+            ${bonus.SD !== 0 ? `, SD: ${bonus.SD}` : ''}
+            ${bonus.CdC !== 0 ? `, CdC: ${bonus.CdC}` : ''}
+            `, "Info");
+
+        // Add Ini bonus
+        const initCharData = charData.map((char) => char.Id === firstActor.Id ? { 
+            ...char, CombatStats: { 
+                ...char.CombatStats, SA: char.CombatStats.SA + bonus.SA, SD: char.CombatStats.SD + bonus.SD, CdC: char.CombatStats.CdC + bonus.CdC
+            }
+        } : char);
+
+        // First ATK
+        const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, initCharData, handleHistoryEventAdd);
+
+        // Update character data
+        const updatedCharData = charData.map((char) => char.Id === firstAtkRes?.defenderData.Id ? firstAtkRes.defenderData : char);
+
+        // Second ATK
+        const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, updatedCharData, handleHistoryEventAdd);
+
+        // Update character data
+        const finalCharData = updatedCharData.map((char) => char.Id === secondAtkRes?.defenderData.Id ? secondAtkRes.defenderData : char);
+
+        // Remove Ini bonus
+        finalCharData.map((char) => char.Id === firstActor.Id ? { 
+            ...char, CombatStats: { 
+                ...char.CombatStats, SA: char.CombatStats.SA - bonus.SA, SD: char.CombatStats.SD - bonus.SD, CdC: char.CombatStats.CdC - bonus.CdC
+            }
+        } : char);
+
+        setCharData(finalCharData);
+    }
 
     function handleSetDisplayActorData (actorType: string, charName: string): void {
         const selectedChar = charData.find((char) => char.Name === charName) || null;
@@ -108,8 +177,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                         <div className="flex flex-col items-center gap-2">
                             <h2 className="input_label">Controles de combat: </h2>
                             <div className="flex flex-row gap-2">
-                                <button onClick={() => handleFightAtk(displayActorAData?.Id?? null, displayActorBData?.Id?? null, charData, setCharData, displayActorAData, setDisplayActorAData, displayActorBData, setDisplayActorBData, handleHistoryEventAdd)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A attaque B</button>
-                                <button onClick={() => handleFightAtk(displayActorBData?.Id?? null, displayActorAData?.Id?? null, charData, setCharData, displayActorAData, setDisplayActorAData, displayActorBData, setDisplayActorBData, handleHistoryEventAdd)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">B attaque A</button>
+                                <button onClick={() => handleTurnPrep(displayActorAData, displayActorBData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Tour de combat</button>
                             </div>
                             <div className="flex flex-col items-center gap-2">
                                 <h2 className="input_label">Compétences activables :</h2>

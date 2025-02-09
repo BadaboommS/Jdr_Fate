@@ -4,7 +4,7 @@ import { DataContext } from '../context/DataContext';
 import { BsBookmarkPlusFill } from 'react-icons/bs';
 import { Modal } from './Modal';
 import { CharBuffInterface, CharStatsInterface, EffectFormInputInterface } from '../types/statsType';
-import { addEffect } from '../pages/Fight/FightScreen/FightHandlers/fightCalc';
+import { addEffect } from '../function/FightCalc';
 
 interface AddCustomEffectFormProps {
     toUpdateCharData: CharStatsInterface;

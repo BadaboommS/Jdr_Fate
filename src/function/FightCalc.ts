@@ -1,6 +1,6 @@
-import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, DebuffType } from "../../../../types/statsType";
-import { rollDice } from "../../../../function/GlobalFunction";
-import { CCDebuffList } from "../../../../types/fightType";
+import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, DebuffInterface } from "../types/statsType";
+import { rollDice } from "./GlobalFunction";
+import { CCDebuffList } from "../types/fightType";
 
 const DEBUG = false;
 
@@ -8,14 +8,9 @@ export function handleFightAtk(
     attackerId: number | null,
     defenderId: number | null,
     charData: CharStatsInterface[],
-    setCharData: (data: CharStatsInterface[]) => void,
-    displayActorAData: CharStatsInterface | null,
-    setDisplayActorAData: (data: CharStatsInterface | null) => void,
-    displayActorBData: CharStatsInterface | null,
-    setDisplayActorBData: (data: CharStatsInterface | null) => void,
     handleHistoryEventAdd: (msg: string, type: string, title?: string) => void,
     nbAtk?: number
-): void {
+) {
     if (attackerId === null || defenderId === null) { return; }
 
     const attackerData = charData[charData.findIndex((char) => char.Id === attackerId)];
@@ -52,14 +47,7 @@ export function handleFightAtk(
     handleHistoryEventAdd(`-- Dégâts totaux infligés : ${dmgCounter} --`, 'Atk');
     handleHistoryEventAdd(`-- Fin de l'attaque --`, 'Text');
 
-    // Save changes to charData
-    setCharData(charData.map((char) => char.Id === defenderData.Id ? defenderData : char)); // defender
-
-    // reload state for display
-    if (displayActorAData?.Id === attackerId) { setDisplayActorAData(attackerData); }
-    if (displayActorAData?.Id === defenderId) { setDisplayActorAData(defenderData); }
-    if (displayActorBData?.Id === attackerId) { setDisplayActorBData(attackerData); }
-    if (displayActorBData?.Id === defenderId) { setDisplayActorBData(defenderData); }
+    return { attackerData, defenderData };
 }
 
 function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterface, atkNumber: number, critCounter: number) {
@@ -101,33 +89,36 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     if(DEBUG) console.log('armorPierce: ', armorPierce);
 
     // Calcul Dmg Final
-    const finalDmg = Math.floor(Dmg + armorPierce);
+    let finalDmg = Math.floor(Dmg + armorPierce);
     if(DEBUG) console.log('finalDmg: ', finalDmg);
 
     const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: ${finalDmg} Dmg`, msgType: 'Atk', msgTitle: `JetAtk: ${atkJet} | JetDef: ${defJet}`}];
 
     // Calcul CC
     const CCDiceRoll = rollDice(50);
-    let debuff: DebuffType | null = null;
+    let debuff: DebuffInterface | null = null;
 
-    // Check CC
-    const enableCC = (critCounter < Attacker.CombatStats.CC);
+    if(CCDiceRoll < Attacker.CombatStats.CdC){
+        // Check CC
+        const enableCC = (critCounter < Attacker.CombatStats.CC);
+        if(enableCC){
+            msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
+            
+            // Select debuff
+            const weaponTypeDebuffList = CCDebuffList[CCDebuffList.findIndex(debuff => debuff.Type === Attacker.Weapon.WeaponType)];
 
-    if(enableCC && CCDiceRoll < Attacker.CombatStats.CdC){
-        msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
-        
-        // Select debuff
-        const weaponTypeDebuffList = CCDebuffList[CCDebuffList.findIndex(debuff => debuff.Type === Attacker.Weapon.WeaponType)];
-
-        if(Defender.DebuffsList.length > 5){
-            msgArray.push({ historyMsg: `${Defender.Name} a trop de debuff !`, msgType: 'CC', msgTitle: ''});
+            if(Defender.DebuffsList.length > 5){
+                msgArray.push({ historyMsg: `${Defender.Name} a trop de debuff !`, msgType: 'CC', msgTitle: ''});
+            }else{
+                do{
+                    debuff = weaponTypeDebuffList.Debuffs[rollDice(6) - 1];
+                }while(Defender.DebuffsList.some(d => d.Name === debuff?.Name));
+                msgArray.push({ historyMsg: `${Defender.Name} reçoit ${debuff.Name}`, msgType: 'CC', msgTitle: ''});
+            }
+            critCounter++;
         }else{
-            do{
-                debuff = weaponTypeDebuffList.Debuffs[rollDice(6) - 1];
-            }while(Defender.DebuffsList.some(d => d.Name === debuff?.Name));
-            msgArray.push({ historyMsg: `${Defender.Name} reçoit ${debuff.Name}`, msgType: 'CC', msgTitle: ''});
+            finalDmg += 30;
         }
-        critCounter++;
     }
 
     return({ dmg: finalDmg, msg: msgArray, debuff: debuff, critCounter: critCounter });

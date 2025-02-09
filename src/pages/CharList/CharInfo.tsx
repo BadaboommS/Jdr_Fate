@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { CharStatsInterface } from "../../types/statsType";
 import { DataContext } from "../../context/DataContext";
-import { removeEffect } from "../Fight/FightScreen/FightHandlers/fightCalc";
+import { removeEffect } from "../../function/FightCalc";
 import { CharBuffInterface, CharDebuffInterface } from "../../types/statsType";
 import { RxCross1 } from "react-icons/rx";
 import { AddCustomEffectForm } from "../../global/AddCustomEffectForm";

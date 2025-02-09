@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
 import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/statsType";
-import { applyEffect } from "../Fight/FightScreen/FightHandlers/fightCalc";
+import { applyEffect } from "../../function/FightCalc";
 
 interface EditCharPropsInterface {
     charStats: CharStatsInterface;
@@ -28,11 +28,11 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Confirmer l'Edit du character ?`)){ return;} ;
 
-        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD } = data;
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, STR, END, AGI, MANA, MGK, LUK, SPD } = data;
         const newCharacterData: CharStatsInterface = {
             Id: charStats.Id, Name, Joueur, Type,
             Weapon: { WeaponName, WeaponDmg, WeaponType },
-            Armor, Hp, Mana,
+            Armor, Hp: Number(data.Hp), Mana: Number(data.Mana),
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             InitCombatStats: { Ini: Number(data.Ini), SA: Number(data.SA), AA: Number(data.AA), DMG: Number(data.DMG), PA: Number(data.PA), SD: Number(data.SD), AD: Number(data.AD), ReD: Number(data.ReD), CdC: Number(data.CdC), CC: Number(data.CC), AN: Number(data.AN) },
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },

@@ -43,7 +43,7 @@ export function CreateChar() {
         //set les values des stats de combats avec les retour des calc function
         setValue('Hp', calcFunctionService.calcPVMax(CARACS.END as StatKey)); // END
         setValue('Mana', CARAC_VALUES.MANA);
-        setValue("Ini", calcFunctionService.calcIni(CARAC_VALUES.SPD));
+        setValue("Ini", CARAC_VALUES.SPD);
         setValue("SA", calcFunctionService.calcSA(CARAC_VALUES.STR, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
         setValue("AA", calcFunctionService.calcAA(CARAC_VALUES.STR, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
         setValue("DMG", calcFunctionService.calcDMG(CARAC_VALUES.STR));

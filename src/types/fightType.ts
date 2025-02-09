@@ -38,7 +38,7 @@ export const CCDebuffList = [
                 }
             },
             {
-                Name: "Renversé", // VOIR AVEC HUGO
+                Name: "Renversé",
                 Desc: "Projeté au sol, -20 SA. Pour se relever, -1 AA et -1 AD.",
                 Effect: {
                     CombatStats: { SA: -20 }
@@ -73,19 +73,19 @@ export const CCDebuffList = [
                 }
             },
             {
-                Name: "Empalé", // VOIR AVEC HUGO
+                Name: "Empalé", // VOIR avec albanus
                 Desc: "Tant qu'elle est empalée, la cible ne peut pas bouger et subit -2 AD. Peut consommer 2 AA et 2 AD pour se retirer. La cible subit 200 dégâts. Priorité au défenseur.",
                 Effect: {
                     CombatStats: { AD: -2 }
                 }
             },
             {
-                Name: "Epaule perforée", // VOIR AVEC HUGO
+                Name: "Epaule perforée",
                 Desc: "Subit 30 dégâts et lâche son arme en fonction du bras. Pour ramasser l'arme : -2 AD et -10 SD.",
                 Dmg: -30
             },
             {
-                Name: "Jambe percée", // RANG ?
+                Name: "Jambe percée", // voir carac alban
                 Desc: "-1 Rang SPD, AGI. Ne peut plus fuir.",
                 Effect: {
                     CharCaracteristics: { AGI: -1, SPD: -1 },                
