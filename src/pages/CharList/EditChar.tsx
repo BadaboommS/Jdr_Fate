@@ -26,20 +26,13 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
     });
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
-        if(!window.confirm(`Confirmer l'Edit du character ?`)){
-            return;
-        }
+        if(!window.confirm(`Confirmer l'Edit du character ?`)){ return;} ;
 
         const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD } = data;
         const newCharacterData: CharStatsInterface = {
-            Id: charStats.Id,
-            Name,
-            Joueur,
-            Type,
+            Id: charStats.Id, Name, Joueur, Type,
             Weapon: { WeaponName, WeaponDmg, WeaponType },
-            Armor,
-            Hp,
-            Mana,
+            Armor, Hp, Mana,
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             InitCombatStats: { Ini: Number(data.Ini), SA: Number(data.SA), AA: Number(data.AA), DMG: Number(data.DMG), PA: Number(data.PA), SD: Number(data.SD), AD: Number(data.AD), ReD: Number(data.ReD), CdC: Number(data.CdC), CC: Number(data.CC), AN: Number(data.AN) },
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
@@ -47,6 +40,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
             CC: Number(data.CC), AN: Number(data.AN) },
             BuffsList: charStats.BuffsList.map(buff => ({ ...buff, Applied: false })), // remove applied from all buffs
             DebuffsList: charStats.DebuffsList.map(debuff => ({ ...debuff, Applied: false })), // remove applied from all debuffs
+            FightStyle: null,
             ...(showVariant && { Variant })
         };
 

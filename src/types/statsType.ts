@@ -14,38 +14,54 @@ export interface CharStatsInterface {
     InitCombatStats: FightStatsType;
     BuffsList: CharBuffInterface[];
     DebuffsList: CharDebuffInterface[];
+    FightStyle: FightStyleInterface | null;
 }
 
-export interface CharDebuffInterface extends DebuffType {
+export interface CharDebuffInterface extends DebuffInterface {
     Applied: boolean;
-    Id: number,
-}
-
-export interface CharBuffInterface extends BuffType {
-    Applied: boolean;
-    Id: number,
-}
-
-export type DebuffType = {
-    Name: string,
-    Desc: string,
-    Dmg?: number,
-    Effect?: EffectType,
-}
-
-export type BuffType = {
     Id: number;
-    Name: string,
-    Desc: string,
-    Effect?: EffectType,
 }
 
-type EffectType = {
-    CharCaracteristics?: Partial<CaracteristicsValueType>,
-    CombatStats?: Partial<FightStatsType>,
-    Dot?: number,
-    Hot?: number
+export interface CharBuffInterface extends BuffInterface {
+    Applied: boolean;
+    Id: number;
 }
+
+export interface DebuffInterface {
+    Name: string;
+    Desc: string;
+    Dmg?: number;
+    Effect?: EffectInterface;
+}
+
+export interface BuffInterface {
+    Id: number;
+    Name: string;
+    Desc: string;
+    Effect?: EffectInterface;
+}
+
+export interface FightStyleInterface {
+    Name: string;
+    Type: string;
+    Effect?: EffectInterface;
+}
+
+export interface CharSkillsInteface {
+    Id: number;
+    Name: string;
+    Desc: string;
+    Effect?: EffectInterface;
+    Enabled: boolean;
+}
+
+interface EffectInterface {
+    CharCaracteristics?: Partial<CharStatsCaracteristicsValueType>;
+    CombatStats?: Partial<FightStatsType>;
+    Dot?: number;
+    Hot?: number;
+}
+
 
 /* enum CharEnum { Master, Servant, PNJ };
 enum ClassicServantEnum { Archer, Assassin, Berserker, Caster, Lancer, Rider, Saber };
@@ -65,16 +81,6 @@ export type CharStatsCaracteristicsType = {
     MGK: string,
     LUK: string,
     SPD: string
-}
-
-export type CaracteristicsValueType = {
-    STR: number,
-    END: number,
-    AGI: number,
-    MANA: number,
-    MGK: number,
-    LUK: number,
-    SPD: number
 }
 
 export type CharStatsCaracteristicsValueType = {
@@ -183,11 +189,3 @@ export interface EffectFormInputInterface {
     Dot?: number;
     Hot?: number;
 }
-
-/* 
-Un jet d’initiative est un jet 1d10+SPD
-Un jet d’attaque est un jet 1d100+SA.
-Un jet de défense est un jet 1d100+SD.
-Un jet de coups critiques est un jet 1d50.
-Un jet de paramètre est 1d10+[valeur du paramètre]
- */
