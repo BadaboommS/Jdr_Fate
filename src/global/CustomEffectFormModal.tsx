@@ -6,6 +6,7 @@ import { BsBookmarkPlusFill } from 'react-icons/bs';
 import { Modal } from './Modal';
 import { CharBuffInterface, CharStatsInterface, EffectFormInputInterface } from '../types/statsType';
 import { addEffect, removeEffect } from '../function/FightCalc';
+import { EffectPresetArray } from '../data/EffectPreset';
 
 interface AddCustomEffectFormProps {
     toUpdateCharData: CharStatsInterface;
@@ -22,7 +23,6 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
 
     useEffect(() => {
         if (toEdit && showCustomEffectModal) {
-            console.log(toEdit);
             if(toEditEffectType !== undefined) setEffectType(toEditEffectType);
             setValue('Name', toEdit.Name);
             setValue('Desc', toEdit.Desc);
@@ -72,6 +72,23 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
         handleModalClose();
     }
 
+    function handlePresetSetting(presetName: string){
+        const presetData = EffectPresetArray.find((effect) => effect.Name === presetName);
+        if (!presetData) {
+            reset();
+            setEffectType('Buff');
+            return;
+        }
+
+        setEffectType(presetData.EffectType);
+        setValue("Name", presetData.Name);
+        setValue("Desc", presetData.Name);
+        ['STR', 'END', 'AGI', 'MANA', 'MGK', 'LUK', 'SPD'].forEach((carac) => setValue(carac as keyof EffectFormInputInterface, presetData.Effect?.CharCaracteristics?.[carac as keyof typeof presetData.Effect.CharCaracteristics] ?? 0));
+        ['Ini', 'SA', 'AA', 'DMG', 'PA', 'SD', 'AD', 'ReD', 'CdC', 'CC', 'AN'].forEach((stat) => setValue(stat as keyof EffectFormInputInterface, presetData.Effect?.CombatStats?.[stat as keyof typeof presetData.Effect.CombatStats] ?? 0));
+        setValue("Dot", presetData.Effect?.Dot || 0);
+        setValue("Hot", presetData.Effect?.Hot || 0);
+    }
+
     function handleModalClose(){
         reset();
         setShowCustomEffectModal(false);
@@ -87,6 +104,15 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
                     ?   <Modal isOpen={showCustomEffectModal} onClose={() => handleModalClose()}>
                             <div className='flex flex-col gap-2'>
                                 <h2 className='text-xl text-center'>{toEdit ? `Edit effect: ${toEdit.Name}` : `Add new effect to: ${toUpdateCharData.Name}`}</h2>
+                                <div className='input_entry'>
+                                    <label htmlFor="preset_select" className='input_label'>Effect Preset</label>
+                                    <select className='input_field' id='preset_select' onChange={(e) => handlePresetSetting(e.currentTarget.value)}>
+                                        <option value="None">None</option>
+                                        {EffectPresetArray.map((preset, index) => (
+                                            <option key={index} value={preset.Name}>{preset.Name}</option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <div className='input_entry'>
                                     <h3 className='input_label'>Effect Type :</h3>
                                     <div className='input_field flex justify-center gap-2'>
@@ -116,6 +142,16 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
                                                     <input id={prop.toLowerCase()} type='number' {...register(prop as keyof EffectFormInputInterface)} defaultValue={0} className='input_field' />
                                                 </div>
                                             ))}
+                                            <div className='input_group pt-2'>
+                                                <div className='input_entry'>
+                                                    <label className='input_label' htmlFor='dot'>Dot</label>
+                                                    <input id='dot' type='number' {...register('Dot')} defaultValue={0} className='input_field'/>
+                                                </div>
+                                                <div className='input_entry'>
+                                                    <label className='input_label' htmlFor='hot'>Hot</label>
+                                                    <input id='hot' type='number' {...register('Hot')} defaultValue={0} className='input_field'/>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className='input_group'>
                                             {['Ini', 'SA', 'AA', 'DMG', 'PA', 'SD', 'AD', 'ReD', 'CdC', 'CC', 'AN'].map((prop) => (
@@ -126,14 +162,7 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
                                             ))}
                                         </div>
                                     </div>
-                                    <div className='input_entry'>
-                                        <label className='input_label' htmlFor='dot'>Dot</label>
-                                        <input id='dot' type='number' {...register('Dot')} defaultValue={0} className='input_field'/>
-                                    </div>
-                                    <div className='input_entry'>
-                                        <label className='input_label' htmlFor='hot'>Hot</label>
-                                        <input id='hot' type='number' {...register('Hot')} defaultValue={0} className='input_field'/>
-                                    </div>
+                                    
                                                 
                                     <div className='flex justify-around items-center'>
                                         <button type="submit" className='bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer'>Submit</button>

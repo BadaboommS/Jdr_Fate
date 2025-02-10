@@ -35,7 +35,6 @@ export interface DebuffInterface {
 }
 
 export interface BuffInterface {
-    Id: number;
     Name: string;
     Desc: string;
     Effect?: EffectInterface;
@@ -66,7 +65,6 @@ interface TurnEffectInterface {
     Dot: number;
     Hot: number;
 }
-
 
 /* enum CharEnum { Master, Servant, PNJ };
 enum ClassicServantEnum { Archer, Assassin, Berserker, Caster, Lancer, Rider, Saber };

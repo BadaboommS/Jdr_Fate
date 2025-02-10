@@ -1,6 +1,6 @@
 import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, DebuffInterface } from "../types/statsType";
 import { rollDice } from "./GlobalFunction";
-import { CCDebuffList } from "../types/fightType";
+import { CCDebuffList } from "../data/CCDebuff";
 
 const DEBUG = false;
 
