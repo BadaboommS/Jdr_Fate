@@ -15,6 +15,7 @@ export interface CharStatsInterface {
     BuffsList: CharBuffInterface[];
     DebuffsList: CharDebuffInterface[];
     FightStyle: FightStyleInterface | null;
+    TurnEffect: TurnEffectInterface;
 }
 
 export interface CharDebuffInterface extends DebuffInterface {
@@ -60,6 +61,11 @@ interface EffectInterface {
     CombatStats?: Partial<FightStatsType>;
     Dot?: number;
     Hot?: number;
+}
+
+interface TurnEffectInterface {
+    Dot: number;
+    Hot: number;
 }
 
 

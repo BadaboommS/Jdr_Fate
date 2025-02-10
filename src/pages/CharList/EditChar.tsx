@@ -41,6 +41,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
             BuffsList: charStats.BuffsList.map(buff => ({ ...buff, Applied: false })), // remove applied from all buffs
             DebuffsList: charStats.DebuffsList.map(debuff => ({ ...debuff, Applied: false })), // remove applied from all debuffs
             FightStyle: null,
+            TurnEffect: charStats.TurnEffect,
             ...(showVariant && { Variant })
         };
 

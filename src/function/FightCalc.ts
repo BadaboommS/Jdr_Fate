@@ -150,7 +150,7 @@ export function applyEffect(charData: CharStatsInterface, effectType: 'Buff' | '
             if(effect.Effect){
                 // Debuff Carac  VOIR AVEC HUGO RANG
                 /* const debuffCaracs = debuff.Effect.CharCaracteristics || null; 
-                if (debuffCaracs !== null) {
+                if (debuffCaracs) {
                     Object.keys(debuffCaracs).forEach(([key]) => {
                         const CaracKey = key as keyof typeof charData.Caracteristics;
                         if (debuffCaracs[CaracKey]) { charData.Caracteristics[CaracKey] += debuffCaracs[CaracKey]; };
@@ -159,12 +159,18 @@ export function applyEffect(charData: CharStatsInterface, effectType: 'Buff' | '
 
                 // Debuff CombatStats
                 const debuffCombatStats = effect.Effect.CombatStats || null;
-                if (debuffCombatStats !== null) {
+                if (debuffCombatStats) {
                     Object.keys(debuffCombatStats).forEach((key) => {
                         const combatStatKey = key as keyof typeof charData.CombatStats;
                         if (debuffCombatStats[combatStatKey]) { charData.CombatStats[combatStatKey] += debuffCombatStats[combatStatKey]; };
                     });
                 }
+
+                // Dot & Hot
+                const effectDot = effect.Effect.Dot || null;
+                const effectHot = effect.Effect.Hot || null;
+                if(effectDot) charData.TurnEffect.Dot += effectDot;
+                if(effectHot) charData.TurnEffect.Hot += effectHot;
             }
             effect.Applied = true;
         }
@@ -188,12 +194,18 @@ export function unapplyEffect(charData: CharStatsInterface, effectData: CharBuff
 
             // Effect CombatStats
             const effectCombatStats = effectData.Effect.CombatStats || null;
-            if (effectCombatStats !== null) {
+            if (effectCombatStats) {
                 Object.keys(effectCombatStats).forEach((key) => {
                     const combatStatKey = key as keyof typeof charData.CombatStats;
                     if (effectCombatStats[combatStatKey]) { charData.CombatStats[combatStatKey] -= effectCombatStats[combatStatKey]; }
                 });
             }
+
+            // Dot & Hot
+            const effectDot = effectData.Effect.Dot || null;
+            const effectHot = effectData.Effect.Hot || null;
+            if(effectDot) charData.TurnEffect.Dot -= effectDot;
+            if(effectHot) charData.TurnEffect.Hot -= effectHot;
         }
         effectData.Applied = false;
     }

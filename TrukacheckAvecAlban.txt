@@ -1,3 +1,5 @@
 Critique ?
 Res magique ?
-Tour de combat ?
+DEFINIR Tour
+MANA + COMPETENCES
+VALUES CARAC

@@ -83,7 +83,8 @@
         "AN": 3
       },
       "BuffsList": [],
-      "DebuffsList": []
+      "DebuffsList": [],
+      "TurnEffect": { "Dot": 0, "Hot": 0 }
     },
     {
       "Name": "Servant Test",
@@ -144,7 +145,8 @@
         "AN": 4
       },
       "BuffsList": [],
-      "DebuffsList": []
+      "DebuffsList": [],
+      "TurnEffect": { "Dot": 0, "Hot": 0 }
     },
     {
       "Name": "PNJ Test",
@@ -204,7 +206,8 @@
         "AN": 2
       },
       "BuffsList": [],
-      "DebuffsList": []
+      "DebuffsList": [],
+      "TurnEffect": { "Dot": 0, "Hot": 0 }
     }
   ]
 }

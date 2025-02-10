@@ -32,6 +32,23 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     function handleTurnPrep(actorA: CharStatsInterface | null, actorB: CharStatsInterface | null): void{
         if(actorA === null || actorB === null){ return; };
 
+        console.log(charData);
+        // Dot & Hot
+        let afterTurnEffectActorAData = null;
+        let afterTurnEffectActorBData = null
+        if(actorA.TurnEffect.Dot !== 0 || actorA.TurnEffect.Hot !== 0) afterTurnEffectActorAData = applyTurnEffect(actorA);
+        if(actorB.TurnEffect.Dot !== 0 || actorB.TurnEffect.Hot !== 0) afterTurnEffectActorBData = applyTurnEffect(actorB);
+        if (afterTurnEffectActorAData !== null || afterTurnEffectActorBData !== null) {
+            setCharData(charData.map((char: CharStatsInterface) => {
+                switch(true){
+                    case (char.Id === afterTurnEffectActorAData?.Id && afterTurnEffectActorAData !== null): return afterTurnEffectActorAData;
+                    case (char.Id === afterTurnEffectActorBData?.Id && afterTurnEffectActorBData !== null): return afterTurnEffectActorBData;
+                    default: return char;
+                }
+            }));
+        }
+        console.log(charData);
+
         // Initiative
         const actorAIni = actorA.CombatStats.Ini + rollDice(10);
         const actorBIni = actorB.CombatStats.Ini + rollDice(10);
@@ -57,6 +74,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     function handleTurn(firstActor: CharStatsInterface, secondActor: CharStatsInterface, bonus: IniBuffInterface, iniDiff: number){
         handleHistoryEventAdd(`
             La différence d'Ini est de ${iniDiff}.
+            ${bonus.SA === 0 ? `La différence est minime.` : ''}
             ${bonus.SA !== 0 ? `${firstActor.Name} gagne SA: ${bonus.SA}` : ''}
             ${bonus.SD !== 0 ? `, SD: ${bonus.SD}` : ''}
             ${bonus.CdC !== 0 ? `, CdC: ${bonus.CdC}` : ''}
@@ -89,6 +107,19 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         } : char);
 
         setCharData(finalCharData);
+    }
+
+    function applyTurnEffect(actorData: CharStatsInterface){
+        if(actorData.TurnEffect.Dot !== 0){
+            handleHistoryEventAdd(`${actorData.Name} prend des dégâts sur la durée ! ( ${actorData.TurnEffect.Dot} )`, 'Atk');
+            actorData.Hp -= actorData.TurnEffect.Dot;
+        }
+        if(actorData.TurnEffect.Hot !== 0){
+            handleHistoryEventAdd(`${actorData.Name} reçoit un heal sur la durée ! ( ${actorData.TurnEffect.Hot} )`, 'Heal');
+            actorData.Hp += actorData.TurnEffect.Hot;
+        }
+        
+        return actorData;
     }
 
     function handleSetDisplayActorData (actorType: string, charName: string): void {

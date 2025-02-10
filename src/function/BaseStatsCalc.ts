@@ -1,5 +1,4 @@
 import { CharStatsCaracteristicsType, StatKey } from "../types/statsType";
-import { rollDice } from "./GlobalFunction";
 
 function convertLetterToValue(caracs: CharStatsCaracteristicsType) {
     const STRValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
@@ -25,11 +24,6 @@ function convertLetterToValue(caracs: CharStatsCaracteristicsType) {
 function calcPVMax(END: StatKey): number {
     const ENDValue: Record<StatKey, number | null> = { E: 5000, D: 7000, C: 10000, B: 12000, A: 15000, EX: 0 };
     return ENDValue[END] || 5000;
-}
-
-// Calcul de l'ini
-function calcIni(SPD: number): number {
-    return SPD + rollDice(10);
 }
 
 // Calcul des Actions d'Attaque (AA)
@@ -71,16 +65,21 @@ function calcCC(LUK: number): number {
     return 0;
 } */
 
-export const calcFunctionService = {
-    convertLetterToValue,
-    calcPVMax,
-    calcIni,
-    calcAA,
-    calcAD,
-    calcSA,
-    calcSD,
-    calcDMG,
-    calcReD,
-    calcCC,
-    /* calcPA */
+export function caracToStatsCalc (caracLetters: CharStatsCaracteristicsType, armor: number) {
+    const caracValues = convertLetterToValue(caracLetters);
+    return {
+        "Hp" : calcPVMax(caracLetters.END as StatKey),
+        "Mana" : caracValues.MANA,
+        "Ini": caracValues.SPD,
+        "SA": calcSA(caracValues.STR, caracValues.AGI, caracValues.SPD),
+        "AA": calcAA(caracValues.STR, caracValues.AGI, caracValues.SPD),
+        "DMG": calcDMG(caracValues.STR),
+        "PA": 0,
+        "SD": calcSD(caracValues.END, caracValues.AGI, caracValues.SPD),
+        "AD": calcAD(caracValues.END, caracValues.AGI, caracValues.SPD),
+        "ReD": calcReD(caracValues.END, armor),
+        "CdC": calcCC(caracValues.LUK),
+        "CC": 2,
+        "AN": 0,
+    }
 }

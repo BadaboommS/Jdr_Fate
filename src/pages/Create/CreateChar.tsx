@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
-import { CreateCharFormInputInterface, StatKey } from "../../types/statsType";
-import { calcFunctionService } from "../../function/BaseStatsCalc";
+import { CreateCharFormInputInterface } from "../../types/statsType";
+import { caracToStatsCalc } from "../../function/BaseStatsCalc";
 import './createChar.css';
 
 
@@ -22,7 +22,7 @@ export function CreateChar() {
             Id: charData[0] ? charData[charData.length - 1].Id + 1 : 0,
             Name, Joueur, Type,
             Weapon: { WeaponName, WeaponDmg: Number(WeaponDmg), WeaponType },
-            Armor: Number(Armor), Hp: Number(Hp), Mana: Number(Mana),
+            Hp: Number(Hp), Mana: Number(Mana), Armor: Number(Armor),
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
@@ -30,6 +30,7 @@ export function CreateChar() {
             BuffsList: [],
             DebuffsList: [],
             FightStyle: null,
+            TurnEffect: { Dot: 0, Hot: 0},
             ...(showVariant && { Variant })
         };
 
@@ -38,22 +39,10 @@ export function CreateChar() {
     
     function handleCalculStats(){
         const CARACS = { STR: getValues("STR"), END: getValues("END"), AGI: getValues("AGI"), MANA: getValues("MANA"), MGK: getValues("MGK"), LUK: getValues("LUK"), SPD: getValues("SPD") };
-        const CARAC_VALUES = calcFunctionService.convertLetterToValue(CARACS);
-        
-        //set les values des stats de combats avec les retour des calc function
-        setValue('Hp', calcFunctionService.calcPVMax(CARACS.END as StatKey)); // END
-        setValue('Mana', CARAC_VALUES.MANA);
-        setValue("Ini", CARAC_VALUES.SPD);
-        setValue("SA", calcFunctionService.calcSA(CARAC_VALUES.STR, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
-        setValue("AA", calcFunctionService.calcAA(CARAC_VALUES.STR, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
-        setValue("DMG", calcFunctionService.calcDMG(CARAC_VALUES.STR));
-        setValue("PA", 0);
-        setValue("SD", calcFunctionService.calcSD(CARAC_VALUES.END, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
-        setValue("AD", calcFunctionService.calcAD(CARAC_VALUES.END, CARAC_VALUES.AGI, CARAC_VALUES.SPD));
-        setValue("ReD", calcFunctionService.calcReD(CARAC_VALUES.END, parseInt(getValues("Armor").toString())));
-        setValue("CdC", calcFunctionService.calcCC(CARAC_VALUES.LUK));
-        setValue("CC", 2);
-        setValue("AN", 0);
+        const CARAC_VALUES = caracToStatsCalc(CARACS, Number(getValues('Armor')));
+        Object.entries(CARAC_VALUES).forEach(([key, value]) => {
+            setValue(key as keyof CreateCharFormInputInterface, value);
+        });
     }
 
     function handleReset(){

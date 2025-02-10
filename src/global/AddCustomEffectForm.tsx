@@ -74,11 +74,11 @@ export function AddCustomEffectForm ({ toUpdateCharData }: AddCustomEffectFormPr
                                 <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-2'>
                                     <div className='input_entry'>
                                         <label className='input_label' htmlFor='name'>Name</label>
-                                        <input id='name' {...register('Name')} placeholder='Enter Effect Name here' className='input_field p-1'/>
+                                        <input id='name' {...register("Name", {required: "Enter a Name !"})} placeholder='Enter Effect Name here' className='input_field p-1'/>
                                     </div>
                                     <div className='input_entry !flex-col'>
                                         <label className='input_label' htmlFor='desc'>Description</label>
-                                        <input id='desc' {...register('Desc')} placeholder='Enter Effect Description here' className='input_field'/>
+                                        <input id='desc' {...register('Desc', {required: "Enter a Description !"})} placeholder='Enter Effect Description here' className='input_field'/>
                                     </div>
                                     <h2 className='text-center text-xl'>Effets : </h2>
                                     <div className='grid grid-cols-2 gap-2'>
