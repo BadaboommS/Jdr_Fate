@@ -1,7 +1,7 @@
 import { CharStatsInterface } from "../../../../types/statsType";
 import { RxCross1 } from "react-icons/rx";
 import { CharBuffInterface, CharDebuffInterface } from "../../../../types/statsType";
-import { AddCustomEffectForm } from "../../../../global/AddCustomEffectForm";
+import { CustomEffectFormModal } from "../../../../global/CustomEffectFormModal";
 import { FightEditCharModal } from "./FightEditCharModal";
 
 interface FightActorStatsDisplayInterface {
@@ -76,7 +76,8 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                                     {Object.entries(characterData.BuffsList).map(([key, value]) => (
                                         <div key={key} className="input_entry">
                                             <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
-                                            <button onClick={() => handleRemoveEffect(characterData, value, "Buff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all"><RxCross1 size={20}/></button>
+                                            <CustomEffectFormModal toUpdateCharData={characterData} toEdit={value} toEditEffectType="Buff"/>
+                                            <button onClick={() => handleRemoveEffect(characterData, value, "Buff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all border border-black"><RxCross1 size={24}/></button>
                                         </div>
                                     ))}
                                 </>
@@ -89,7 +90,8 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                                     {Object.entries(characterData.DebuffsList).map(([key, value]) => (
                                         <div key={key} className="input_entry">
                                             <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
-                                            <button onClick={() => handleRemoveEffect(characterData, value, "Debuff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all"><RxCross1 size={20}/></button>
+                                            <CustomEffectFormModal toUpdateCharData={characterData} toEdit={value} toEditEffectType="Debuff" />
+                                            <button onClick={() => handleRemoveEffect(characterData, value, "Debuff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all border border-black"><RxCross1 size={24}/></button>
                                         </div>
                                     ))}
                                 </>
@@ -97,7 +99,7 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                     }
                 </div>
                 <div className="flex justify-around">
-                    <AddCustomEffectForm toUpdateCharData={characterData} />
+                    <CustomEffectFormModal toUpdateCharData={characterData} />
                     <FightEditCharModal toEditCharData={characterData} />
                 </div>
             </div>

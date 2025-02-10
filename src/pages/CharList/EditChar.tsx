@@ -40,15 +40,12 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
             CC: Number(data.CC), AN: Number(data.AN) },
             BuffsList: charStats.BuffsList.map(buff => ({ ...buff, Applied: false })), // remove applied from all buffs
             DebuffsList: charStats.DebuffsList.map(debuff => ({ ...debuff, Applied: false })), // remove applied from all debuffs
-            FightStyle: null,
             TurnEffect: charStats.TurnEffect,
             ...(showVariant && { Variant })
         };
 
-        const buffUpdatedCharData = applyEffect(newCharacterData, "Buff");
-        const defbuffUpddatedCharData = applyEffect(buffUpdatedCharData, "Debuff");
-
-        setCharData(charData.map(char => char.Id === charStats.Id ? defbuffUpddatedCharData : char));
+        const effectUpdatedCharData = applyEffect(newCharacterData);
+        setCharData(charData.map(char => char.Id === charStats.Id ? effectUpdatedCharData : char));
     }
 
     function handleReset(){

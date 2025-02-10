@@ -4,7 +4,7 @@ import { DataContext } from "../../context/DataContext";
 import { removeEffect } from "../../function/FightCalc";
 import { CharBuffInterface, CharDebuffInterface } from "../../types/statsType";
 import { RxCross1 } from "react-icons/rx";
-import { AddCustomEffectForm } from "../../global/AddCustomEffectForm";
+import { CustomEffectFormModal } from "../../global/CustomEffectFormModal";
 
 interface CharInfoPropsInterface {
     charStats: CharStatsInterface;
@@ -91,7 +91,8 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
                                     {Object.entries(charStats.BuffsList).map(([key, value]) => (
                                         <div key={key} className="input_entry">
                                             <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
-                                            <button onClick={() => handleRemoveEffect(charStats, value, "Buff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all"><RxCross1 size={20}/></button>
+                                            <CustomEffectFormModal toUpdateCharData={charStats} toEdit={value} toEditEffectType="Buff" />
+                                            <button onClick={() => handleRemoveEffect(charStats, value, "Buff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all border border-black"><RxCross1 size={20}/></button>
                                         </div>
                                     ))}
                                 </div>
@@ -104,7 +105,8 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
                                     {Object.entries(charStats.DebuffsList).map(([key, value]) => (
                                         <div key={key} className="input_entry">
                                             <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
-                                            <button onClick={() => handleRemoveEffect(charStats, value, "Debuff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all"><RxCross1 size={20}/></button>
+                                            <CustomEffectFormModal toUpdateCharData={charStats} toEdit={value} toEditEffectType="Debuff" />
+                                            <button onClick={() => handleRemoveEffect(charStats, value, "Debuff")} className="bg-red-900 text-white hover:bg-white hover:text-red-900 cursor-pointer p-1 transition-all border border-black"><RxCross1 size={24}/></button>
                                         </div>
                                     ))}
                                 </div>
@@ -114,7 +116,7 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
             </div>
             <div className="flex justify-center py-5">
                 <div className="min-w-80 flex justify-around">
-                    <AddCustomEffectForm toUpdateCharData={charStats} />
+                    <CustomEffectFormModal toUpdateCharData={charStats} />
                     <button onClick={handleSetEdit} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Edit</button>
                     <button onClick={handleCloseModal} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Cancel</button>
                 </div>

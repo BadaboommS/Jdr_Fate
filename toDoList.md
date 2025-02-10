@@ -9,3 +9,4 @@
 7. [ ] dot / hot avant tour de combats.
 9. [ ] Ajouter conversion Lettre Valeur plus précise -> ex: A-, B+
 10. [ ] Ajouter stance.
+11. [ ] Add effect preset.

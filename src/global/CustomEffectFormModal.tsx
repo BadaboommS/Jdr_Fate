@@ -1,26 +1,51 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { DataContext } from '../context/DataContext';
+import { FaEdit } from "react-icons/fa";
 import { BsBookmarkPlusFill } from 'react-icons/bs';
 import { Modal } from './Modal';
 import { CharBuffInterface, CharStatsInterface, EffectFormInputInterface } from '../types/statsType';
-import { addEffect } from '../function/FightCalc';
+import { addEffect, removeEffect } from '../function/FightCalc';
 
 interface AddCustomEffectFormProps {
     toUpdateCharData: CharStatsInterface;
+    toEdit?: CharBuffInterface;
+    toEditEffectType?: "Buff" | "Debuff";
 }
 
-export function AddCustomEffectForm ({ toUpdateCharData }: AddCustomEffectFormProps) {
+export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectType }: AddCustomEffectFormProps) {
     const { charData, setCharData } = useContext(DataContext);
     const [showCustomEffectModal, setShowCustomEffectModal] = useState(false);
     const [effectType, setEffectType] = useState<"Buff" | "Debuff">('Buff');
-    const { register, handleSubmit, reset } = useForm<EffectFormInputInterface>({ defaultValues: { Name: '', Desc: '', STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0, Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0, Dot: 0, Hot: 0 } })
+    const { register, handleSubmit, reset, setValue } = useForm<EffectFormInputInterface>({ defaultValues: { Name: '', Desc: '', STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0, Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0, Dot: 0, Hot: 0 } });
+
+
+    useEffect(() => {
+        if (toEdit && showCustomEffectModal) {
+            console.log(toEdit);
+            if(toEditEffectType !== undefined) setEffectType(toEditEffectType);
+            setValue('Name', toEdit.Name);
+            setValue('Desc', toEdit.Desc);
+            if (toEdit.Effect) {
+                Object.entries(toEdit.Effect.CharCaracteristics || {}).forEach(([key, value]) => setValue(key as keyof EffectFormInputInterface, value));
+                Object.entries(toEdit.Effect.CombatStats || {}).forEach(([key, value]) => setValue(key as keyof EffectFormInputInterface, value));
+                if (toEdit.Effect.Dot) setValue('Dot', toEdit.Effect.Dot);
+                if (toEdit.Effect.Hot) setValue('Hot', toEdit.Effect.Hot);
+            }
+        }
+    }, [toEdit, setValue, toEditEffectType, showCustomEffectModal]);
 
     const onSubmit: SubmitHandler<EffectFormInputInterface> = (data) => {
         if(!window.confirm(`Confirmer l'atout de ${data.Name} ?`)){ return charData; };
-        const effectList = (effectType === "Buff")? toUpdateCharData.BuffsList : toUpdateCharData.DebuffsList;
+        
+        // Remove effect if edit
+        let effectRemovedCharData = null;
+        if(toEdit && toEditEffectType){ effectRemovedCharData = removeEffect(toUpdateCharData, toEdit, toEditEffectType); };
+        const toUpdateData = effectRemovedCharData !== null? effectRemovedCharData : toUpdateCharData;
+        
+        const effectList = (effectType === "Buff")? toUpdateData.BuffsList : toUpdateData.DebuffsList;
         const newEffect: CharBuffInterface = {
-            Id: effectList[0]? effectList[effectList.length - 1].Id + 1 : 0,
+            Id: toEdit ? toEdit.Id : (effectList[0] ? effectList[effectList.length - 1].Id + 1 : 0),
             Name: data.Name,
             Desc: data.Desc,
             Applied: false
@@ -41,9 +66,9 @@ export function AddCustomEffectForm ({ toUpdateCharData }: AddCustomEffectFormPr
                 ...(hotStock !== null && { Hot: hotStock })
             };
         }
-
-        const updatedCharData = addEffect(toUpdateCharData, newEffect, effectType);
-        setCharData(charData.map((char) => char.Id === toUpdateCharData.Id ? updatedCharData : char));
+        
+        const updatedCharData = addEffect(toUpdateData, newEffect, effectType);
+        setCharData(charData.map((char) => char.Id === toUpdateData.Id ? updatedCharData : char));
         handleModalClose();
     }
 
@@ -54,12 +79,14 @@ export function AddCustomEffectForm ({ toUpdateCharData }: AddCustomEffectFormPr
 
     return (
         <>
-            <button onClick={() => setShowCustomEffectModal(true)} title="Add Effect" className='text-green-500 hover:text-white hover:bg-green-500 rounded cursor-pointer transition-all'><BsBookmarkPlusFill size={32}/></button>
+            <button onClick={() => setShowCustomEffectModal(true)} title={toEdit? "Edit effect" : "Add Effect"} className={toEdit? 'text-white bg-green-500 hover:text-green-500 hover:bg-white cursor-pointer transition-all border border-black' : 'text-green-500 hover:bg-green-500 hover:text-white cursor-pointer rounded transition-all'}>
+                {(toEdit? <FaEdit size={24} className='m-1'/> : <BsBookmarkPlusFill size={32} />)}
+                </button>
             {
                 (showCustomEffectModal)
                     ?   <Modal isOpen={showCustomEffectModal} onClose={() => handleModalClose()}>
                             <div className='flex flex-col gap-2'>
-                                <h2 className='text-xl text-center'>Add new effect to : {toUpdateCharData.Name}</h2>
+                                <h2 className='text-xl text-center'>{toEdit ? `Edit effect: ${toEdit.Name}` : `Add new effect to: ${toUpdateCharData.Name}`}</h2>
                                 <div className='input_entry'>
                                     <h3 className='input_label'>Effect Type :</h3>
                                     <div className='input_field flex justify-center gap-2'>

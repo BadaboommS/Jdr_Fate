@@ -14,7 +14,6 @@ export interface CharStatsInterface {
     InitCombatStats: FightStatsType;
     BuffsList: CharBuffInterface[];
     DebuffsList: CharDebuffInterface[];
-    FightStyle: FightStyleInterface | null;
     TurnEffect: TurnEffectInterface;
 }
 

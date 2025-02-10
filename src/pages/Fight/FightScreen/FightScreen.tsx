@@ -32,7 +32,8 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     function handleTurnPrep(actorA: CharStatsInterface | null, actorB: CharStatsInterface | null): void{
         if(actorA === null || actorB === null){ return; };
 
-        console.log(charData);
+        // Stance
+
         // Dot & Hot
         let afterTurnEffectActorAData = null;
         let afterTurnEffectActorBData = null
@@ -47,7 +48,6 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                 }
             }));
         }
-        console.log(charData);
 
         // Initiative
         const actorAIni = actorA.CombatStats.Ini + rollDice(10);

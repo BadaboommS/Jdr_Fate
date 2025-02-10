@@ -29,7 +29,6 @@ export function CreateChar() {
             InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             BuffsList: [],
             DebuffsList: [],
-            FightStyle: null,
             TurnEffect: { Dot: 0, Hot: 0},
             ...(showVariant && { Variant })
         };
