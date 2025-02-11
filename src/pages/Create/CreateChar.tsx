@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
-import { CreateCharFormInputInterface } from "../../types/statsType";
+import { CreateCharFormInputInterface, CombatStatsTitle } from "../../types/statsType";
 import { caracToStatsCalc } from "../../function/BaseStatsCalc";
 import './createChar.css';
 
@@ -148,7 +148,7 @@ export function CreateChar() {
                         </div>
                         {["Ini", "SA", "AA", "DMG", "PA", "SD", "AD", "ReD", "CdC", "CC", "AN"].map((stat) => (
                             <div className="input_entry" key={stat}>
-                                <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
+                                <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label cursor-help" title={CombatStatsTitle[stat as keyof typeof CombatStatsTitle]}>{stat} :</label>
                                 <input type="number" {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} defaultValue={0} id={`input_${stat.toLowerCase()}`} className="input_field" />
                             </div>
                         ))}

@@ -8,10 +8,10 @@ export interface CharStatsInterface {
     Armor: number;
     Hp: number;
     Mana: number;
-    Caracteristics: CharStatsCaracteristicsType;
-    CombatStats: FightStatsType;
-    InitCaracteristics: CharStatsCaracteristicsType;
-    InitCombatStats: FightStatsType;
+    Caracteristics: CharStatsCaracteristicsInterface;
+    CombatStats: CharStatsCombatStatsInterface;
+    InitCaracteristics: CharStatsCaracteristicsInterface;
+    InitCombatStats: CharStatsCombatStatsInterface;
     BuffsList: CharBuffInterface[];
     DebuffsList: CharDebuffInterface[];
     TurnEffect: TurnEffectInterface;
@@ -46,19 +46,19 @@ export interface FightStyleInterface {
     Effect?: EffectInterface;
 }
 
+export interface EffectInterface {
+    CharCaracteristics?: Partial<CharStatsCaracteristicsValueInterface>;
+    CombatStats?: Partial<CharStatsCombatStatsInterface>;
+    Dot?: number;
+    Hot?: number;
+}
+
 export interface CharSkillsInteface {
     Id: number;
     Name: string;
     Desc: string;
     Effect?: EffectInterface;
     Enabled: boolean;
-}
-
-interface EffectInterface {
-    CharCaracteristics?: Partial<CharStatsCaracteristicsValueType>;
-    CombatStats?: Partial<FightStatsType>;
-    Dot?: number;
-    Hot?: number;
 }
 
 interface TurnEffectInterface {
@@ -76,61 +76,40 @@ type WeaponType = {
     WeaponType: string,
 }
 
-export type CharStatsCaracteristicsType = {
-    STR: string,
-    END: string,
-    AGI: string,
-    MANA: string,
-    MGK: string,
-    LUK: string,
-    SPD: string
+export interface CharStatsCaracteristicsInterface {
+    STR: string;
+    END: string;
+    AGI: string;
+    MANA: string;
+    MGK: string;
+    LUK: string;
+    SPD: string;
 }
 
-export type CharStatsCaracteristicsValueType = {
-    STR: number,
-    END: number,
-    AGI: number,
-    MANA: number,
-    MGK: number,
-    LUK: number,
-    SPD: number
+export interface CharStatsCaracteristicsValueInterface {
+    STR: number;
+    END: number;
+    AGI: number;
+    MANA: number;
+    MGK: number;
+    LUK: number;
+    SPD: number;
 }
 
 export type StatKey = 'E' | 'D' | 'C' | 'B' | 'A' | 'EX';
 
-export type FightStatsType = {
-    Ini: number, // Initiative : bonus 1er tour
-    SA: number,  // Score Atk : précision
-    AA: number,  // Actions Atk : nombre atk en 1 tour
-    DMG: number, // Dégats -> Arme + boost
-    PA: number,  // Pénétration armure : à soustraire à la ReD adverse
-    SD: number,  // Score de Def : capacité à se défendre d'une atk
-    AD: number,  // Actions de Def : nombre de jets de def avant de subir des malus
-    ReD: number, // Réduction de Dégats : réduit les dmg de chaque atk -> Armure + consitution + boost
-    CdC: number, // Chance de Crit : %
-    CC: number,  // Coup Critique : nombre de CC max en un tour
-    AN: number   // Actions neutres
-}
-
-export enum OffFightingPoseEnum {
-    Serp, // Serpent
-    Rhin, // Rhinocéros
-    Drag, // Dragon
-    Pant  // Panthère
-}
-
-export enum DefFightingPoseEnum {
-    Roch, // Rocher
-    Leza, // Lezard
-    Pieu, // Pieuvre
-    Gori  // Gorille
-}
-
-export enum NeutralFightningPoseEnum {
-    Rose, // Roseau
-    Gole, // Golem
-    Flam, // Flamant Rose
-    Marm  // Marmotte
+export interface CharStatsCombatStatsInterface {
+    Ini: number;
+    SA: number;
+    AA: number;
+    DMG: number;
+    PA: number;
+    SD: number;
+    AD: number;
+    ReD: number;
+    CdC: number;
+    CC: number;
+    AN: number;
 }
 
 export interface CreateCharFormInputInterface {
@@ -192,3 +171,17 @@ export interface EffectFormInputInterface {
     Dot?: number;
     Hot?: number;
 }
+
+export const CombatStatsTitle = {
+    Ini: "L’Initiative (Ini) détermine d’éventuels bonus au premier tour.",
+    SA: "Le Score d’Attaque (SA) détermine la précision de l’attaque.",
+    AA: "Les Actions d’Attaque (AA) déterminent le nombre d’attaques portées en 1 tour",
+    DMG: "Les Dégâts (DMG) sont une base de dégâts, déterminés par l’arme, la force et d’éventuels bonus extérieurs.",
+    PA: "La Pénétration d’Armure (PA) correspond à la valeur soustraite à la ReD de l’adversaire.",
+    SD: "Le Score de Défense (SD) détermine la capacité à se défendre contre une attaque.",
+    AD: "Les Actions de Défense (AD) déterminent le nombre de jets de défense avant de subir des malus pour toute défense ultérieure.",
+    ReD: "La Réduction de Dégâts (ReD) détermine la quantité de dégâts soustraite à chaque attaque qui touche le personnage. Elle est déterminée par son armure, sa constitution et d’éventuels bonus.",
+    CdC: "Les Chances de Critiques (CdC) déterminent la probabilité d’infliger des dégâts supplémentaires et d’infliger des effets néfastes aux ennemis.",
+    CC: "Les Coups Critiques (CC) déterminent le nombre de coups critiques qu’il est possible de porter en un tour.",
+    AN: "Les Actions neutres (AN) peuvent être gagnée grâce à des compétences, certains sorts nécessitent des AN. Il est possible de convertir 1 AA ou 1AD en 1 AN mais il faut convertir 2AN pour obtenir 1AA ou 1AD."
+};

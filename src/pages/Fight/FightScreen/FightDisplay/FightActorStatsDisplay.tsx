@@ -1,6 +1,6 @@
 import { CharStatsInterface } from "../../../../types/statsType";
 import { RxCross1 } from "react-icons/rx";
-import { CharBuffInterface, CharDebuffInterface } from "../../../../types/statsType";
+import { CharBuffInterface, CharDebuffInterface, CombatStatsTitle } from "../../../../types/statsType";
 import { CustomEffectFormModal } from "../../../../global/CustomEffectFormModal";
 import { FightEditCharModal } from "./FightEditCharModal";
 
@@ -65,7 +65,7 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                     <h3 className="input_label">Combat Stats :</h3>
                     {Object.entries(characterData.CombatStats).map(([key, value]) => (
                         <div key={key} className="input_entry">
-                            <span className="input_label">{key}: </span>
+                            <span className="input_label cursor-help" title={CombatStatsTitle[key as keyof typeof characterData.CombatStats]}>{key}: </span>
                             <span className={`input_field ${value < characterData.InitCombatStats[key as keyof typeof characterData.CombatStats] ? '!text-red-500' : ''}${value > characterData.InitCombatStats[key as keyof typeof characterData.CombatStats] ? '!text-blue-500' : ''}`}>{value}</span>
                         </div>
                     ))}

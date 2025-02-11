@@ -9,6 +9,7 @@ import { Modal } from "../../../global/Modal";
 import { handleFightAtk, removeEffect } from "../../../function/FightCalc";
 import { FightSettingsModal } from "./FightSettingsModal";
 import { rollDice } from "../../../function/GlobalFunction";
+import { FightStanceArray } from "../../../data/FightStance";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -209,6 +210,23 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                             <h2 className="input_label">Controles de combat: </h2>
                             <div className="flex flex-row gap-2">
                                 <button onClick={() => handleTurnPrep(displayActorAData, displayActorBData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Tour de combat</button>
+                            </div>
+                            <div className="flex flex-col items-center gap-2">
+                                <h2 className="input_label">Choix Position de combat :</h2>
+                                <div className="grid grid-cols-2 gap-2 w-full">
+                                    <div className="flex flex-col">
+                                        <h2 className="text-center input_label">Acteur A :</h2>
+                                        <select>
+                                            {FightStanceArray.map((stance) => {
+                                                return <option value={stance.Name} title={stance.Desc}>{stance.Name}</option>
+                                            })}
+                                        </select>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <h2 className="text-center input_label">Acteur B :</h2>
+                                        
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex flex-col items-center gap-2">
                                 <h2 className="input_label">Compétences activables :</h2>

@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
-import { CharStatsInterface, CreateCharFormInputInterface } from "../../types/statsType";
+import { CharStatsInterface, CreateCharFormInputInterface, CombatStatsTitle } from "../../types/statsType";
 import { applyEffect } from "../../function/FightCalc";
 
 interface EditCharPropsInterface {
@@ -138,7 +138,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                             </div>
                             {Object.entries(charStats.InitCombatStats).map(([key, value]) => (
                                 <div key={key} className="input_entry">
-                                    <label htmlFor={`input_${key.toLowerCase()}`} className="input_label">{key} :</label>
+                                    <label htmlFor={`input_${key.toLowerCase()}`} className="input_label cursor-help" title={CombatStatsTitle[key as keyof typeof CombatStatsTitle]}>{key} :</label>
                                     <input type="number" {...register(key as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${key} Amount !` })} defaultValue={value} id={`input_${key.toLowerCase()}`} className="input_field" />
                                 </div>
                             ))}
