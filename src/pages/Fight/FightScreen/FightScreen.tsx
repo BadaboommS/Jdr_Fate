@@ -231,7 +231,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                                 <div className="grid grid-cols-2 gap-2 w-full">
                                     <div className="flex flex-col">
                                         <h2 className="text-center input_label">Acteur A :</h2>
-                                        <select className="input_field" onChange={(e) => handleFightStanceChange(displayActorAData?.Id, e.currentTarget.value)}>
+                                        <select className="input_field" id="actorA_stance_select" onChange={(e) => handleFightStanceChange(displayActorAData?.Id, e.currentTarget.value)} defaultValue={displayActorAData?.FightStyle?.Name || "None"}>
                                             <option value="None">None</option>
                                             {FightStanceArray.map((stance) => {
                                                 return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
@@ -240,7 +240,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                                     </div>
                                     <div className="flex flex-col">
                                         <h2 className="text-center input_label">Acteur B :</h2>
-                                        <select className="input_field" onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value)}>
+                                        <select className="input_field" id="actorB_stance_select" onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value)} defaultValue={displayActorBData?.FightStyle?.Name || "None"}>
                                             <option value="None">None</option>
                                             {FightStanceArray.map((stance) => {
                                                 return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
