@@ -6,10 +6,11 @@ import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../.
 import { FightListInterface } from "../../../types/fightType";
 import { Terminal } from "./FightDisplay/Terminal";
 import { Modal } from "../../../global/Modal";
-import { handleFightAtk, removeEffect } from "../../../function/FightCalc";
+import { applyStance, handleFightAtk, removeEffect, unapplyStance } from "../../../function/FightCalc";
 import { FightSettingsModal } from "./FightSettingsModal";
 import { rollDice } from "../../../function/GlobalFunction";
 import { FightStanceArray } from "../../../data/FightStance";
+import './fightScreen.css';
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -17,7 +18,7 @@ interface FightScreenPropsInterface {
     saveFightData: (activeFightData: FightListInterface) => void;
 }
 
-interface IniBuffInterface {
+interface IniTempBuffInterface {
     SA: number;
     SD: number;
     CdC: number;
@@ -32,8 +33,6 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
 
     function handleTurnPrep(actorA: CharStatsInterface | null, actorB: CharStatsInterface | null): void{
         if(actorA === null || actorB === null){ return; };
-
-        // Stance
 
         // Dot & Hot
         let afterTurnEffectActorAData = null;
@@ -55,7 +54,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         const actorBIni = actorB.CombatStats.Ini + rollDice(10);
 
         const initiativeDifference = Math.abs(actorAIni - actorBIni);
-        let bonus: IniBuffInterface = { SA: 0, SD: 0, CdC: 0 };
+        let bonus: IniTempBuffInterface = { SA: 0, SD: 0, CdC: 0 };
 
         if (initiativeDifference >= 2 && initiativeDifference <= 3) {
             bonus = { SA: 15, SD: 15, CdC: 0 };
@@ -72,24 +71,24 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         }
     }
 
-    function handleTurn(firstActor: CharStatsInterface, secondActor: CharStatsInterface, bonus: IniBuffInterface, iniDiff: number){
+    function handleTurn(firstActor: CharStatsInterface, secondActor: CharStatsInterface, iniTempBuff: IniTempBuffInterface, iniDiff: number){
         handleHistoryEventAdd(`
             La différence d'Ini est de ${iniDiff}.
-            ${bonus.SA === 0 ? `La différence est minime.` : ''}
-            ${bonus.SA !== 0 ? `${firstActor.Name} gagne SA: ${bonus.SA}` : ''}
-            ${bonus.SD !== 0 ? `, SD: ${bonus.SD}` : ''}
-            ${bonus.CdC !== 0 ? `, CdC: ${bonus.CdC}` : ''}
+            ${iniDiff < 2 ? `La différence est minime.` : ''}
+            ${iniTempBuff.SA !== 0 ? `${firstActor.Name} gagne SA: ${iniTempBuff.SA}` : ''}
+            ${iniTempBuff.SD !== 0 ? `, SD: ${iniTempBuff.SD}` : ''}
+            ${iniTempBuff.CdC !== 0 ? `, CdC: ${iniTempBuff.CdC}` : ''}
             `, "Info");
-
-        // Add Ini bonus
-        const initCharData = charData.map((char) => char.Id === firstActor.Id ? { 
+        
+        // Buff Ini
+        const IniBuffedCharData = charData.map((char) => char.Id === firstActor.Id ? { 
             ...char, CombatStats: { 
-                ...char.CombatStats, SA: char.CombatStats.SA + bonus.SA, SD: char.CombatStats.SD + bonus.SD, CdC: char.CombatStats.CdC + bonus.CdC
+                ...char.CombatStats, SA: char.CombatStats.SA + iniTempBuff.SA, SD: char.CombatStats.SD + iniTempBuff.SD, CdC: char.CombatStats.CdC + iniTempBuff.CdC
             }
         } : char);
 
         // First ATK
-        const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, initCharData, handleHistoryEventAdd);
+        const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, IniBuffedCharData, handleHistoryEventAdd);
 
         // Update character data
         const updatedCharData = charData.map((char) => char.Id === firstAtkRes?.defenderData.Id ? firstAtkRes.defenderData : char);
@@ -103,14 +102,14 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         // Remove Ini bonus
         finalCharData.map((char) => char.Id === firstActor.Id ? { 
             ...char, CombatStats: { 
-                ...char.CombatStats, SA: char.CombatStats.SA - bonus.SA, SD: char.CombatStats.SD - bonus.SD, CdC: char.CombatStats.CdC - bonus.CdC
+                ...char.CombatStats, SA: char.CombatStats.SA - iniTempBuff.SA, SD: char.CombatStats.SD - iniTempBuff.SD, CdC: char.CombatStats.CdC - iniTempBuff.CdC
             }
         } : char);
 
         setCharData(finalCharData);
     }
 
-    function applyTurnEffect(actorData: CharStatsInterface){
+    function applyTurnEffect(actorData: CharStatsInterface): CharStatsInterface {
         if(actorData.TurnEffect.Dot !== 0){
             handleHistoryEventAdd(`${actorData.Name} prend des dégâts sur la durée ! ( ${actorData.TurnEffect.Dot} )`, 'Atk');
             actorData.Hp -= actorData.TurnEffect.Dot;
@@ -146,6 +145,22 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                 : [...prevState.fightMembers, name]
         }));
         handleHistoryEventAdd(`${name} ${memberListChangeMsg}`, 'Info');
+    }
+
+    function handleFightStanceChange(actorId: number | undefined, stanceName: string) {
+        const actorData = charData.find((char) => char.Id === actorId);
+        if(!actorData){ return; }
+
+        const removedOldStanceBuffData = unapplyStance(actorData);
+        const stanceData = FightStanceArray.find((stance) => stance.Name === stanceName);
+        if(stanceData){
+            removedOldStanceBuffData.FightStyle = stanceData;
+            const addedNewStanceBuffData = applyStance(removedOldStanceBuffData);
+            setCharData(charData.map((char) => char.Id === actorId ? addedNewStanceBuffData : char));
+        }else{
+            removedOldStanceBuffData.FightStyle = null;
+            setCharData(charData.map((char) => char.Id === actorId ? removedOldStanceBuffData : char));
+        }   
     }
 
     function handleHistoryEventAdd(newHistoryEntry: string, newMsgType: string, msgTitle: string = ''): void { setActiveData(prevState => ({ ...prevState, fightHistory: [{historyMsg: newHistoryEntry, msgType: newMsgType, msgTitle: msgTitle}, ...prevState.fightHistory]})); };
@@ -216,15 +231,21 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                                 <div className="grid grid-cols-2 gap-2 w-full">
                                     <div className="flex flex-col">
                                         <h2 className="text-center input_label">Acteur A :</h2>
-                                        <select>
+                                        <select className="input_field" onChange={(e) => handleFightStanceChange(displayActorAData?.Id, e.currentTarget.value)}>
+                                            <option value="None">None</option>
                                             {FightStanceArray.map((stance) => {
-                                                return <option value={stance.Name} title={stance.Desc}>{stance.Name}</option>
+                                                return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
                                             })}
                                         </select>
                                     </div>
                                     <div className="flex flex-col">
                                         <h2 className="text-center input_label">Acteur B :</h2>
-                                        
+                                        <select className="input_field" onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value)}>
+                                            <option value="None">None</option>
+                                            {FightStanceArray.map((stance) => {
+                                                return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
+                                            })}
+                                        </select>
                                     </div>
                                 </div>
                             </div>

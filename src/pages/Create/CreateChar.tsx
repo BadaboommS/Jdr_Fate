@@ -30,6 +30,7 @@ export function CreateChar() {
             BuffsList: [],
             DebuffsList: [],
             TurnEffect: { Dot: 0, Hot: 0},
+            FightStyle: null,
             ...(showVariant && { Variant })
         };
 

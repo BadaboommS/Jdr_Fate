@@ -1,4 +1,5 @@
 import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, DebuffInterface } from "../types/statsType";
+import { StanceBaseEffectArray } from "../data/FightStance";
 import { rollDice } from "./GlobalFunction";
 import { CCDebuffList } from "../data/CCDebuff";
 
@@ -219,5 +220,49 @@ export function unapplyEffect(charData: CharStatsInterface, effectData: CharBuff
         }
         effectData.Applied = false;
     }
+    return charData;
+}
+
+export function applyStance(charData: CharStatsInterface): CharStatsInterface{
+    const stanceType = charData.FightStyle?.Type;
+    if(stanceType){
+        const stanceTypeBuff = StanceBaseEffectArray[stanceType as keyof typeof StanceBaseEffectArray];
+        if(stanceTypeBuff){
+            Object.keys(stanceTypeBuff).forEach((key) => {
+                const stanceBaseBuffKey = key as keyof typeof charData.CombatStats;
+                if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { charData.CombatStats[stanceBaseBuffKey] += (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
+            });
+        }
+    }
+    const stanceBuff = charData.FightStyle?.Effect?.CombatStats || null;
+        if (stanceBuff) {
+            Object.keys(stanceBuff).forEach((key) => {
+                const stanceBuffKey = key as keyof typeof charData.CombatStats;
+                if (stanceBuff[stanceBuffKey]) { charData.CombatStats[stanceBuffKey] += stanceBuff[stanceBuffKey]; };
+            });
+        }
+
+    return charData;
+}
+
+export function unapplyStance(charData: CharStatsInterface): CharStatsInterface{
+    const stanceType = charData.FightStyle?.Type;
+    if(stanceType){
+        const stanceTypeBuff = StanceBaseEffectArray[stanceType as keyof typeof StanceBaseEffectArray];
+        if(stanceTypeBuff){
+            Object.keys(stanceTypeBuff).forEach((key) => {
+                const stanceBaseBuffKey = key as keyof typeof charData.CombatStats;
+                if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { charData.CombatStats[stanceBaseBuffKey] -= (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
+            });
+        }
+    }
+    const stanceBuff = charData.FightStyle?.Effect?.CombatStats || null;
+        if (stanceBuff) {
+            Object.keys(stanceBuff).forEach((key) => {
+                const stanceBuffKey = key as keyof typeof charData.CombatStats;
+                if (stanceBuff[stanceBuffKey]) { charData.CombatStats[stanceBuffKey] -= stanceBuff[stanceBuffKey]; };
+            });
+        }
+
     return charData;
 }
