@@ -6,11 +6,12 @@ import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../.
 import { FightListInterface } from "../../../types/fightType";
 import { Terminal } from "./FightDisplay/Terminal";
 import { Modal } from "../../../global/Modal";
-import { applyStance, handleFightAtk, removeEffect, unapplyStance } from "../../../function/FightCalc";
+import { addEffect, applyStance, handleFightAtk, removeEffect, unapplyStance } from "../../../function/FightCalc";
 import { FightSettingsModal } from "./FightSettingsModal";
 import { rollDice } from "../../../function/GlobalFunction";
 import { FightStanceArray } from "../../../data/FightStance";
 import './fightScreen.css';
+import { EffectPresetArray } from "../../../data/EffectPreset";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -91,20 +92,48 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, IniBuffedCharData, handleHistoryEventAdd);
 
         // Update character data
-        const updatedCharData = charData.map((char) => char.Id === firstAtkRes?.defenderData.Id ? firstAtkRes.defenderData : char);
+        const updatedCharData = charData.map((char) => {
+            switch(true){
+                case char.Id === firstAtkRes?.defenderData.Id: return firstAtkRes.defenderData;
+                case char.Id === firstAtkRes?.attackerData.Id: return firstAtkRes.attackerData;
+                default: return char;
+            }
+        })
 
         // Second ATK
         const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, updatedCharData, handleHistoryEventAdd);
 
         // Update character data
-        const finalCharData = updatedCharData.map((char) => char.Id === secondAtkRes?.defenderData.Id ? secondAtkRes.defenderData : char);
+        let finalCharData = updatedCharData.map((char) => {
+            switch(true){
+                case char.Id === secondAtkRes?.defenderData.Id: return secondAtkRes.defenderData;
+                case char.Id === secondAtkRes?.attackerData.Id: return secondAtkRes.attackerData;
+                default: return char;
+            }
+        });
 
         // Remove Ini bonus
-        finalCharData.map((char) => char.Id === firstActor.Id ? { 
+        finalCharData = finalCharData.map((char) => char.Id === firstActor.Id ? { 
             ...char, CombatStats: { 
                 ...char.CombatStats, SA: char.CombatStats.SA - iniTempBuff.SA, SD: char.CombatStats.SD - iniTempBuff.SD, CdC: char.CombatStats.CdC - iniTempBuff.CdC
             }
         } : char);
+
+        // Dragon Stance
+        if(firstActor.FightStyle?.Name === "Position du Dragon" && !firstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
+            const dragonBuff = EffectPresetArray.find(effect => effect.Name === "Déchainement du Dragon");
+            if(dragonBuff){
+                finalCharData = finalCharData.map((char) => char.Id === firstActor.Id ? addEffect(char, { ...dragonBuff, Applied: false }, "Buff") : char);
+                handleHistoryEventAdd(`${firstActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
+            }
+        }
+        if(secondActor.FightStyle?.Name === "Position du Dragon" && !secondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
+            const dragonBuff = EffectPresetArray.find(effect => effect.Name === "Déchainement du Dragon");
+            if(dragonBuff){
+                finalCharData = finalCharData.map((char) => char.Id === secondActor.Id ? addEffect(char, { ...dragonBuff, Applied: false }, "Buff") : char);
+                handleHistoryEventAdd(`${secondActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
+            }
+        }
 
         setCharData(finalCharData);
     }

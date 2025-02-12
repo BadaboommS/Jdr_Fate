@@ -2,6 +2,7 @@ import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, DebuffInter
 import { StanceBaseEffectArray } from "../data/FightStance";
 import { rollDice } from "./GlobalFunction";
 import { CCDebuffList } from "../data/CCDebuff";
+import { EffectPresetArray } from "../data/EffectPreset";
 
 const DEBUG = false;
 
@@ -14,7 +15,7 @@ export function handleFightAtk(
 ) {
     if (attackerId === null || defenderId === null) { return; }
 
-    const attackerData = charData[charData.findIndex((char) => char.Id === attackerId)];
+    let attackerData = charData[charData.findIndex((char) => char.Id === attackerId)];
     let defenderData = charData[charData.findIndex((char) => char.Id === defenderId)];
     const atkCount = (nbAtk) ? nbAtk : attackerData.CombatStats.AA;
 
@@ -22,18 +23,16 @@ export function handleFightAtk(
 
     let critCounter = 0;
     let dmgCounter = 0;
+    let successAtkCounter = 0;
     for (let i = 0; i < atkCount; i++) {
         // FightCalc
-        const combatRes = handleDmgCalc(attackerData, defenderData, i, critCounter); // Calc Attack
+        const combatRes = handleDmgCalc(attackerData, defenderData, i, critCounter, successAtkCounter); // Calc Attack
 
+        // SuccessAtkCounter
+        if(combatRes.dmg) successAtkCounter += 1;
+        
         // Display all turn msg
         combatRes.msg.map((msg) => handleHistoryEventAdd(msg.historyMsg, msg.msgType, msg.msgTitle));
-
-        // Add new debuff
-        if (combatRes.debuff !== null && combatRes.debuff !== undefined) { 
-            const newDebuff = { ...combatRes.debuff, Applied: false, Id: defenderData.DebuffsList[0]? defenderData.DebuffsList[defenderData.DebuffsList.length - 1].Id + 1: 0 };
-            defenderData = addEffect(defenderData, newDebuff, "Debuff");
-        }
 
         // CheckCrit Counter
         if(combatRes.critCounter) critCounter += combatRes.critCounter;
@@ -42,7 +41,18 @@ export function handleFightAtk(
         if(combatRes.dmg) dmgCounter += combatRes.dmg;
         
         // setData
-        defenderData = { ...defenderData, Hp: defenderData.Hp - combatRes.dmg };
+        defenderData = { ...combatRes.Defender, Hp: combatRes.Defender.Hp - combatRes.dmg };
+    }
+
+    // Stance Roseau
+    if(defenderData.FightStyle?.Name === "Position du Roseau"){
+        const successfullDefCounter = Math.floor((atkCount - successAtkCounter) / 2);
+        const roseauDebuff = EffectPresetArray.find(effect => effect.Name === "Revers de Roseau");
+        if(roseauDebuff) {
+            for(let i = 0; i < successfullDefCounter; i ++){
+                attackerData = addEffect(attackerData, {...roseauDebuff, Applied: false, Id: attackerData.DebuffsList[0]? attackerData.DebuffsList[attackerData.DebuffsList.length - 1].Id + 1: 0}, "Debuff");
+            }
+        }
     }
 
     handleHistoryEventAdd(`-- Dégâts totaux infligés : ${dmgCounter} --`, 'Atk');
@@ -51,14 +61,13 @@ export function handleFightAtk(
     return { attackerData, defenderData };
 }
 
-function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterface, atkNumber: number, critCounter: number) {
-    const atkJet = rollDice(100) + Attacker.CombatStats.SA;
-    const defJet = rollDice(100) + Defender.CombatStats.SD;
+function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterface, atkNumber: number, critCounter: number, atkSuccessCounter: number) {
+    const atkJet = Attacker.FightStyle?.Name === "Position du Flamant Rose"? 50 : rollDice(100) + Attacker.CombatStats.SA;
+    const defJet = Defender.FightStyle?.Name === "Position du Flamant Rose"? 50 : rollDice(100) + Defender.CombatStats.SD;
     if(DEBUG) console.log('atk, def: ',atkJet, defJet);
 
     // Calcul malus AD
-    // Todo: If stance change max malus
-    const maxMalus = 90;
+    const maxMalus = Defender.FightStyle?.Name === "Position du Lézard"? 45 : 90;
     const malusAD = (atkNumber - Defender.CombatStats.AD) > 0 ? Math.min((atkNumber - Defender.CombatStats.AD) * -15, -maxMalus) : 0;
     if(DEBUG) console.log('malusAD', malusAD);
 
@@ -67,8 +76,8 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     if(atkSuccess > 0){ //Echec atk
         if(DEBUG) console.log('echec atk: ', atkSuccess);
         const dmg = 0;
-        const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: Echec`, msgType: 'Def', msgTitle: `JetAtk: ${atkJet} | JetDef: ${defJet}`}];
-        return({ dmg: dmg, msg: msgArray });
+        const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: Echec`, msgType: 'Def', msgTitle: `JetAtk: ${atkJet - Attacker.CombatStats.SA} + ${Attacker.CombatStats.SA} | JetDef: ${defJet - Defender.CombatStats.SD} + ${Defender.CombatStats.SD}`}];
+        return({ Defender: Defender, dmg: dmg, msg: msgArray });
     }
     if(DEBUG) console.log('succès atk: ', atkSuccess);
 
@@ -99,12 +108,14 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     const CCDiceRoll = rollDice(50);
     let debuff: DebuffInterface | null = null;
 
-    if(CCDiceRoll < Attacker.CombatStats.CdC){
+    if(CCDiceRoll < Attacker.CombatStats.CdC && Attacker.FightStyle?.Name !== "Position du Flamant Rose"){
         // Check CC
         const enableCC = (critCounter < Attacker.CombatStats.CC);
-        if(enableCC){
+        if(enableCC && Defender.FightStyle?.Name === "Position de la Pieuvre"){
             msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
-            
+            msgArray.push({ historyMsg: `Mais ${Defender.Name} esquive les effets néfastes !`, msgType: 'CC', msgTitle: ''});
+        }else if(enableCC){
+            msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
             // Select debuff
             const weaponTypeDebuffList = CCDebuffList[CCDebuffList.findIndex(debuff => debuff.Type === Attacker.Weapon.WeaponType)];
 
@@ -114,6 +125,12 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
                 do{
                     debuff = weaponTypeDebuffList.Debuffs[rollDice(6) - 1];
                 }while(Defender.DebuffsList.some(d => d.Name === debuff?.Name));
+
+                // Add new debuff
+                const newDebuff: CharDebuffInterface = { Name: debuff.Name, Desc: debuff.Desc, Effect: debuff.Effect, Applied: false, Id: Defender.DebuffsList[0]? Defender.DebuffsList[Defender.DebuffsList.length - 1].Id + 1: 0 };
+                if(debuff.Dmg) newDebuff.Dmg = debuff.Dmg;
+                if(debuff.Effect) newDebuff.Effect = debuff.Effect;
+                Defender = addEffect(Defender, newDebuff, "Debuff");
                 msgArray.push({ historyMsg: `${Defender.Name} reçoit ${debuff.Name}`, msgType: 'CC', msgTitle: ''});
             }
             critCounter++;
@@ -122,7 +139,61 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
         }
     }
 
-    return({ dmg: finalDmg, msg: msgArray, debuff: debuff, critCounter: critCounter });
+    // Serpent Stance
+    if(atkSuccessCounter === 0 && Attacker.FightStyle?.Name === "Position du Serpent"){
+        if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+            msgArray.push({ historyMsg: `${Defender.Name} esquive le poison du serpent !`, msgType: 'CC', msgTitle: ''});
+        }else{
+            const serpentDotDebuff = EffectPresetArray.find(effect => effect.Name === "Poison du Serpent");
+            if(serpentDotDebuff){
+                Defender = addEffect(Defender, {...serpentDotDebuff, Applied: false }, "Debuff");
+                msgArray.push({ historyMsg: `Position du Serpent inflige 50 dégats sur la durée ! (4 tour)`, msgType: 'Atk', msgTitle: ''});
+            } 
+        }
+    }
+
+    // Rhinocéros Stance
+    if(Attacker.FightStyle?.Name === "Position du Rhinocéros"){
+        if(atkSuccessCounter === 0){
+            if (rollDice(100) <= 50) {
+                if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+                    msgArray.push({ historyMsg: `${Defender.Name} esquive le Premier Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
+                }else{
+                    const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Premier Coup du Rhinocéros");
+                    if (rhinoDebuff) {
+                        Defender = addEffect(Defender, { ...rhinoDebuff, Applied: false }, "Debuff");
+                        msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
+                    }
+                }
+            }else { msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); }
+        }else if(atkSuccessCounter === 1){
+            if (rollDice(100) <= 50) {
+                if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+                    msgArray.push({ historyMsg: `${Defender.Name} esquive le Second Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
+                }else{
+                    const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Second Coup du Rhinocéros");
+                    if (rhinoDebuff) {
+                        Defender = addEffect(Defender, { ...rhinoDebuff, Applied: false }, "Debuff");
+                        msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
+                    }
+                }
+            }else { msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); }
+        }else if(atkSuccessCounter === 2){
+            if (rollDice(100) <= 50) {
+                if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+                    msgArray.push({ historyMsg: `${Defender.Name} esquive le Troisième Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
+                }else{
+                    const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Troisième Coup du Rhinocéros");
+                    if (rhinoDebuff) {
+                        Defender = addEffect(Defender, { ...rhinoDebuff, Applied: false }, "Debuff");
+                        msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
+                    }
+                }
+            }else { msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); }
+        }
+    }    
+
+    return({ Defender: Defender, dmg: finalDmg, msg: msgArray, debuff: debuff, critCounter: critCounter });
 }
 
 export function addEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{

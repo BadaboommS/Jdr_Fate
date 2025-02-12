@@ -3,3 +3,7 @@ Res magique ?
 DEFINIR Tour
 MANA + COMPETENCES
 VALUES CARAC
+Poison Serpent effet de CC? (esquive pieuvre)
+Stance Rhino atk réussie ou non ?
+Second coup Rhino STA ?
+Poison du serpent stackable ?

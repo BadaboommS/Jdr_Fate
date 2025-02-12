@@ -82,7 +82,7 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
 
         setEffectType(presetData.EffectType);
         setValue("Name", presetData.Name);
-        setValue("Desc", presetData.Name);
+        setValue("Desc", presetData.Desc);
         ['STR', 'END', 'AGI', 'MANA', 'MGK', 'LUK', 'SPD'].forEach((carac) => setValue(carac as keyof EffectFormInputInterface, presetData.Effect?.CharCaracteristics?.[carac as keyof typeof presetData.Effect.CharCaracteristics] ?? 0));
         ['Ini', 'SA', 'AA', 'DMG', 'PA', 'SD', 'AD', 'ReD', 'CdC', 'CC', 'AN'].forEach((stat) => setValue(stat as keyof EffectFormInputInterface, presetData.Effect?.CombatStats?.[stat as keyof typeof presetData.Effect.CombatStats] ?? 0));
         setValue("Dot", presetData.Effect?.Dot || 0);

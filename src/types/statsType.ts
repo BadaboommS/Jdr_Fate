@@ -21,11 +21,13 @@ export interface CharStatsInterface {
 export interface CharDebuffInterface extends DebuffInterface {
     Applied: boolean;
     Id: number;
+    EffectType?: string;
 }
 
 export interface CharBuffInterface extends BuffInterface {
     Applied: boolean;
     Id: number;
+    EffectType?: string;
 }
 
 export interface DebuffInterface {
