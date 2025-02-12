@@ -55,7 +55,7 @@ export function handleFightAtk(
         }
     }
 
-    handleHistoryEventAdd(`-- Dégâts totaux infligés : ${dmgCounter} --`, 'Atk');
+    handleHistoryEventAdd(`-- ${defenderData.Name} subit au total : ${dmgCounter} --`, 'Atk');
     handleHistoryEventAdd(`-- Fin de l'attaque --`, 'Text');
 
     return { attackerData, defenderData };
@@ -76,7 +76,7 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     if(atkSuccess > 0){ //Echec atk
         if(DEBUG) console.log('echec atk: ', atkSuccess);
         const dmg = 0;
-        const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: Echec`, msgType: 'Def', msgTitle: `JetAtk: ${atkJet - Attacker.CombatStats.SA} + ${Attacker.CombatStats.SA} | JetDef: ${defJet - Defender.CombatStats.SD} + ${Defender.CombatStats.SD}`}];
+        const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: Echec`, msgType: 'Def', msgTitle: `${Attacker.Name}: ${atkJet - Attacker.CombatStats.SA} + ${Attacker.CombatStats.SA} | ${Defender.Name}: ${defJet - Defender.CombatStats.SD} + ${Defender.CombatStats.SD}`}];
         return({ Defender: Defender, dmg: dmg, msg: msgArray });
     }
     if(DEBUG) console.log('succès atk: ', atkSuccess);
@@ -102,7 +102,7 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     let finalDmg = Math.floor(Dmg + armorPierce);
     if(DEBUG) console.log('finalDmg: ', finalDmg);
 
-    const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: ${finalDmg} Dmg`, msgType: 'Atk', msgTitle: `JetAtk: ${atkJet} | JetDef: ${defJet}`}];
+    const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: ${finalDmg} Dmg`, msgType: 'Atk', msgTitle: `${Attacker.Name}: ${atkJet - Attacker.CombatStats.SA} + ${Attacker.CombatStats.SA} | ${Defender.Name}: ${defJet - Defender.CombatStats.SD} + ${Defender.CombatStats.SD}`}];
 
     // Calcul CC
     const CCDiceRoll = rollDice(50);

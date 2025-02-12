@@ -35,6 +35,8 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     function handleTurnPrep(actorA: CharStatsInterface | null, actorB: CharStatsInterface | null): void{
         if(actorA === null || actorB === null){ return; };
 
+        handleHistoryEventAdd('Début du tour de combat !', "Info", "");
+
         // Dot & Hot
         let afterTurnEffectActorAData = null;
         let afterTurnEffectActorBData = null
