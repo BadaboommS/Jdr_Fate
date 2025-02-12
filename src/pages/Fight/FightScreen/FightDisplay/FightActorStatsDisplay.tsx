@@ -3,6 +3,7 @@ import { RxCross1 } from "react-icons/rx";
 import { CharBuffInterface, CharDebuffInterface, CombatStatsTitle } from "../../../../types/statsType";
 import { CustomEffectFormModal } from "../../../../global/CustomEffectFormModal";
 import { FightEditCharModal } from "./FightEditCharModal";
+import { FightANModal } from "./FightANModal";
 
 interface FightActorStatsDisplayInterface {
     characterData: CharStatsInterface;
@@ -57,7 +58,9 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                     {Object.entries(characterData.Caracteristics).map(([key, value]) => (
                         <div key={key} className="input_entry">
                             <span className="input_label">{key}: </span>
-                            <span className="input_field">{value}</span>
+                            <span className={`input_field ${characterData.CaracteristicsBuff[key as keyof typeof characterData.Caracteristics]? characterData.CaracteristicsBuff[key as keyof typeof characterData.Caracteristics] < 0? "!text-red-500" : "!text-blue-500" : ""}`}>
+                                {value}{characterData.CaracteristicsBuff[key as keyof typeof characterData.Caracteristics]? ` + ${characterData.CaracteristicsBuff[key as keyof typeof characterData.Caracteristics]}` : ""}
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -101,6 +104,7 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                 <div className="flex justify-around">
                     <CustomEffectFormModal toUpdateCharData={characterData} />
                     <FightEditCharModal toEditCharData={characterData} />
+                    <FightANModal toEditCharData={characterData} />
                 </div>
             </div>
             //{(characterData.Variant) && <div><img src={`./assets/servant_img/${characterData.Variant}.png`} className="w-fit h-fit variant_img"/></div>}

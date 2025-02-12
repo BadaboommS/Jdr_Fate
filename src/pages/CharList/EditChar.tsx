@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
 import { CharStatsInterface, CreateCharFormInputInterface, CombatStatsTitle } from "../../types/statsType";
-import { applyEffect } from "../../function/FightCalc";
+import { applyCombatStatsEffect } from "../../function/FightCalc";
 
 interface EditCharPropsInterface {
     charStats: CharStatsInterface;
@@ -42,10 +42,11 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
             DebuffsList: charStats.DebuffsList.map(debuff => ({ ...debuff, Applied: false })), // remove applied from all debuffs
             TurnEffect: charStats.TurnEffect,
             FightStyle: null,
+            CaracteristicsBuff: charStats.CaracteristicsBuff,
             ...(showVariant && { Variant })
         };
 
-        const effectUpdatedCharData = applyEffect(newCharacterData);
+        const effectUpdatedCharData = applyCombatStatsEffect(newCharacterData);
         setCharData(charData.map(char => char.Id === charStats.Id ? effectUpdatedCharData : char));
     }
 
@@ -114,7 +115,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                                 <div key={stat} className="input_entry">
                                     <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
                                     <select {...register(stat as keyof CreateCharFormInputInterface)} id={`input_${stat.toLowerCase()}`} className="input_field">
-                                        {["E", "D", "C", "B", "A", "EX"].map(level => (
+                                        {["EX", "A", "B", "C", "D", "E"].map(level => (
                                             <option key={level} value={level}>{level}</option>
                                         ))}
                                     </select>

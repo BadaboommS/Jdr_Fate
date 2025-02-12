@@ -29,8 +29,9 @@ export function CreateChar() {
             InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             BuffsList: [],
             DebuffsList: [],
-            TurnEffect: { Dot: 0, Hot: 0},
+            TurnEffect: { Dot: 0, Hot: 0 },
             FightStyle: null,
+            CaracteristicsBuff: { STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0 },
             ...(showVariant && { Variant })
         };
 
@@ -125,7 +126,7 @@ export function CreateChar() {
                             <div className="input_entry" key={stat}>
                                 <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
                                 <select {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} defaultValue={'E'} id={`input_${stat.toLowerCase()}`} className="input_field">
-                                    {["E", "D", "C", "B", "A", "EX"].map((value) => (
+                                    {["EX", "A", "B", "C", "D", "E"].map((value) => (
                                         <option value={value} key={value}>{value}</option>
                                     ))}
                                 </select>

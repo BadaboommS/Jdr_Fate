@@ -1,8 +1,9 @@
-import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, DebuffInterface } from "../types/statsType";
+import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, BuffInterface, DebuffInterface, CharStatsCaracteristicsInterface } from "../types/statsType";
 import { StanceBaseEffectArray } from "../data/FightStance";
 import { rollDice } from "./GlobalFunction";
 import { CCDebuffList } from "../data/CCDebuff";
 import { EffectPresetArray } from "../data/EffectPreset";
+import { updateCombatStatsCalc } from "./BaseStatsCalc";
 
 const DEBUG = false;
 
@@ -35,7 +36,7 @@ export function handleFightAtk(
         combatRes.msg.map((msg) => handleHistoryEventAdd(msg.historyMsg, msg.msgType, msg.msgTitle));
 
         // CheckCrit Counter
-        if(combatRes.critCounter) critCounter += combatRes.critCounter;
+        if(combatRes.critCounter) critCounter += 1;
 
         // DataCounter
         if(combatRes.dmg) dmgCounter += combatRes.dmg;
@@ -46,11 +47,11 @@ export function handleFightAtk(
 
     // Stance Roseau
     if(defenderData.FightStyle?.Name === "Position du Roseau"){
-        const successfullDefCounter = Math.floor((atkCount - successAtkCounter) / 2);
+        const successfullDefCounter = Math.floor((atkCount - successAtkCounter) / 3);
         const roseauDebuff = EffectPresetArray.find(effect => effect.Name === "Revers de Roseau");
         if(roseauDebuff) {
             for(let i = 0; i < successfullDefCounter; i ++){
-                attackerData = addEffect(attackerData, {...roseauDebuff, Applied: false, Id: attackerData.DebuffsList[0]? attackerData.DebuffsList[attackerData.DebuffsList.length - 1].Id + 1: 0}, "Debuff");
+                attackerData = addEffect(attackerData, roseauDebuff, "Debuff");
             }
         }
     }
@@ -108,9 +109,9 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     const CCDiceRoll = rollDice(50);
     let debuff: DebuffInterface | null = null;
 
+    // Check CC
+    const enableCC = (critCounter < Attacker.CombatStats.CC);
     if(CCDiceRoll < Attacker.CombatStats.CdC && Attacker.FightStyle?.Name !== "Position du Flamant Rose"){
-        // Check CC
-        const enableCC = (critCounter < Attacker.CombatStats.CC);
         if(enableCC && Defender.FightStyle?.Name === "Position de la Pieuvre"){
             msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
             msgArray.push({ historyMsg: `Mais ${Defender.Name} esquive les effets néfastes !`, msgType: 'CC', msgTitle: ''});
@@ -127,7 +128,7 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
                 }while(Defender.DebuffsList.some(d => d.Name === debuff?.Name));
 
                 // Add new debuff
-                const newDebuff: CharDebuffInterface = { Name: debuff.Name, Desc: debuff.Desc, Effect: debuff.Effect, Applied: false, Id: Defender.DebuffsList[0]? Defender.DebuffsList[Defender.DebuffsList.length - 1].Id + 1: 0 };
+                const newDebuff: DebuffInterface = { Name: debuff.Name, Desc: debuff.Desc, Effect: debuff.Effect };
                 if(debuff.Dmg) newDebuff.Dmg = debuff.Dmg;
                 if(debuff.Effect) newDebuff.Effect = debuff.Effect;
                 Defender = addEffect(Defender, newDebuff, "Debuff");
@@ -141,12 +142,14 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
 
     // Serpent Stance
     if(atkSuccessCounter === 0 && Attacker.FightStyle?.Name === "Position du Serpent"){
-        if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+        if(Defender.DebuffsList.some(debuff => debuff.Name === "Poison du Serpent")){
+            msgArray.push({ historyMsg: `Le poison de ${Defender.Name} est refresh (4 tours) !`, msgType: 'CC', msgTitle: ''});
+        }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
             msgArray.push({ historyMsg: `${Defender.Name} esquive le poison du serpent !`, msgType: 'CC', msgTitle: ''});
         }else{
             const serpentDotDebuff = EffectPresetArray.find(effect => effect.Name === "Poison du Serpent");
             if(serpentDotDebuff){
-                Defender = addEffect(Defender, {...serpentDotDebuff, Applied: false }, "Debuff");
+                Defender = addEffect(Defender, serpentDotDebuff, "Debuff");
                 msgArray.push({ historyMsg: `Position du Serpent inflige 50 dégats sur la durée ! (4 tour)`, msgType: 'Atk', msgTitle: ''});
             } 
         }
@@ -156,184 +159,264 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     if(Attacker.FightStyle?.Name === "Position du Rhinocéros"){
         if(atkSuccessCounter === 0){
             if (rollDice(100) <= 50) {
-                if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+                if(Defender.DebuffsList.some(debuff => debuff.Name === "Premier Coup du Rhinocéros")){
+                    msgArray.push({ historyMsg: `${Defender.Name} a déjà le Premier Coup du Rhinocéros (+30 dmg) !`, msgType: 'CC', msgTitle: ''});
+                    finalDmg += 30;
+                }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
                     msgArray.push({ historyMsg: `${Defender.Name} esquive le Premier Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
-                }else{
+                }else if(enableCC){
                     const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Premier Coup du Rhinocéros");
                     if (rhinoDebuff) {
-                        Defender = addEffect(Defender, { ...rhinoDebuff, Applied: false }, "Debuff");
+                        Defender = addEffect(Defender, rhinoDebuff, "Debuff");
                         msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
+                        critCounter++;
                     }
+                }else{
+                    msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros touche, mais la limite de CC est atteinte (+30 dmg) !`, msgType: 'Info', msgTitle: '' });
+                    finalDmg += 30;
                 }
-            }else { msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); }
+            }else { 
+                msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' });
+            }
         }else if(atkSuccessCounter === 1){
             if (rollDice(100) <= 50) {
-                if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+                if(Defender.DebuffsList.some(debuff => debuff.Name === "Second Coup du Rhinocéros")){
+                    msgArray.push({ historyMsg: `${Defender.Name} a déjà le Second Coup du Rhinocéros (+30 dmg) !`, msgType: 'CC', msgTitle: ''});
+                    finalDmg += 30;
+                }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
                     msgArray.push({ historyMsg: `${Defender.Name} esquive le Second Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
-                }else{
+                }else if(enableCC){
                     const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Second Coup du Rhinocéros");
                     if (rhinoDebuff) {
-                        Defender = addEffect(Defender, { ...rhinoDebuff, Applied: false }, "Debuff");
+                        Defender = addEffect(Defender, rhinoDebuff, "Debuff");
                         msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
+                        critCounter++;
                     }
+                }else{
+                    msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros touche, mais la limite de CC est atteinte (+30 dmg) !`, msgType: 'Info', msgTitle: '' });
+                    finalDmg += 30;
                 }
-            }else { msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); }
+            }else { 
+                msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); 
+            }
         }else if(atkSuccessCounter === 2){
             if (rollDice(100) <= 50) {
-                if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+                if(Defender.DebuffsList.some(debuff => debuff.Name === "Troisième Coup du Rhinocéros")){
+                    msgArray.push({ historyMsg: `${Defender.Name} a déjà le Troisième Coup du Rhinocéros (+30 dmg) !`, msgType: 'CC', msgTitle: ''});
+                    finalDmg += 30;
+                }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
                     msgArray.push({ historyMsg: `${Defender.Name} esquive le Troisième Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
-                }else{
+                }else if(enableCC){
                     const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Troisième Coup du Rhinocéros");
                     if (rhinoDebuff) {
-                        Defender = addEffect(Defender, { ...rhinoDebuff, Applied: false }, "Debuff");
+                        Defender = addEffect(Defender, rhinoDebuff, "Debuff");
                         msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
+                        critCounter++;
                     }
+                }else{
+                    msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros touche, mais la limite de CC est atteinte (+30 dmg) !`, msgType: 'Info', msgTitle: '' });
+                    finalDmg += 30;
                 }
-            }else { msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); }
+            }else { 
+                msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); 
+            }
         }
     }    
 
     return({ Defender: Defender, dmg: finalDmg, msg: msgArray, debuff: debuff, critCounter: critCounter });
 }
 
-export function addEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{
+export function addEffect(charData: CharStatsInterface, effect: BuffInterface | DebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{
     const effectList = effectType === 'Buff' ? charData.BuffsList : charData.DebuffsList;
-    const updatedEffectList = [...effectList, effect];
-    const updatedcharData = { ...charData, BuffsList: effectType === 'Buff' ? updatedEffectList : charData.BuffsList, DebuffsList: effectType === 'Debuff' ? updatedEffectList : charData.DebuffsList};
-    const effectUpdatedcharData = applyEffect(updatedcharData);
+    const newEffect = {...effect, Applied: false, Id: effectList[0]? effectList[effectList.length - 1].Id + 1: 0}
+    let newCharData = charData;
+    if(newEffect.Effect?.CharCaracteristics){
+        const removedEffectCharData = unapplyAllCombatStatEffect(charData);
+        newCharData = applyCaracStatsEffect(removedEffectCharData, newEffect);
+    }
+    const updatedEffectList = [...effectList, newEffect];
+    const updatedcharData = { ...newCharData, BuffsList: effectType === 'Buff' ? updatedEffectList : newCharData.BuffsList, DebuffsList: effectType === 'Debuff' ? updatedEffectList : newCharData.DebuffsList};
+    const effectUpdatedcharData = applyCombatStatsEffect(updatedcharData);
     return effectUpdatedcharData;
 }
 
 export function removeEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{
     const effectList = effectType === 'Buff' ? charData.BuffsList : charData.DebuffsList;
+    let newCharData = charData;
+    if(effect.Effect?.CharCaracteristics){
+        const removedEffectCharData = unapplyAllCombatStatEffect(newCharData);
+        const removedCarEffect = unapplyCaracStatsEffect(removedEffectCharData, effect);
+        newCharData = applyCombatStatsEffect(removedCarEffect);
+    }
     const updatedEffectList = effectList.filter((e) => e.Id !== effect.Id);
-    const updatedcharData = { ...charData, BuffsList: effectType === 'Buff' ? updatedEffectList : charData.BuffsList, DebuffsList: effectType === 'Debuff' ? updatedEffectList : charData.DebuffsList};
-    const effectUpdatedcharData = unapplyEffect(updatedcharData, effect);
+    const updatedcharData = { ...newCharData, BuffsList: effectType === 'Buff' ? updatedEffectList : newCharData.BuffsList, DebuffsList: effectType === 'Debuff' ? updatedEffectList : newCharData.DebuffsList};
+    const effectUpdatedcharData = unapplyCombatStatEffect(updatedcharData, effect);
     return effectUpdatedcharData;
 }
 
 export function updateEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
-    const unappliedCharData = unapplyEffect(charData, effect);
-    const reAppliedCharData = applyEffect(unappliedCharData);
+    const unappliedCharData = unapplyCombatStatEffect(charData, effect);
+    const reAppliedCharData = applyCombatStatsEffect(unappliedCharData);
     return reAppliedCharData;
 }
 
-export function applyEffect(charData: CharStatsInterface): CharStatsInterface{
+export function applyCaracStatsEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
+    const caracEffect = effect.Effect?.CharCaracteristics || null;
+    const newData = { ...charData };
+    if (caracEffect) {
+        Object.keys(caracEffect).forEach((key) => {
+            const caracKey = key as keyof CharStatsCaracteristicsInterface;
+            if (caracEffect[caracKey]) { newData.CaracteristicsBuff[caracKey] += caracEffect[caracKey]; };
+        });
+    }
+    const returnData = updateCombatStatsCalc(newData);
+    return returnData;
+}
+
+export function unapplyCaracStatsEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
+    const caracEffect = effect.Effect?.CharCaracteristics || null;
+    const newData = { ...charData };
+    if (caracEffect) {
+        Object.keys(caracEffect).forEach((key) => {
+            const caracKey = key as keyof CharStatsCaracteristicsInterface;
+            if (caracEffect[caracKey]) { newData.CaracteristicsBuff[caracKey] -= caracEffect[caracKey]; };
+        });
+    }
+    const returnData = updateCombatStatsCalc(newData);
+    return returnData;
+}
+
+export function applyCombatStatsEffect(charData: CharStatsInterface): CharStatsInterface {
+    const newData = { ...charData };
     
     ["Buff", "Debuff"].forEach((type) => {
-        const list = type === 'Buff' ? charData.BuffsList : charData.DebuffsList;
+        const list = type === 'Buff' ? newData.BuffsList : newData.DebuffsList;
 
         list.forEach((effect) => {
             if(!effect.Applied){
-                if("Dmg" in effect && typeof(effect.Dmg) === "number"){ charData.Hp += effect.Dmg || 0; }
+                if("Dmg" in effect && typeof(effect.Dmg) === "number"){ newData.Hp += effect.Dmg || 0; }
     
                 if(effect.Effect){
-                    // Debuff Carac  VOIR AVEC HUGO RANG
-                    /* const debuffCaracs = debuff.Effect.CharCaracteristics || null; 
-                    if (debuffCaracs) {
-                        Object.keys(debuffCaracs).forEach(([key]) => {
-                            const CaracKey = key as keyof typeof charData.Caracteristics;
-                            if (debuffCaracs[CaracKey]) { charData.Caracteristics[CaracKey] += debuffCaracs[CaracKey]; };
-                        });
-                    } */
-    
                     // Debuff CombatStats
                     const debuffCombatStats = effect.Effect.CombatStats || null;
                     if (debuffCombatStats) {
                         Object.keys(debuffCombatStats).forEach((key) => {
-                            const combatStatKey = key as keyof typeof charData.CombatStats;
-                            if (debuffCombatStats[combatStatKey]) { charData.CombatStats[combatStatKey] += debuffCombatStats[combatStatKey]; };
+                            const combatStatKey = key as keyof typeof newData.CombatStats;
+                            if (debuffCombatStats[combatStatKey]) { newData.CombatStats[combatStatKey] += debuffCombatStats[combatStatKey]; };
                         });
                     }
     
                     // Dot & Hot
                     const effectDot = effect.Effect.Dot || null;
                     const effectHot = effect.Effect.Hot || null;
-                    if(effectDot) charData.TurnEffect.Dot += effectDot;
-                    if(effectHot) charData.TurnEffect.Hot += effectHot;
+                    if(effectDot) newData.TurnEffect.Dot += effectDot;
+                    if(effectHot) newData.TurnEffect.Hot += effectHot;
                 }
                 effect.Applied = true;
             }
         })
     })
-    
-
-    return charData;
+    return newData;
 }
 
-export function unapplyEffect(charData: CharStatsInterface, effectData: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
+export function unapplyCombatStatEffect(charData: CharStatsInterface, effectData: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
     if (!effectData) { return charData; }
+    const newData = { ...charData };
     if (effectData.Applied) {
         if (effectData.Effect) {
-            // Effect Carac  VOIR AVEC HUGO RANG
-            /* const effectCaracs = effect.Effect.CharCaracteristics || null; 
-            if (effectCaracs !== null) {
-                Object.keys(effectCaracs).forEach(([key]) => {
-                    const CaracKey = key as keyof typeof charData.Caracteristics;
-                    if (effectCaracs[CaracKey]) { charData.Caracteristics[CaracKey] += effectCaracs[CaracKey]; };
-                });
-            } */
 
             // Effect CombatStats
             const effectCombatStats = effectData.Effect.CombatStats || null;
             if (effectCombatStats) {
                 Object.keys(effectCombatStats).forEach((key) => {
-                    const combatStatKey = key as keyof typeof charData.CombatStats;
-                    if (effectCombatStats[combatStatKey]) { charData.CombatStats[combatStatKey] -= effectCombatStats[combatStatKey]; }
+                    const combatStatKey = key as keyof typeof newData.CombatStats;
+                    if (effectCombatStats[combatStatKey]) { newData.CombatStats[combatStatKey] -= effectCombatStats[combatStatKey]; }
                 });
             }
 
             // Dot & Hot
             const effectDot = effectData.Effect.Dot || null;
             const effectHot = effectData.Effect.Hot || null;
-            if(effectDot) charData.TurnEffect.Dot -= effectDot;
-            if(effectHot) charData.TurnEffect.Hot -= effectHot;
+            if(effectDot) newData.TurnEffect.Dot -= effectDot;
+            if(effectHot) newData.TurnEffect.Hot -= effectHot;
         }
         effectData.Applied = false;
     }
-    return charData;
+    return newData;
+}
+
+export function unapplyAllCombatStatEffect(charData: CharStatsInterface): CharStatsInterface {
+    const newData = { ...charData };
+    ["Buff", "Debuff"].forEach((type) => {
+        const list = type === 'Buff' ? newData.BuffsList : newData.DebuffsList;
+
+        list.forEach((effect) => {
+            if (effect.Applied) {
+                if (effect.Effect) {
+                    // Effect CombatStats
+                    const effectCombatStats = effect.Effect.CombatStats || null;
+                    if (effectCombatStats) {
+                        Object.keys(effectCombatStats).forEach((key) => {
+                            const combatStatKey = key as keyof typeof newData.CombatStats;
+                            if (effectCombatStats[combatStatKey]) { newData.CombatStats[combatStatKey] -= effectCombatStats[combatStatKey]; }
+                        });
+                    }
+
+                    // Dot & Hot
+                    const effectDot = effect.Effect.Dot || null;
+                    const effectHot = effect.Effect.Hot || null;
+                    if (effectDot) newData.TurnEffect.Dot -= effectDot;
+                    if (effectHot) newData.TurnEffect.Hot -= effectHot;
+                }
+                effect.Applied = false;
+            }
+        });
+    });
+    return newData;
 }
 
 export function applyStance(charData: CharStatsInterface): CharStatsInterface{
-    const stanceType = charData.FightStyle?.Type;
+    const newData = { ...charData };
+    const stanceType = newData.FightStyle?.Type;
     if(stanceType){
         const stanceTypeBuff = StanceBaseEffectArray[stanceType as keyof typeof StanceBaseEffectArray];
         if(stanceTypeBuff){
             Object.keys(stanceTypeBuff).forEach((key) => {
-                const stanceBaseBuffKey = key as keyof typeof charData.CombatStats;
-                if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { charData.CombatStats[stanceBaseBuffKey] += (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
+                const stanceBaseBuffKey = key as keyof typeof newData.CombatStats;
+                if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { newData.CombatStats[stanceBaseBuffKey] += (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
             });
         }
     }
-    const stanceBuff = charData.FightStyle?.Effect?.CombatStats || null;
+    const stanceBuff = newData.FightStyle?.Effect?.CombatStats || null;
         if (stanceBuff) {
             Object.keys(stanceBuff).forEach((key) => {
-                const stanceBuffKey = key as keyof typeof charData.CombatStats;
-                if (stanceBuff[stanceBuffKey]) { charData.CombatStats[stanceBuffKey] += stanceBuff[stanceBuffKey]; };
+                const stanceBuffKey = key as keyof typeof newData.CombatStats;
+                if (stanceBuff[stanceBuffKey]) { newData.CombatStats[stanceBuffKey] += stanceBuff[stanceBuffKey]; };
             });
         }
 
-    return charData;
+    return newData;
 }
 
 export function unapplyStance(charData: CharStatsInterface): CharStatsInterface{
-    const stanceType = charData.FightStyle?.Type;
+    const newData = { ...charData };
+    const stanceType = newData.FightStyle?.Type;
     if(stanceType){
         const stanceTypeBuff = StanceBaseEffectArray[stanceType as keyof typeof StanceBaseEffectArray];
         if(stanceTypeBuff){
             Object.keys(stanceTypeBuff).forEach((key) => {
-                const stanceBaseBuffKey = key as keyof typeof charData.CombatStats;
-                if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { charData.CombatStats[stanceBaseBuffKey] -= (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
+                const stanceBaseBuffKey = key as keyof typeof newData.CombatStats;
+                if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { newData.CombatStats[stanceBaseBuffKey] -= (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
             });
         }
     }
-    const stanceBuff = charData.FightStyle?.Effect?.CombatStats || null;
+    const stanceBuff = newData.FightStyle?.Effect?.CombatStats || null;
         if (stanceBuff) {
             Object.keys(stanceBuff).forEach((key) => {
-                const stanceBuffKey = key as keyof typeof charData.CombatStats;
-                if (stanceBuff[stanceBuffKey]) { charData.CombatStats[stanceBuffKey] -= stanceBuff[stanceBuffKey]; };
+                const stanceBuffKey = key as keyof typeof newData.CombatStats;
+                if (stanceBuff[stanceBuffKey]) { newData.CombatStats[stanceBuffKey] -= stanceBuff[stanceBuffKey]; };
             });
         }
 
-    return charData;
+    return newData;
 }

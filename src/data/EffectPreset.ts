@@ -55,29 +55,29 @@ export const EffectPresetArray: EffectPresetInterface[] = [
     { 
         Id: 5,
         Name: "Premier Coup du Rhinocéros",
-        Desc: `Votre Rang AGI et SPD est réduit de 1 pendant 3 tours.
+        Desc: `Votre AA et AD est réduit de 1 pendant 3 tours.
 --------------------------
 # Le MJ devra gérer manuellement la supression de celui-ci.`, 
         EffectType: "Debuff",
-        Effect: { CharCaracteristics: { AGI: -1, SPD: -1 } }
+        Effect: { CombatStats: { AD: -1, AA: -1 } }
     },
     { 
         Id: 6,
         Name: "Second Coup du Rhinocéros",
-        Desc: `Votre Rang End est réduit de 2 pendant 3 tours.
+        Desc: `Votre AD est réduit de 2 pendant 3 tours.
 --------------------------
 # Le MJ devra gérer manuellement la supression de celui-ci.`, 
         EffectType: "Debuff",
-        Effect: { CharCaracteristics: { END: -2 } } // STA ?
+        Effect: { CombatStats: { AD: -2 } }
     },
-    { 
+    {
         Id: 6,
         Name: "Troisième Coup du Rhinocéros",
-        Desc: `Votre Rang STR est réduit de 2 pendant 3 tours.
+        Desc: `Votre AA est réduit de 2 pendant 3 tours.
 --------------------------
 # Le MJ devra gérer manuellement la supression de celui-ci.`, 
         EffectType: "Debuff",
-        Effect: { CharCaracteristics: { STR: -2 } }
+        Effect: { CombatStats: { AA: -2 } }
     },
     { 
         Id: 7,

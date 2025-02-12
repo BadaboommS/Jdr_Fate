@@ -18,8 +18,18 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
     const { charData, setCharData } = useContext(DataContext);
     const [showCustomEffectModal, setShowCustomEffectModal] = useState(false);
     const [effectType, setEffectType] = useState<"Buff" | "Debuff">('Buff');
+    const [filteredPresetList, setFilteredPressetList] = useState<string[]>([]);
+    const [filterQuery, setFilterQuery] = useState('');
     const { register, handleSubmit, reset, setValue } = useForm<EffectFormInputInterface>({ defaultValues: { Name: '', Desc: '', STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0, Ini: 0, SA: 0, AA: 0, DMG: 0, PA: 0, SD: 0, AD: 0, ReD: 0, CdC: 0, CC: 0, AN: 0, Dot: 0, Hot: 0 } });
 
+    useEffect(() => {
+        if(filterQuery !== ''){
+            const filteredList = EffectPresetArray.filter((effect) => effect.Name.toLowerCase().includes(filterQuery.toLowerCase())).map((effect) => effect.Name);
+            setFilteredPressetList(filteredList)
+        }else{
+            setFilteredPressetList(EffectPresetArray.map((effect) => effect.Name));
+        }
+    }, [filterQuery])
 
     useEffect(() => {
         if (toEdit && showCustomEffectModal) {
@@ -87,6 +97,7 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
         ['Ini', 'SA', 'AA', 'DMG', 'PA', 'SD', 'AD', 'ReD', 'CdC', 'CC', 'AN'].forEach((stat) => setValue(stat as keyof EffectFormInputInterface, presetData.Effect?.CombatStats?.[stat as keyof typeof presetData.Effect.CombatStats] ?? 0));
         setValue("Dot", presetData.Effect?.Dot || 0);
         setValue("Hot", presetData.Effect?.Hot || 0);
+        setFilterQuery('');
     }
 
     function handleModalClose(){
@@ -102,16 +113,26 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
             {
                 (showCustomEffectModal)
                     ?   <Modal isOpen={showCustomEffectModal} onClose={() => handleModalClose()}>
-                            <div className='flex flex-col gap-2'>
+                            <div className='flex flex-col gap-2 min-w-full>'>
                                 <h2 className='text-xl text-center'>{toEdit ? `Edit effect: ${toEdit.Name}` : `Add new effect to: ${toUpdateCharData.Name}`}</h2>
                                 <div className='input_entry'>
-                                    <label htmlFor="preset_select" className='input_label'>Effect Preset</label>
-                                    <select className='input_field' id='preset_select' onChange={(e) => handlePresetSetting(e.currentTarget.value)}>
-                                        <option value="None">None</option>
-                                        {EffectPresetArray.map((preset, index) => (
-                                            <option key={index} value={preset.Name}>{preset.Name}</option>
-                                        ))}
-                                    </select>
+                                    <label htmlFor="preset_select" className='input_label'>Effect Preset: </label>
+                                    <div className='input_field'>
+                                        <input id="preset_select" className='w-[95%] h-full px-1 indent-1' list="filteredPresetList" placeholder="Filtre Preset" value={filterQuery} onChange={(e) => setFilterQuery(e.currentTarget.value)} />
+                                        {filteredPresetList.length > 0 && filterQuery !== '' && (
+                                            <div className="absolute mt-1 bg-white border shadow-lg rounded-lg">
+                                            {filteredPresetList.map((presetName, index) => (
+                                                <div
+                                                    key={`${presetName}_${index}`}
+                                                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() => handlePresetSetting(presetName)}
+                                                >
+                                                {presetName}
+                                                </div>
+                                            ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className='input_entry'>
                                     <h3 className='input_label'>Effect Type :</h3>

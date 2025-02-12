@@ -36,8 +36,8 @@
       },
       "Armor": 10,
       "Id": 0,
-      "Hp": 100,
-      "Mana": 50,
+      "Hp": 10000,
+      "Mana": 1200,
       "Caracteristics": {
         "STR": "B",
         "END": "C",
@@ -57,34 +57,35 @@
         "SPD": "B"
       },
       "CombatStats": {
-        "Ini": 15,
+        "Ini": 5,
         "SA": 80,
-        "AA": 3,
-        "DMG": 20,
+        "AA": 9,
+        "DMG": 25,
         "PA": 5,
         "SD": 70,
-        "AD": 2,
-        "ReD": 10,
-        "CdC": 25,
+        "AD": 8,
+        "ReD": 22,
+        "CdC": 4,
         "CC": 2,
-        "AN": 3
+        "AN": 0
       },
       "InitCombatStats": {
-        "Ini": 15,
+        "Ini": 5,
         "SA": 80,
-        "AA": 3,
-        "DMG": 20,
+        "AA": 9,
+        "DMG": 25,
         "PA": 5,
         "SD": 70,
-        "AD": 2,
-        "ReD": 10,
-        "CdC": 25,
+        "AD": 8,
+        "ReD": 22,
+        "CdC": 4,
         "CC": 2,
-        "AN": 3
+        "AN": 0
       },
       "BuffsList": [],
       "DebuffsList": [],
-      "TurnEffect": { "Dot": 0, "Hot": 0 }
+      "TurnEffect": { "Dot": 0, "Hot": 0 },
+      "CaracteristicsBuff": { "STR": 0, "END": 0, "AGI": 0, "MANA": 0, "MGK": 0, "LUK": 0, "SPD": 0 }
     },
     {
       "Name": "Servant Test",
@@ -98,8 +99,8 @@
       "Armor": 10,
       "Variant": "Assassin",
       "Id": 1,
-      "Hp": 120,
-      "Mana": 60,
+      "Hp": 7000,
+      "Mana": 1000,
       "Caracteristics": {
         "STR": "A",
         "END": "B",
@@ -119,34 +120,35 @@
         "SPD": "A"
       },
       "CombatStats": {
-        "Ini": 20,
+        "Ini": 7,
         "SA": 90,
-        "AA": 4,
-        "DMG": 25,
-        "PA": 7,
-        "SD": 80,
-        "AD": 3,
-        "ReD": 15,
-        "CdC": 30,
-        "CC": 3,
-        "AN": 4
+        "AA": 11,
+        "DMG": 35,
+        "PA": 10,
+        "SD": 70,
+        "AD": 9,
+        "ReD": 25,
+        "CdC": 7,
+        "CC": 2,
+        "AN": 0
       },
       "InitCombatStats": {
-        "Ini": 20,
+        "Ini": 7,
         "SA": 90,
-        "AA": 4,
-        "DMG": 25,
-        "PA": 7,
-        "SD": 80,
-        "AD": 3,
-        "ReD": 15,
-        "CdC": 30,
-        "CC": 3,
-        "AN": 4
+        "AA": 11,
+        "DMG": 35,
+        "PA": 10,
+        "SD": 70,
+        "AD": 9,
+        "ReD": 25,
+        "CdC": 7,
+        "CC": 2,
+        "AN": 0
       },
       "BuffsList": [],
       "DebuffsList": [],
-      "TurnEffect": { "Dot": 0, "Hot": 0 }
+      "TurnEffect": { "Dot": 0, "Hot": 0 },
+      "CaracteristicsBuff": { "STR": 0, "END": 0, "AGI": 0, "MANA": 0, "MGK": 0, "LUK": 0, "SPD": 0 }
     },
     {
       "Name": "PNJ Test",
@@ -159,8 +161,8 @@
       },
       "Armor": 10,
       "Id": 2,
-      "Hp": 80,
-      "Mana": 40,
+      "Hp": 7000,
+      "Mana": 1000,
       "Caracteristics": {
         "STR": "C",
         "END": "D",
@@ -180,34 +182,35 @@
         "SPD": "C"
       },
       "CombatStats": {
-        "Ini": 10,
+        "Ini": 4,
         "SA": 60,
-        "AA": 2,
-        "DMG": 15,
-        "PA": 3,
+        "AA": 7,
+        "DMG": 20,
+        "PA": 5,
         "SD": 50,
-        "AD": 1,
-        "ReD": 5,
-        "CdC": 20,
-        "CC": 1,
-        "AN": 2
+        "AD": 5,
+        "ReD": 16,
+        "CdC": 5,
+        "CC": 2,
+        "AN": 0
       },
       "InitCombatStats": {
-        "Ini": 10,
+        "Ini": 4,
         "SA": 60,
-        "AA": 2,
-        "DMG": 15,
-        "PA": 3,
+        "AA": 7,
+        "DMG": 20,
+        "PA": 5,
         "SD": 50,
-        "AD": 1,
-        "ReD": 5,
-        "CdC": 20,
-        "CC": 1,
-        "AN": 2
+        "AD": 5,
+        "ReD": 16,
+        "CdC": 5,
+        "CC": 2,
+        "AN": 0
       },
       "BuffsList": [],
       "DebuffsList": [],
-      "TurnEffect": { "Dot": 0, "Hot": 0 }
+      "TurnEffect": { "Dot": 0, "Hot": 0 },
+      "CaracteristicsBuff": { "STR": 0, "END": 0, "AGI": 0, "MANA": 0, "MGK": 0, "LUK": 0, "SPD": 0 }
     }
   ]
 }

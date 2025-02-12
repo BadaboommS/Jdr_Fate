@@ -16,6 +16,7 @@ export interface CharStatsInterface {
     DebuffsList: CharDebuffInterface[];
     TurnEffect: TurnEffectInterface;
     FightStyle: FightStyleInterface | null;
+    CaracteristicsBuff: CharStatsCaracteristicsValueInterface;
 }
 
 export interface CharDebuffInterface extends DebuffInterface {

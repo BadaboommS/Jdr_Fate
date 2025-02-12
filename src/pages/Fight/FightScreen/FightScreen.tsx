@@ -125,18 +125,18 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         if(firstActor.FightStyle?.Name === "Position du Dragon" && !firstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
             const dragonBuff = EffectPresetArray.find(effect => effect.Name === "Déchainement du Dragon");
             if(dragonBuff){
-                finalCharData = finalCharData.map((char) => char.Id === firstActor.Id ? addEffect(char, { ...dragonBuff, Applied: false }, "Buff") : char);
+                finalCharData = finalCharData.map((char) => char.Id === firstActor.Id ? addEffect(char, dragonBuff, "Buff") : char);
                 handleHistoryEventAdd(`${firstActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
             }
         }
         if(secondActor.FightStyle?.Name === "Position du Dragon" && !secondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
             const dragonBuff = EffectPresetArray.find(effect => effect.Name === "Déchainement du Dragon");
             if(dragonBuff){
-                finalCharData = finalCharData.map((char) => char.Id === secondActor.Id ? addEffect(char, { ...dragonBuff, Applied: false }, "Buff") : char);
+                finalCharData = finalCharData.map((char) => char.Id === secondActor.Id ? addEffect(char, dragonBuff, "Buff") : char);
                 handleHistoryEventAdd(`${secondActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
             }
         }
-
+        console.log(finalCharData);
         setCharData(finalCharData);
     }
 

@@ -1,9 +1,21 @@
-Critique ?
-Res magique ?
-DEFINIR Tour
-MANA + COMPETENCES
-VALUES CARAC
-Poison Serpent effet de CC? (esquive pieuvre)
-Stance Rhino atk réussie ou non ?
-Second coup Rhino STA ?
-Poison du serpent stackable ?
+Questions à Alban:
+
+Qu'est ce que la résistance magique, comment est-elle définie et quelle est le rôle de cette stat dans les calcul de combats ?
+    -> class skill
+
+Mana: Regen de mana quotidienne gerée directement par le MJ. Coup en mana de 2% par tour mini, sinon debuff -> ajouter un coup minimum ?
+    -> 2% de la valeur max
+
+Version proposée: { E: 1, D-: 1, E+: 2, D: 2, D+: 3, C-: 3, C: 4, D-:4, C+: 5, B-: 5, B: 5, B+: 6, A-: 6, A: 7, A+: 8, EX: 0 }
+
+De plus, donner une valeur fixe à EX.
+    -> Donner une valeur custom si ex est selectionné.
+Mana propal: { E: 500, E+: 600, D-: 600,  D: 700, D+: 800, C-: 900, C: 1000, C+: 1100, B-: 1100, B: 1200, B+: 1300, A-: 1400 A: 1500, EX: 0 }
+Hp propal: { E: 5000, E+: 6000, D-: 6000,  D: 7000, D+: 8000, C-: 9000, C: 10000, C+: 11000, B-: 11000, B: 12000, B+: 13000, A-: 14000 A: 15000, EX: 0 }
+
+Questions sur les skills et les tours de jeu:
+- Pour le moment un "Tour de combat" se déroule en lançant les attaques de celui qui a l'ini et inversement. 
+Que ce passe-t-il si quelqu'un lance un skill actif (ex: une boule de feu)? Est-ce que celui lance son skill, tandis que l'autre effectue ses attaques "basiques"?
+Ou ce skill replace la première attaque de son tour de jeu? Ex: 5AA -> première attaque boule de feu, seconde attaque basique, etc...
+Ah j'aimerais bien la liste des skills pour les implémenter à la création des perso.
+    -> Oublier les skills

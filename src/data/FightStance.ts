@@ -31,8 +31,8 @@ Le premier coup qui touche fait saigner l'adversaire, inflige 50 dmg par tour pe
 --------------------------
 Les 3 premiers coups (dans cet ordre et non stackable) ont 50% de chance de :  
     1. Baisser de 1 l'AGI et la SPD pendant 3 tours (considéré comme un effet de CC)
-    2. Baisser de 2 la STA pendant 3 tours (considéré comme un effet de CC)
-    3. Baisser de 2 la STR pendant 3 tours (considéré comme un effet de CC)
+    2. Baisser de 2 l'AD pendant 3 tours (considéré comme un effet de CC)
+    3. Baisser de 2 l'AA pendant 3 tours (considéré comme un effet de CC)
 --------------------------
 # Les effets apparaitront sous forme de Debuff.
 # Le MJ devra gérer manuellement la suppression de ceux-ci.`,
@@ -101,7 +101,7 @@ Gagne un bonus de +3 SPD pour protéger quelqu’un. Si réussi, il gagne un bon
         Name: "Position du Roseau",
         Desc: `Position de combat Neutre: +10 SA, +10 SD.
 --------------------------
-Pour chaque 2 défenses réussies ce tour ci, l’adversaire a -1 AA au prochain tour.`,
+Pour chaque 3 défenses réussies ce tour ci, l’adversaire a -1 AA au prochain tour.`,
         Type: "Neutre",
         Effect: {}
     },

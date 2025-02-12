@@ -1,6 +1,6 @@
-import { CharStatsCaracteristicsType, StatKey } from "../types/statsType";
+import { CharStatsCaracteristicsInterface, CharStatsInterface, StatKey } from "../types/statsType";
 
-function convertLetterToValue(caracs: CharStatsCaracteristicsType) {
+function convertLetterToValue(caracs: CharStatsCaracteristicsInterface) {
     const STRValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
     const ENDValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
     const AGIValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
@@ -36,7 +36,7 @@ function calcAD(END: number, AGI: number, SPD: number): number {
     return Math.floor((END + AGI + SPD) / 2);
 }
 
-// Calcul du Score d'Attaque (SA)
+/* // Calcul du Score d'Attaque (SA)
 function calcSA(STR: number, AGI: number, SPD: number): number {
     return 300 + (STR * 3) + (AGI * 2) + (SPD * 1);
 }
@@ -44,7 +44,7 @@ function calcSA(STR: number, AGI: number, SPD: number): number {
 // Calcul du Score de Défense (SD)
 function calcSD(END: number, AGI: number, SPD: number): number {
     return 300 + (END * 3) + (AGI * 2) + (SPD * 1);
-}
+} */
 
 // Calcul des Dégâts Physiques
 function calcDMG(STR: number): number {
@@ -65,21 +65,44 @@ function calcCC(LUK: number): number {
     return 0;
 } */
 
-export function caracToStatsCalc (caracLetters: CharStatsCaracteristicsType, armor: number) {
+export function caracToStatsCalc (caracLetters: CharStatsCaracteristicsInterface, armor: number) {
     const caracValues = convertLetterToValue(caracLetters);
     return {
         "Hp" : calcPVMax(caracLetters.END as StatKey),
         "Mana" : caracValues.MANA,
         "Ini": caracValues.SPD,
-        "SA": calcSA(caracValues.STR, caracValues.AGI, caracValues.SPD),
+        "SA": 0,
         "AA": calcAA(caracValues.STR, caracValues.AGI, caracValues.SPD),
         "DMG": calcDMG(caracValues.STR),
         "PA": 0,
-        "SD": calcSD(caracValues.END, caracValues.AGI, caracValues.SPD),
+        "SD": 0,
         "AD": calcAD(caracValues.END, caracValues.AGI, caracValues.SPD),
         "ReD": calcReD(caracValues.END, armor),
         "CdC": calcCC(caracValues.LUK),
         "CC": 2,
         "AN": 0,
     }
+}
+
+export function updateCombatStatsCalc (charData: CharStatsInterface){
+    const newCharData = { ...charData };
+    const caracValues = convertLetterToValue(newCharData.Caracteristics);
+    Object.keys(caracValues).forEach((key) => {
+        const caracKey = key as keyof CharStatsCaracteristicsInterface;
+        if (newCharData.CaracteristicsBuff[caracKey]) { caracValues[caracKey] += newCharData.CaracteristicsBuff[caracKey]; };
+    });
+    newCharData.CombatStats = {
+        "Ini": caracValues.SPD,
+        "SA": newCharData.CombatStats.SA,
+        "AA": calcAA(caracValues.STR, caracValues.AGI, caracValues.SPD),
+        "DMG": calcDMG(caracValues.STR),
+        "PA": newCharData.CombatStats.PA,
+        "SD": newCharData.CombatStats.SD,
+        "AD": calcAD(caracValues.END, caracValues.AGI, caracValues.SPD),
+        "ReD": calcReD(caracValues.END, newCharData.Armor),
+        "CdC": calcCC(caracValues.LUK),
+        "CC": newCharData.CombatStats.CC,
+        "AN": newCharData.CombatStats.AN
+    }
+    return newCharData;
 }

@@ -67,7 +67,9 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
                     {Object.entries(charStats.Caracteristics).map(([key, value]) => (
                         <div key={key} className="input_entry">
                             <span className="input_label">{key}: </span>
-                            <span className="input_field">{value}</span>
+                            <span className={`input_field ${charStats.CaracteristicsBuff[key as keyof typeof charStats.Caracteristics]? charStats.CaracteristicsBuff[key as keyof typeof charStats.Caracteristics] < 0? "!text-red-500" : "!text-blue-500" : ""}`}>
+                                {value}{charStats.CaracteristicsBuff[key as keyof typeof charStats.Caracteristics]? `+ ${charStats.CaracteristicsBuff[key as keyof typeof charStats.Caracteristics]}` : ""}
+                            </span>
                         </div>
                     ))}
                 </div>
