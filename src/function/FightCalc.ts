@@ -377,3 +377,18 @@ export function unapplyStance(charData: CharStatsInterface): CharStatsInterface{
 
     return newData;
 }
+
+export function handleTurnManaCost (charData: CharStatsInterface) {
+    const newData = { ...charData };
+    let manaTurnSuccess = true;
+    let manaCost = Math.floor((charData.InitMana / 100) * 2);
+    if(manaCost > 30) manaCost = 30;
+    
+    if(charData.Mana < manaCost){
+        manaTurnSuccess = false;
+    }else{
+        newData.Mana -= manaCost;
+    }
+
+    return { manaUsedData: newData, success: manaTurnSuccess, manaCost: manaCost };
+}

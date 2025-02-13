@@ -54,7 +54,7 @@ export function FightANModal ({ toEditCharData }: CharItemPropsInterface) {
 
     return (
         <>
-            <button onClick={() => setShowModal(true)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">AN</button>
+            <button onClick={() => handleModalClose()} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">AN</button>
             {
                 (showModal)
                 ?   <Modal isOpen={showModal} onClose={() => setShowModal(false)}>

@@ -30,7 +30,7 @@ Le premier coup qui touche fait saigner l'adversaire, inflige 50 dmg par tour pe
         Desc: `Position de combat Offensive: +10 SA, +1 AA, -1 AD.
 --------------------------
 Les 3 premiers coups (dans cet ordre et non stackable) ont 50% de chance de :  
-    1. Baisser de 1 l'AGI et la SPD pendant 3 tours (considéré comme un effet de CC)
+    1. Baisser de 1 l'AA et l'AD pendant 3 tours (considéré comme un effet de CC)
     2. Baisser de 2 l'AD pendant 3 tours (considéré comme un effet de CC)
     3. Baisser de 2 l'AA pendant 3 tours (considéré comme un effet de CC)
 --------------------------

@@ -7,7 +7,9 @@ export interface CharStatsInterface {
     Weapon: WeaponType;
     Armor: number;
     Hp: number;
+    InitHp: number;
     Mana: number;
+    InitMana: number;
     Caracteristics: CharStatsCaracteristicsInterface;
     CombatStats: CharStatsCombatStatsInterface;
     InitCaracteristics: CharStatsCaracteristicsInterface;
@@ -17,6 +19,7 @@ export interface CharStatsInterface {
     TurnEffect: TurnEffectInterface;
     FightStyle: FightStyleInterface | null;
     CaracteristicsBuff: CharStatsCaracteristicsValueInterface;
+    CustomCaracteristicsValue: Partial<CharStatsCaracteristicsInterface>;
 }
 
 export interface CharDebuffInterface extends DebuffInterface {
@@ -100,7 +103,8 @@ export interface CharStatsCaracteristicsValueInterface {
     SPD: number;
 }
 
-export type StatKey = 'E' | 'E+' | 'D-' | 'D' | 'D+' | 'C-' | 'C' | 'C+' | 'B-' | 'B' | 'B+' | 'A-' | 'A' | 'A+' | 'EX';
+export type StatKey = 'E' | 'E+' | 'D-' | 'D' | 'D+' | 'C-' | 'C' | 'C+' | 'B-' | 'B' | 'B+' | 'A-' | 'A' | 'A+' | 'EX' | 'S';
+export const StatKeyArray = ['E' , 'E+' , 'D-' , 'D' , 'D+' , 'C-' , 'C' , 'C+' , 'B-' , 'B' , 'B+' , 'A-' , 'A' , 'A+' , 'EX', 'S'];
 
 export interface CharStatsCombatStatsInterface {
     Ini: number;

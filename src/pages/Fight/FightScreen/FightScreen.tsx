@@ -6,7 +6,7 @@ import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../.
 import { FightListInterface } from "../../../types/fightType";
 import { Terminal } from "./FightDisplay/Terminal";
 import { Modal } from "../../../global/Modal";
-import { addEffect, applyStance, handleFightAtk, removeEffect, unapplyStance } from "../../../function/FightCalc";
+import { addEffect, applyStance, handleFightAtk, handleTurnManaCost, removeEffect, unapplyStance } from "../../../function/FightCalc";
 import { FightSettingsModal } from "./FightSettingsModal";
 import { rollDice } from "../../../function/GlobalFunction";
 import { FightStanceArray } from "../../../data/FightStance";
@@ -23,6 +23,13 @@ interface IniTempBuffInterface {
     SA: number;
     SD: number;
     CdC: number;
+}
+
+interface ManaDebuffInterface {
+    AA: number;
+    AD: number;
+    SA: number;
+    SD: number;
 }
 
 export function FightScreen ({ activeFightData, handleModalClose, saveFightData }: FightScreenPropsInterface) {
@@ -90,11 +97,44 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
             }
         } : char);
 
+        // Ajouter coup mana du tour
+        let firstActorManaDebuff = null;
+        let secondActorManaDebuff = null;
+
+        const firstActorManaResult = handleTurnManaCost(firstActor);
+        let firstActorManaData = firstActorManaResult.manaUsedData;
+        if(!firstActorManaResult.success){
+            firstActorManaDebuff = { AA: (firstActor.CombatStats.AA / 2), AD: (firstActor.CombatStats.AD / 2), SA: 50, SD: 50 };
+            handleHistoryEventAdd(`${firstActorManaData.Name} n'a pas assez de Mana pour ce tour !`, "Atk");
+            handleHistoryEventAdd(`-${firstActorManaDebuff.AA} AA, -${firstActorManaDebuff.AD} AD, -${firstActorManaDebuff.SA} SA, -${firstActorManaDebuff.SD} SD.`, "Atk");
+            firstActorManaData = handleManaDebuff(firstActorManaData, firstActorManaDebuff, "Add");
+        }else{
+            handleHistoryEventAdd(`${firstActorManaData.Name} utilise son mana pour son tour (${firstActorManaResult.manaCost}) !`, "Def");
+        }
+        const secondActorManaResult = handleTurnManaCost(secondActor);
+        let secondActorManaData = secondActorManaResult.manaUsedData;
+        if(!secondActorManaResult.success){ 
+            secondActorManaDebuff = { AA: (secondActor.CombatStats.AA / 2), AD: (secondActor.CombatStats.AD / 2), SA: 50, SD: 50 };
+            handleHistoryEventAdd(`${secondActorManaData.Name} n'a pas assez de Mana pour ce tour !`, "Atk");
+            handleHistoryEventAdd(`-${secondActorManaDebuff.AA} AA, -${secondActorManaDebuff.AD} AD, -${secondActorManaDebuff.SA} SA, -${secondActorManaDebuff.SD} SD.`, "Atk");
+            secondActorManaData = handleManaDebuff(secondActorManaData, secondActorManaDebuff, "Add");
+        }else{
+            handleHistoryEventAdd(`${secondActorManaData.Name} utilise son mana pour son tour (${secondActorManaResult.manaCost}) !`, "Def");
+        }
+
+        const ManaUsedCharData = IniBuffedCharData.map((char) => {
+            switch(char.Id){
+                case (firstActorManaData.Id): return firstActorManaData;
+                case (secondActorManaData.Id): return secondActorManaData;
+                default: return char;
+            }
+        })
+        
         // First ATK
-        const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, IniBuffedCharData, handleHistoryEventAdd);
+        const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, ManaUsedCharData, handleHistoryEventAdd);
 
         // Update character data
-        const updatedCharData = charData.map((char) => {
+        const firstAtkData = charData.map((char) => {
             switch(true){
                 case char.Id === firstAtkRes?.defenderData.Id: return firstAtkRes.defenderData;
                 case char.Id === firstAtkRes?.attackerData.Id: return firstAtkRes.attackerData;
@@ -103,10 +143,10 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         })
 
         // Second ATK
-        const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, updatedCharData, handleHistoryEventAdd);
+        const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, firstAtkData, handleHistoryEventAdd);
 
         // Update character data
-        let finalCharData = updatedCharData.map((char) => {
+        const secondAtkData = firstAtkData.map((char) => {
             switch(true){
                 case char.Id === secondAtkRes?.defenderData.Id: return secondAtkRes.defenderData;
                 case char.Id === secondAtkRes?.attackerData.Id: return secondAtkRes.attackerData;
@@ -115,11 +155,27 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         });
 
         // Remove Ini bonus
-        finalCharData = finalCharData.map((char) => char.Id === firstActor.Id ? { 
+        let finalCharData = secondAtkData.map((char) => char.Id === firstActor.Id ? { 
             ...char, CombatStats: { 
                 ...char.CombatStats, SA: char.CombatStats.SA - iniTempBuff.SA, SD: char.CombatStats.SD - iniTempBuff.SD, CdC: char.CombatStats.CdC - iniTempBuff.CdC
             }
         } : char);
+
+        // Remove Mana debuff
+        if(firstActorManaDebuff !== null || secondActorManaDebuff !== null){
+            let firstActorData = finalCharData.find((char) => char.Id !== firstActor.Id);
+            let secondActorData = finalCharData.find((char) => char.Id !== secondActor.Id);
+            if(firstActorManaDebuff !== null){ if(firstActorData) firstActorData = handleManaDebuff(firstActorData, firstActorManaDebuff, "Remove"); };
+            if(secondActorManaDebuff !== null){ if(secondActorData) secondActorData = handleManaDebuff(secondActorData, secondActorManaDebuff, "Remove");
+            }
+            finalCharData = finalCharData.map((char) => {
+                switch(char.Id){
+                    case (firstActorManaData.Id): return firstActorManaData;
+                    case (secondActorManaData.Id): return secondActorManaData;
+                    default: return char;
+                }
+            })
+        }
 
         // Dragon Stance
         if(firstActor.FightStyle?.Name === "Position du Dragon" && !firstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
@@ -136,7 +192,6 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                 handleHistoryEventAdd(`${secondActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
             }
         }
-        console.log(finalCharData);
         setCharData(finalCharData);
     }
 
@@ -151,6 +206,15 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         }
         
         return actorData;
+    }
+
+    function handleManaDebuff(actor: CharStatsInterface, debuff: ManaDebuffInterface, action: "Add" | "Remove"): CharStatsInterface {
+        const actorStats = actor.CombatStats;
+        if (actorStats && debuff) {
+            if (action === "Add") { actorStats.AA -= debuff.AA; actorStats.AD -= debuff.AD; actorStats.SA -= debuff.SA; actorStats.SD -= debuff.SD;}
+            else if (action === "Remove") { actorStats.AA += debuff.AA; actorStats.AD += debuff.AD; actorStats.SA += debuff.SA; actorStats.SD += debuff.SD; }
+        }
+        return actor;
     }
 
     function handleSetDisplayActorData (actorType: string, charName: string): void {

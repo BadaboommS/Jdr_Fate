@@ -4,6 +4,7 @@ import { CharBuffInterface, CharDebuffInterface, CombatStatsTitle } from "../../
 import { CustomEffectFormModal } from "../../../../global/CustomEffectFormModal";
 import { FightEditCharModal } from "./FightEditCharModal";
 import { FightANModal } from "./FightANModal";
+import { FightStatsEdit } from "./FightStatsEdit";
 
 interface FightActorStatsDisplayInterface {
     characterData: CharStatsInterface;
@@ -48,7 +49,7 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                     )}
                     <div className="input_entry">
                         <div className="input_label">Hp: </div>
-                        <div className="input_field">{characterData.Hp}</div>
+                        <div className='input_field'>{characterData.Hp}</div>
                     </div>
                     <div className="input_entry">
                         <div className="input_label">Mana: </div>
@@ -101,9 +102,10 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                             : <></>
                     }
                 </div>
-                <div className="flex justify-around">
+                <div className="flex justify-around items-center">
                     <CustomEffectFormModal toUpdateCharData={characterData} />
                     <FightEditCharModal toEditCharData={characterData} />
+                    <FightStatsEdit toEditCharData={characterData} />
                     <FightANModal toEditCharData={characterData} />
                 </div>
             </div>

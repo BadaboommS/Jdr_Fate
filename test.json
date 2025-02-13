@@ -38,6 +38,8 @@
       "Id": 0,
       "Hp": 10000,
       "Mana": 1200,
+      "InitHp": 10000,
+      "InitMana": 1200,
       "Caracteristics": {
         "STR": "B",
         "END": "C",
@@ -101,6 +103,8 @@
       "Id": 1,
       "Hp": 7000,
       "Mana": 1000,
+      "InitHp": 7000,
+      "InitMana": 1000,
       "Caracteristics": {
         "STR": "A",
         "END": "B",
@@ -163,6 +167,8 @@
       "Id": 2,
       "Hp": 7000,
       "Mana": 1000,
+      "InitHp": 7000,
+      "InitMana": 1000,
       "Caracteristics": {
         "STR": "C",
         "END": "D",

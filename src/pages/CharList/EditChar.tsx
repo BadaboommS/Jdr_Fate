@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
-import { CharStatsInterface, CreateCharFormInputInterface, CombatStatsTitle } from "../../types/statsType";
+import { CharStatsInterface, CreateCharFormInputInterface, CombatStatsTitle, StatKey, StatKeyArray } from "../../types/statsType";
 import { applyCombatStatsEffect } from "../../function/FightCalc";
 
 interface EditCharPropsInterface {
@@ -28,26 +28,37 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Confirmer l'Edit du character ?`)){ return;} ;
 
-        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, STR, END, AGI, MANA, MGK, LUK, SPD } = data;
+        const { Name, Joueur, Type, Hp, Mana, WeaponName, WeaponDmg, WeaponType, Armor, Variant, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData: CharStatsInterface = {
             Id: charStats.Id, Name, Joueur, Type,
             Weapon: { WeaponName, WeaponDmg, WeaponType },
-            Armor, Hp: Number(data.Hp), Mana: Number(data.Mana),
+            Armor, Hp: Number(Hp), InitHp: Number(Hp), Mana: Number(Mana), InitMana: Number(Mana),
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
-            InitCombatStats: { Ini: Number(data.Ini), SA: Number(data.SA), AA: Number(data.AA), DMG: Number(data.DMG), PA: Number(data.PA), SD: Number(data.SD), AD: Number(data.AD), ReD: Number(data.ReD), CdC: Number(data.CdC), CC: Number(data.CC), AN: Number(data.AN) },
+            InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
-            CombatStats: { Ini: Number(data.Ini), SA: Number(data.SA), AA: Number(data.AA), DMG: Number(data.DMG), PA: Number(data.PA), SD: Number(data.SD), AD: Number(data.AD), ReD: Number(data.ReD), CdC: Number(data.CdC),
-            CC: Number(data.CC), AN: Number(data.AN) },
+            CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             BuffsList: charStats.BuffsList.map(buff => ({ ...buff, Applied: false })), // remove applied from all buffs
             DebuffsList: charStats.DebuffsList.map(debuff => ({ ...debuff, Applied: false })), // remove applied from all debuffs
             TurnEffect: charStats.TurnEffect,
             FightStyle: null,
             CaracteristicsBuff: charStats.CaracteristicsBuff,
+            CustomCaracteristicsValue: getCustomValues(),
             ...(showVariant && { Variant })
         };
 
         const effectUpdatedCharData = applyCombatStatsEffect(newCharacterData);
         setCharData(charData.map(char => char.Id === charStats.Id ? effectUpdatedCharData : char));
+    }
+
+    function getCustomValues() {
+        const customInputs = document.querySelectorAll('input[id$="_custom_value"]');
+        const values: Record<string, string> = {};
+
+        customInputs.forEach(input => {
+            const inputElement = input as HTMLInputElement;
+            if(inputElement.value.trim() !== '') values[inputElement.id.split('_')[0]] = inputElement.value.trim();
+        });
+        return values;
     }
 
     function handleReset(){
@@ -60,7 +71,8 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
         <>
             <div className="flex flex-col gap-2 items-center">
                 {(handleDeleteChar !== undefined && <button type="button" className="bg-red-500 hover:bg-white text-white hover:text-red-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer transition-all" onClick={() => handleDeleteChar(charStats.Id)}>Delete</button>)}
-                <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4 gap-2">
+                    <h2 className="font-bold text-xl text-black">Attention: Le mode Edit modifie les valeurs de bases du personnage et non pas les valeurs actuelles.</h2>
                     <div className="grid grid-cols-3 gap-2">
                         <div className="input_group">
                             <div className="flex flex-row input_entry">
@@ -74,23 +86,18 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                             <div className="flex flex-row input_entry">
                                 <label htmlFor="input_type" className="input_label">Character Type :</label>
                                 <select {...register("Type")} id="input_type" onChange={(e) => e.target.value === "Servant"? setShowVariant(true): setShowVariant(false)} className="input_field">
-                                    <option value="Master">Master</option>
-                                    <option value="Servant">Servant</option>
-                                    <option value="PNJ">PNJ</option>
+                                    {["Master", "Servant", "PNJ"].map((value) => (
+                                        <option value={value}>{value}</option>
+                                    ))}
                                 </select>
+                                {(showVariant) && 
+                                <select {...register("Variant")} defaultValue="Archer" id="input_variant" className="input_field !indent-1">
+                                    {["Archer", "Assassin", "Berserker", 'Caster', "Lancer", "Rider", "Saber", "Slayer", "Shielder", "Outsider", "Monster", "Launcher", "Avenger", "Elder"].map((variant) => (
+                                        <option value={variant}>{variant}</option>
+                                    ))}
+                                </select>
+                                }
                             </div>
-                            {
-                                (showVariant)
-                                ?   <div className="flex flex-row input_entry">
-                                        <label htmlFor="input_variant" className="input_label">Servant Variant :</label>
-                                        <select {...register("Variant")} id="input_variant" defaultValue="Archer" className="input_field">
-                                            {["Archer", "Assassin", "Berserker", "Caster", "Lancer", "Rider", "Saber", "Slayer", "Shielder", "Outsider", "Monster", "Launcher", "Avenger", "Elder"].map(variant => (
-                                                <option key={variant} value={variant}>{variant}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                :   <></>
-                            }
                             <div className="input_entry">
                                 <label htmlFor="input_weapon_name" className="input_label">Arme :</label>
                                 <input {...register("WeaponName", {required: "Enter a Valid Arme !"})} placeholder="Nom arme" id="input_weapon_name" className="input_field" autoComplete="false"/>
@@ -98,9 +105,9 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                             <div className="input_entry">
                                 <label htmlFor="input_weapon_type" className="input_label">Type Arme :</label>
                                 <select {...register("WeaponType")} id="input_weapon_type" defaultValue='Contondant' className="input_field">
-                                    <option value="Contondant">Contondant</option>
-                                    <option value="Perçant">Perçant</option>
-                                    <option value="Tranchant">Tranchant</option>
+                                    {["Contondant", "Perçant", "Tranchant"].map((weaponType) => (
+                                        <option key={weaponType} value={weaponType}>{weaponType}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="input_entry">
@@ -114,11 +121,10 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                             {["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"].map((stat) => (
                                 <div key={stat} className="input_entry">
                                     <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
-                                    <select {...register(stat as keyof CreateCharFormInputInterface)} id={`input_${stat.toLowerCase()}`} className="input_field">
-                                        {["EX", "A", "B", "C", "D", "E"].map(level => (
-                                            <option key={level} value={level}>{level}</option>
-                                        ))}
-                                    </select>
+                                    <input {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`, validate: (value) =>  StatKeyArray.includes(value as StatKey) || `Invalid ${stat} value! Must be: ${StatKeyArray.join(", ")}`})} defaultValue={'E'} id={`input_${stat.toLowerCase()}`} className="input_field" />
+                                    {(watch(stat as keyof CreateCharFormInputInterface) === 'EX' || watch(stat as keyof CreateCharFormInputInterface) === 'S') && 
+                                        <input type="number" id={`${stat}_custom_value`} className="input_field" placeholder={`Enter ${watch(stat as keyof CreateCharFormInputInterface)} value`} required />
+                                    }
                                 </div>
                             ))}
                         </div>
