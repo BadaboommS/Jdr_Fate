@@ -157,71 +157,29 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
 
     // Rhinocéros Stance
     if(Attacker.FightStyle?.Name === "Position du Rhinocéros"){
-        if(atkSuccessCounter === 0){
+        if(atkSuccessCounter === 0 || atkSuccessCounter === 1 || atkSuccessCounter === 2){
+            const atkName = ["Premier", "Second", "Troisième"][atkSuccessCounter];
             if (rollDice(100) <= 50) {
-                if(Defender.DebuffsList.some(debuff => debuff.Name === "Premier Coup du Rhinocéros")){
-                    msgArray.push({ historyMsg: `${Defender.Name} a déjà le Premier Coup du Rhinocéros (+30 dmg) !`, msgType: 'CC', msgTitle: ''});
-                    finalDmg += 30;
+                if(Defender.DebuffsList.some(debuff => debuff.Name === `${atkName} Coup du Rhinocéros`)){
+                    msgArray.push({ historyMsg: `${Defender.Name} a déjà le ${atkName} Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
                 }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
-                    msgArray.push({ historyMsg: `${Defender.Name} esquive le Premier Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
+                    msgArray.push({ historyMsg: `${Defender.Name} esquive le ${atkName} Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
                 }else if(enableCC){
-                    const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Premier Coup du Rhinocéros");
+                    const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === `${atkName} Coup du Rhinocéros`);
                     if (rhinoDebuff) {
                         Defender = addEffect(Defender, rhinoDebuff, "Debuff");
-                        msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
+                        msgArray.push({ historyMsg: `Le ${atkName} Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
                         critCounter++;
                     }
                 }else{
-                    msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros touche, mais la limite de CC est atteinte (+30 dmg) !`, msgType: 'Info', msgTitle: '' });
+                    msgArray.push({ historyMsg: `Le ${atkName} Coup du Rhinocéros touche, mais la limite de CC est atteinte (+30 dmg) !`, msgType: 'Info', msgTitle: '' });
                     finalDmg += 30;
                 }
             }else { 
-                msgArray.push({ historyMsg: `Le Premier Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' });
-            }
-        }else if(atkSuccessCounter === 1){
-            if (rollDice(100) <= 50) {
-                if(Defender.DebuffsList.some(debuff => debuff.Name === "Second Coup du Rhinocéros")){
-                    msgArray.push({ historyMsg: `${Defender.Name} a déjà le Second Coup du Rhinocéros (+30 dmg) !`, msgType: 'CC', msgTitle: ''});
-                    finalDmg += 30;
-                }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
-                    msgArray.push({ historyMsg: `${Defender.Name} esquive le Second Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
-                }else if(enableCC){
-                    const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Second Coup du Rhinocéros");
-                    if (rhinoDebuff) {
-                        Defender = addEffect(Defender, rhinoDebuff, "Debuff");
-                        msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
-                        critCounter++;
-                    }
-                }else{
-                    msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros touche, mais la limite de CC est atteinte (+30 dmg) !`, msgType: 'Info', msgTitle: '' });
-                    finalDmg += 30;
-                }
-            }else { 
-                msgArray.push({ historyMsg: `Le Second Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); 
-            }
-        }else if(atkSuccessCounter === 2){
-            if (rollDice(100) <= 50) {
-                if(Defender.DebuffsList.some(debuff => debuff.Name === "Troisième Coup du Rhinocéros")){
-                    msgArray.push({ historyMsg: `${Defender.Name} a déjà le Troisième Coup du Rhinocéros (+30 dmg) !`, msgType: 'CC', msgTitle: ''});
-                    finalDmg += 30;
-                }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
-                    msgArray.push({ historyMsg: `${Defender.Name} esquive le Troisième Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
-                }else if(enableCC){
-                    const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === "Troisième Coup du Rhinocéros");
-                    if (rhinoDebuff) {
-                        Defender = addEffect(Defender, rhinoDebuff, "Debuff");
-                        msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
-                        critCounter++;
-                    }
-                }else{
-                    msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros touche, mais la limite de CC est atteinte (+30 dmg) !`, msgType: 'Info', msgTitle: '' });
-                    finalDmg += 30;
-                }
-            }else { 
-                msgArray.push({ historyMsg: `Le Troisième Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' }); 
+                msgArray.push({ historyMsg: `Le ${atkName} Coup du Rhinocéros rate !`, msgType: 'Info', msgTitle: '' });
             }
         }
-    }    
+    }
 
     return({ Defender: Defender, dmg: finalDmg, msg: msgArray, debuff: debuff, critCounter: critCounter });
 }
