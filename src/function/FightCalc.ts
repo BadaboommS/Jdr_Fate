@@ -180,7 +180,6 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
             }
         }
     }
-
     return({ Defender: Defender, dmg: finalDmg, msg: msgArray, debuff: debuff, critCounter: critCounter });
 }
 

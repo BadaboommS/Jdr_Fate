@@ -100,7 +100,7 @@ export interface CharStatsCaracteristicsValueInterface {
     SPD: number;
 }
 
-export type StatKey = 'E' | 'D' | 'C' | 'B' | 'A' | 'EX';
+export type StatKey = 'E' | 'E+' | 'D-' | 'D' | 'D+' | 'C-' | 'C' | 'C+' | 'B-' | 'B' | 'B+' | 'A-' | 'A' | 'A+' | 'EX';
 
 export interface CharStatsCombatStatsInterface {
     Ini: number;

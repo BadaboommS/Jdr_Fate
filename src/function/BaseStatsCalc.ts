@@ -1,13 +1,13 @@
 import { CharStatsCaracteristicsInterface, CharStatsInterface, StatKey } from "../types/statsType";
 
 function convertLetterToValue(caracs: CharStatsCaracteristicsInterface) {
-    const STRValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
-    const ENDValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
-    const AGIValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
-    const MANAValue: Record<StatKey, number> = { E: 500, D: 700, C: 1000, B: 1200, A: 1500, EX: 0 };
-    const MGKValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
-    const LUKValue: Record<StatKey, number> = { E: 50, D: 49, C: 47, B: 46, A: 44, EX: 0 };
-    const SPDValue: Record<StatKey, number> = { E: 1, D: 2, C: 4, B: 5, A: 7, EX: 0 };
+    const STRValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0 };
+    const ENDValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0 };
+    const AGIValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0 };
+    const MANAValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0 };
+    const MGKValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0 };
+    const LUKValue: Record<StatKey, number> = { "E": 50, "E+": 50, "D-": 49, "D": 49, "D+": 48, "C-": 48, "C": 47, "C+": 47, "B-": 46, "B": 46, "B+": 45, "A-": 45, "A": 44, "A+": 43, "EX": 0 }
+    const SPDValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0 };
 
     return {
         STR: STRValue[caracs.STR as keyof typeof STRValue],
@@ -22,8 +22,14 @@ function convertLetterToValue(caracs: CharStatsCaracteristicsInterface) {
 
 // Calcul des Points de Vie (PV Max)
 function calcPVMax(END: StatKey): number {
-    const ENDValue: Record<StatKey, number | null> = { E: 5000, D: 7000, C: 10000, B: 12000, A: 15000, EX: 0 };
+    const ENDValue: Record<StatKey, number | null> = { "E": 5000, "E+": 6000, "D-": 6000, "D": 7000, "D+": 8000, "C-": 9000, "C": 10000, "C+": 11000, "B-": 11000, "B": 12000, "B+": 13000, "A-": 14000, "A": 15000, "A+": 16000, "EX": 0 };
     return ENDValue[END] || 5000;
+}
+
+// Calcul du Mana
+function calcManaMax(MANA: StatKey): number {
+    const MANAValue: Record<StatKey, number | null> = { "E": 5000, "E+": 6000, "D-": 6000, "D": 7000, "D+": 8000, "C-": 9000, "C": 10000, "C+": 11000, "B-": 11000, "B": 12000, "B+": 13000, "A-": 14000, "A": 15000, "A+": 16000, "EX": 0 };
+    return MANAValue[MANA] || 5000;
 }
 
 // Calcul des Actions d'Attaque (AA)
@@ -61,15 +67,11 @@ function calcCC(LUK: number): number {
     return 51 - LUK;
 }
 
-/* function calcPA(): number {
-    return 0;
-} */
-
 export function caracToStatsCalc (caracLetters: CharStatsCaracteristicsInterface, armor: number) {
     const caracValues = convertLetterToValue(caracLetters);
     return {
         "Hp" : calcPVMax(caracLetters.END as StatKey),
-        "Mana" : caracValues.MANA,
+        "Mana" : calcManaMax(caracLetters.MANA as StatKey),
         "Ini": caracValues.SPD,
         "SA": 0,
         "AA": calcAA(caracValues.STR, caracValues.AGI, caracValues.SPD),
