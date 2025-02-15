@@ -117,8 +117,8 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
                                 <h2 className='text-xl text-center'>{toEdit ? `Edit effect: ${toEdit.Name}` : `Add new effect to: ${toUpdateCharData.Name}`}</h2>
                                 <div className='input_entry'>
                                     <label htmlFor="preset_select" className='input_label'>Effect Preset: </label>
-                                    <div className='input_field'>
-                                        <input id="preset_select" className='w-[95%] h-full px-1 indent-1' list="filteredPresetList" placeholder="Filtre Preset" value={filterQuery} onChange={(e) => setFilterQuery(e.currentTarget.value)} />
+                                    <div className='w-full'>
+                                        <input id="preset_select" className='input_field' list="filteredPresetList" placeholder="Filtre Preset" value={filterQuery} onChange={(e) => setFilterQuery(e.currentTarget.value)} />
                                         {filteredPresetList.length > 0 && filterQuery !== '' && (
                                             <div className="absolute mt-1 bg-white border shadow-lg rounded-lg">
                                             {filteredPresetList.map((presetName, index) => (
