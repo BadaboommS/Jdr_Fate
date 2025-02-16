@@ -87,7 +87,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                                 <label htmlFor="input_type" className="input_label">Character Type :</label>
                                 <select {...register("Type")} id="input_type" onChange={(e) => e.target.value === "Servant"? setShowVariant(true): setShowVariant(false)} className="input_field">
                                     {["Master", "Servant", "PNJ"].map((value) => (
-                                        <option value={value}>{value}</option>
+                                        <option key={value} value={value}>{value}</option>
                                     ))}
                                 </select>
                                 {(showVariant) && 

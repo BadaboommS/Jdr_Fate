@@ -6,3 +6,4 @@
     -> custom compétences
     -> activée: true / false
 10. [ ] Ajouter stance marmote -> voir coût mana.
+11. [ ] Changer ini et mana debuff to preset and apply/unapply.

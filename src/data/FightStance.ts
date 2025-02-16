@@ -13,6 +13,12 @@ export const StanceBaseEffectArray = {
     "Neutre": { SA: 10, SD: 10 }
 }
 
+export function findStance ( Name?: string ){
+    let stance = null;
+    if(Name) stance = FightStanceArray.find(s => s.Name === Name);
+    return stance ? stance : null;
+}
+
 export const FightStanceArray: FightStanceInterface[] = [
     {
         Name: "Position du Serpent",
@@ -116,7 +122,7 @@ Gagne 40 PA, mais perd l’utilisation de ½ (arrondie à l’inférieur) de ses
 # Le MJ devra par la suite gérer manuellement la suppression de celui-ci.`,
         Type: "Neutre",
         Effect: {
-            CombatStats: { PA: 40 }
+            CombatStats: { PA: 40, AA: 0 }
         }
     },
     {

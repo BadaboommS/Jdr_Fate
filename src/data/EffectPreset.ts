@@ -9,6 +9,13 @@ export interface EffectPresetInterface {
     Effect?: EffectInterface;
 }
 
+export function findPreset ( Name?: string, Id?: number ){
+    let preset = null;
+    if(Name) preset = EffectPresetArray.find(p => p.Name === Name);
+    if(Id) preset = EffectPresetArray.find(p => p.Id === Id);
+    return preset ? { Name: preset.Name, Desc: preset.Desc, Effect: preset.Effect } : null;
+}
+
 export const EffectPresetArray: EffectPresetInterface[] = [
     { 
         Id: 0,
@@ -79,11 +86,40 @@ export const EffectPresetArray: EffectPresetInterface[] = [
         Name: "Raideur du Golem",
         Desc: `Vous êtes résistant, mais perdez la moitié de vos AA.
 --------------------------
-# Le MJ devra gérer manuellement la supression de ceux-ci.
---------------------------
-# La valeur de perte de AA doit être entrée manuellement dans le debuff (-1 de base).
-# Le MJ devra par la suite gérer manuellement la suppression de celui-ci.`, 
+# Le MJ devra gérer manuellement la supression de celui-ci.`, 
         EffectType: "Debuff",
         Effect: { CombatStats: { AA: -1 } }
+    },
+    { 
+        Id: 8,
+        Name: "Bonus Initiative 1",
+        Desc: `Vous avez l'initiative.
+--------------------------
+# Ce buff sera rajouté automatiquement lors des jets d'initiatives.
+# Il sera retiré automatiquement après la résolution du tour.
+.`, 
+        EffectType: "Buff",
+        Effect: { CombatStats: { SA: 15, SD: 15 } }
+    },
+    { 
+        Id: 9,
+        Name: "Bonus Initiative 2",
+        Desc: `Vous avez grandement l'initiative.
+--------------------------
+# Ce buff sera rajouté automatiquement lors des jets d'initiatives.
+# Il sera retiré automatiquement après la résolution du tour.
+.`, 
+        EffectType: "Buff",
+        Effect: { CombatStats: { SA: 30, SD: 30, CdC: 2 } }
+    },
+    { 
+        Id: 10,
+        Name: "Mal de mana",
+        Desc: `Vous n'avez pas assez de mana pour vous mouvoir correctement ce tour.
+--------------------------
+# Ce buff sera rajouté automatiquement lors du début du tour si vous n'avez pas assez de mana.
+# Il sera retiré automatiquement après la résolution du tour.`, 
+        EffectType: "Debuff",
+        Effect: { CombatStats: { AA: 0, AD: 0, SA: 50, SD: 50 } }
     }
 ]

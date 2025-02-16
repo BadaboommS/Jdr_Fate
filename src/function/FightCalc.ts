@@ -2,7 +2,7 @@ import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, BuffInterfa
 import { StanceBaseEffectArray } from "../data/FightStance";
 import { rollDice } from "./GlobalFunction";
 import { CCDebuffList } from "../data/CCDebuff";
-import { EffectPresetArray } from "../data/EffectPreset";
+import { EffectPresetArray, findPreset } from "../data/EffectPreset";
 import { updateCombatStatsCalc } from "./BaseStatsCalc";
 
 const DEBUG = false;
@@ -378,17 +378,26 @@ export function unapplyStance(charData: CharStatsInterface): CharStatsInterface{
     return newData;
 }
 
-export function handleTurnManaCost (charData: CharStatsInterface) {
-    const newData = { ...charData };
-    let manaTurnSuccess = true;
+export function handleTurnManaCost (charData: CharStatsInterface, handleHistoryEventAdd: (msg: string, type: string, title?: string) => void) {
+    let newData = { ...charData };
     let manaCost = Math.floor((charData.InitMana / 100) * 2);
     if(manaCost > 30) manaCost = 30;
+    let manaDebuff: DebuffInterface | null = null;
     
     if(charData.Mana < manaCost){
-        manaTurnSuccess = false;
+        handleHistoryEventAdd(`${charData.Name} n'a pas assez de Mana pour ce tour !`, "Atk");
+        manaDebuff = findPreset('Mal de mana');
     }else{
         newData.Mana -= manaCost;
+        handleHistoryEventAdd(`${charData.Name} utilise son mana pour son tour (${manaCost}) !`, "Def");
     }
 
-    return { manaUsedData: newData, success: manaTurnSuccess, manaCost: manaCost };
+    if(manaDebuff && manaDebuff.Effect?.CombatStats){
+        manaDebuff.Effect.CombatStats.AA = -(Math.floor(charData.CombatStats.AA / 2));
+        manaDebuff.Effect.CombatStats.AD = -(Math.floor(charData.CombatStats.AD / 2));
+        handleHistoryEventAdd(`${manaDebuff.Effect?.CombatStats?.AA} AA, ${manaDebuff.Effect?.CombatStats?.AD} AD, -${manaDebuff.Effect?.CombatStats?.SA} SA, -${manaDebuff.Effect?.CombatStats?.SD} SD.`, "Atk");
+        newData = addEffect(newData, manaDebuff, "Debuff");
+    }
+
+    return newData;
 }
