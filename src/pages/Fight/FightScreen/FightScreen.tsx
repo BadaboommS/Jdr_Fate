@@ -11,7 +11,7 @@ import { FightSettingsModal } from "./FightSettingsModal";
 import { rollDice } from "../../../function/GlobalFunction";
 import { FightStanceArray, findStance } from "../../../data/FightStance";
 import './fightScreen.css';
-import { EffectPresetArray, findPreset } from "../../../data/EffectPreset";
+import { findPreset } from "../../../data/EffectPreset";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -77,11 +77,12 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         }
     }
 
-    function handleTurn(firstActor: CharStatsInterface, secondActor: CharStatsInterface){
+    function handleTurn(firstActor: CharStatsInterface | null, secondActor: CharStatsInterface | null, nbAtk?: number){
+        if(!firstActor || !secondActor){ return; };
         let currentData = charData;
        
         // First ATK
-        const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, charData, handleHistoryEventAdd);
+        const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, charData, handleHistoryEventAdd, nbAtk);
 
         if(firstAtkRes){
             currentData = currentData.map((char) => {
@@ -93,45 +94,67 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
             })
 
             // Second ATK
-            const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, currentData, handleHistoryEventAdd);
+            const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, currentData, handleHistoryEventAdd, nbAtk);
 
             // Update character data
             if(secondAtkRes){
-                
+                let iniRemovedFirstActor = secondAtkRes.defenderData;
+                let iniRemovedSecondActor = secondAtkRes.attackerData;
+
                 // Remove Ini bonus
-                if(firstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2" )){ const iniBuff = firstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2"); if(iniBuff) secondAtkRes.defenderData = removeEffect(firstActor, iniBuff, "Buff"); };
-                if(secondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2")){ const iniBuff = secondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1"  || effect.Name === "Bonus Initiative 2"); if(iniBuff) secondAtkRes.attackerData = removeEffect(secondActor, iniBuff, "Buff"); };
+                if(iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2" )){ const iniBuff = iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedFirstActor = removeEffect(iniRemovedFirstActor, iniBuff, "Buff"); };
+                if(iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2")){ const iniBuff = iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1"  || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedSecondActor = removeEffect(iniRemovedSecondActor, iniBuff, "Buff"); };
 
+                let manaRemovedFirstActor = iniRemovedFirstActor;
+                let manaRemovedSecondActor = iniRemovedSecondActor;
                 // Remove Mana debuff
-                if(firstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = firstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) secondAtkRes.defenderData = removeEffect(firstActor, manaDebuff, "Debuff"); };
-                if(secondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = secondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) secondAtkRes.attackerData = removeEffect(secondActor, manaDebuff, "Debuff"); };
+                if(manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedFirstActor = removeEffect(manaRemovedFirstActor, manaDebuff, "Debuff"); };
+                if(manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedSecondActor = removeEffect(manaRemovedSecondActor, manaDebuff, "Debuff"); };
 
+                // Dragon Stance
+                if(manaRemovedFirstActor.FightStyle?.Name === "Position du Dragon" && !manaRemovedFirstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
+                    const dragonBuff = findPreset("Déchainement du Dragon");
+                    if(dragonBuff){
+                        manaRemovedFirstActor = addEffect(manaRemovedFirstActor, dragonBuff, "Buff");
+                        handleHistoryEventAdd(`${manaRemovedFirstActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
+                    }
+                }
+                if(manaRemovedSecondActor.FightStyle?.Name === "Position du Dragon" && !manaRemovedSecondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
+                    const dragonBuff = findPreset("Déchainement du Dragon");
+                    if(dragonBuff){
+                        manaRemovedSecondActor = addEffect(manaRemovedSecondActor, dragonBuff, "Buff");
+                        handleHistoryEventAdd(`${manaRemovedSecondActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
+                    }
+                }
+
+                // Set Data
                 currentData = currentData.map((char) => {
                     switch(true){
-                        case char.Id === secondAtkRes?.defenderData.Id: return secondAtkRes.defenderData;
-                        case char.Id === secondAtkRes?.attackerData.Id: return secondAtkRes.attackerData;
+                        case char.Id === manaRemovedFirstActor.Id: return manaRemovedFirstActor;
+                        case char.Id === manaRemovedSecondActor.Id: return manaRemovedSecondActor;
                         default: return char;
                     }
                 });
-
-                // Dragon Stance
-                if(firstActor.FightStyle?.Name === "Position du Dragon" && !firstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
-                    const dragonBuff = EffectPresetArray.find(effect => effect.Name === "Déchainement du Dragon");
-                    if(dragonBuff){
-                        currentData = currentData.map((char) => char.Id === firstActor.Id ? addEffect(char, dragonBuff, "Buff") : char);
-                        handleHistoryEventAdd(`${firstActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
-                    }
-                }
-                if(secondActor.FightStyle?.Name === "Position du Dragon" && !secondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
-                    const dragonBuff = EffectPresetArray.find(effect => effect.Name === "Déchainement du Dragon");
-                    if(dragonBuff){
-                        currentData = currentData.map((char) => char.Id === secondActor.Id ? addEffect(char, dragonBuff, "Buff") : char);
-                        handleHistoryEventAdd(`${secondActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
-                    }
-                }
             }
         }
 
+        setCharData(currentData);
+    }
+
+    function handleSingleTurn(firstActor: CharStatsInterface | null, secondActor: CharStatsInterface | null, nbAtk?: number){
+        if(!firstActor || !secondActor){ return; };
+        let currentData = charData;
+        const singleAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, charData, handleHistoryEventAdd, nbAtk);
+
+        if(singleAtkRes){
+            currentData = currentData.map((char) => {
+                switch(true){
+                    case char.Id === singleAtkRes?.defenderData.Id: return singleAtkRes.defenderData;
+                    case char.Id === singleAtkRes?.attackerData.Id: return singleAtkRes.attackerData;
+                    default: return char;
+                }
+            })
+        }
         setCharData(currentData);
     }
 
@@ -214,11 +237,6 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                 <nav className="flex justify p-2 items-center justify-around gap-3 w-screen">
                     <div className="flex gap-3 items-center text-2xl">
                         <p className="text-bold">{activeData.fightName} : </p>
-                        {/* <p className="text-lg">Participants: {
-                            (activeData.fightMembers.length > 0)
-                                ?   activeData.fightMembers.map((member: string) => <span key={member}>- {member} -</span>)
-                                :   <span>Pas de participants.</span>
-                        }</p> */}
                         <p className={`${activeData.fightState? 'text-green-500' : 'text-gray-500'}`}>{activeData.fightState? 'En Cours' : 'Fini'}</p>
                     </div>
                     <div className="flex gap-2 items-center">
@@ -253,7 +271,9 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                         <div className="flex flex-col items-center gap-2">
                             <h2 className="input_label">Controles de combat: </h2>
                             <div className="flex flex-row gap-2">
+                                <button onClick={() => handleSingleTurn(displayActorAData, displayActorBData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A &#8594; B</button>
                                 <button onClick={() => handleTurnPrep(displayActorAData, displayActorBData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Tour de combat</button>
+                                <button onClick={() => handleSingleTurn(displayActorBData, displayActorAData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A &#8592; B</button>
                             </div>
                             <div className="flex flex-col items-center gap-2">
                                 <h2 className="input_label">Choix Position de combat :</h2>
