@@ -1,11 +1,79 @@
 import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, BuffInterface, DebuffInterface, CharStatsCaracteristicsInterface } from "../types/statsType";
-import { StanceBaseEffectArray } from "../data/FightStance";
+import { StanceBaseEffect } from "../data/FightStance";
 import { rollDice } from "./GlobalFunction";
-import { CCDebuffList } from "../data/CCDebuff";
-import { EffectPresetArray, findPreset } from "../data/EffectPreset";
+import { getAllDebbuffs, selectRandomDebuff } from "../data/CCDebuff";
+import { findPreset } from "../data/EffectPreset";
 import { updateCombatStatsCalc } from "./BaseStatsCalc";
 
-const DEBUG = false;
+export function handleTurn(
+    firstActor: CharStatsInterface | null,
+    secondActor: CharStatsInterface | null,
+    charData: CharStatsInterface[],
+    handleHistoryEventAdd: (msg: string, type: string, title?: string) => void,
+    nbAtk?: number
+){
+    if(!firstActor || !secondActor){ return; };
+    let currentData = charData;
+   
+    // First ATK
+    const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, charData, handleHistoryEventAdd, nbAtk);
+
+    if(firstAtkRes){
+        currentData = currentData.map((char) => {
+            switch(true){
+                case char.Id === firstAtkRes?.defenderData.Id: return firstAtkRes.defenderData;
+                case char.Id === firstAtkRes?.attackerData.Id: return firstAtkRes.attackerData;
+                default: return char;
+            }
+        })
+
+        // Second ATK
+        const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, currentData, handleHistoryEventAdd, nbAtk);
+
+        // Update character data
+        if(secondAtkRes){
+            let iniRemovedFirstActor = secondAtkRes.defenderData;
+            let iniRemovedSecondActor = secondAtkRes.attackerData;
+
+            // Remove Ini bonus
+            if(iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2" )){ const iniBuff = iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedFirstActor = removeEffect(iniRemovedFirstActor, iniBuff, "Buff"); };
+            if(iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2")){ const iniBuff = iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1"  || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedSecondActor = removeEffect(iniRemovedSecondActor, iniBuff, "Buff"); };
+
+            let manaRemovedFirstActor = iniRemovedFirstActor;
+            let manaRemovedSecondActor = iniRemovedSecondActor;
+            // Remove Mana debuff
+            if(manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedFirstActor = removeEffect(manaRemovedFirstActor, manaDebuff, "Debuff"); };
+            if(manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedSecondActor = removeEffect(manaRemovedSecondActor, manaDebuff, "Debuff"); };
+
+            // Dragon Stance
+            if(manaRemovedFirstActor.FightStyle?.Name === "Position du Dragon" && !manaRemovedFirstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
+                const dragonBuff = findPreset("Déchainement du Dragon");
+                if(dragonBuff){
+                    manaRemovedFirstActor = addEffect(manaRemovedFirstActor, dragonBuff, "Buff");
+                    handleHistoryEventAdd(`${manaRemovedFirstActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
+                }
+            }
+            if(manaRemovedSecondActor.FightStyle?.Name === "Position du Dragon" && !manaRemovedSecondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
+                const dragonBuff = findPreset("Déchainement du Dragon");
+                if(dragonBuff){
+                    manaRemovedSecondActor = addEffect(manaRemovedSecondActor, dragonBuff, "Buff");
+                    handleHistoryEventAdd(`${manaRemovedSecondActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
+                }
+            }
+
+            // Set Data
+            currentData = currentData.map((char) => {
+                switch(true){
+                    case char.Id === manaRemovedFirstActor.Id: return manaRemovedFirstActor;
+                    case char.Id === manaRemovedSecondActor.Id: return manaRemovedSecondActor;
+                    default: return char;
+                }
+            });
+        }
+    }
+
+    return currentData;
+}
 
 export function handleFightAtk(
     attackerId: number | null,
@@ -26,29 +94,20 @@ export function handleFightAtk(
     let dmgCounter = 0;
     let successAtkCounter = 0;
     for (let i = 0; i < atkCount; i++) {
-        // FightCalc
-        const combatRes = handleDmgCalc(attackerData, defenderData, i, critCounter, successAtkCounter); // Calc Attack
+        const combatRes = handleDmgCalc(attackerData, defenderData, i, critCounter, successAtkCounter);
 
-        // SuccessAtkCounter
         if(combatRes.dmg) successAtkCounter += 1;
-        
-        // Display all turn msg
-        combatRes.msg.map((msg) => handleHistoryEventAdd(msg.historyMsg, msg.msgType, msg.msgTitle));
-
-        // CheckCrit Counter
         if(combatRes.critCounter) critCounter += 1;
-
-        // DataCounter
         if(combatRes.dmg) dmgCounter += combatRes.dmg;
+        combatRes.msg.map((msg) => handleHistoryEventAdd(msg.historyMsg, msg.msgType, msg.msgTitle));
         
-        // setData
         defenderData = { ...combatRes.Defender, Hp: combatRes.Defender.Hp - combatRes.dmg };
     }
 
     // Stance Roseau
     if(defenderData.FightStyle?.Name === "Position du Roseau"){
         const successfullDefCounter = Math.floor((atkCount - successAtkCounter) / 3);
-        const roseauDebuff = EffectPresetArray.find(effect => effect.Name === "Revers de Roseau");
+        const roseauDebuff = findPreset("Revers de Roseau");
         if(roseauDebuff) {
             for(let i = 0; i < successfullDefCounter; i ++){
                 attackerData = addEffect(attackerData, roseauDebuff, "Debuff");
@@ -65,22 +124,18 @@ export function handleFightAtk(
 function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterface, atkNumber: number, critCounter: number, atkSuccessCounter: number) {
     const atkJet = Attacker.FightStyle?.Name === "Position du Flamant Rose"? 50 : rollDice(100) + Attacker.CombatStats.SA;
     const defJet = Defender.FightStyle?.Name === "Position du Flamant Rose"? 50 : rollDice(100) + Defender.CombatStats.SD;
-    if(DEBUG) console.log('atk, def: ',atkJet, defJet);
 
     // Calcul malus AD
     const maxMalus = Defender.FightStyle?.Name === "Position du Lézard"? 45 : 90;
     const malusAD = (atkNumber - Defender.CombatStats.AD) > 0 ? Math.min((atkNumber - Defender.CombatStats.AD) * -15, -maxMalus) : 0;
-    if(DEBUG) console.log('malusAD', malusAD);
 
     // Calcul succès atk
     const atkSuccess = (defJet + malusAD) - atkJet;
     if(atkSuccess > 0){ //Echec atk
-        if(DEBUG) console.log('echec atk: ', atkSuccess);
         const dmg = 0;
         const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: Echec`, msgType: 'Def', msgTitle: `${Attacker.Name}: ${atkJet - Attacker.CombatStats.SA} + ${Attacker.CombatStats.SA} SA | ${Defender.Name}: ${defJet - Defender.CombatStats.SD} + ${Defender.CombatStats.SD} SD`}];
         return({ Defender: Defender, dmg: dmg, msg: msgArray });
     }
-    if(DEBUG) console.log('succès atk: ', atkSuccess);
 
     // Calcul ecart dmg
     let ecartDmg = 0;
@@ -89,52 +144,41 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
         case (atkSuccess > 125): ecartDmg = 125; break;
         default: ecartDmg = atkSuccess; 
     }
-    if(DEBUG) console.log('Dmg Ratio (50 min - 125 max): ', ecartDmg);
 
     // Ecart (%) * DMG stat
     const Dmg = (ecartDmg / 100) * Attacker.CombatStats.DMG;
-    if(DEBUG) console.log('Dmg: ', Dmg);
 
     // Calcul ArmorPierce
     const armorPierce = (Defender.CombatStats.ReD - Attacker.CombatStats.PA) < 0 ? 0 : (Defender.CombatStats.ReD - Attacker.CombatStats.PA);
-    if(DEBUG) console.log('armorPierce: ', armorPierce);
 
     // Calcul Dmg Final
     let finalDmg = Math.floor(Dmg + armorPierce);
-    if(DEBUG) console.log('finalDmg: ', finalDmg);
-
     const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: ${finalDmg} Dmg`, msgType: 'Atk', msgTitle: `${Attacker.Name}: ${atkJet - Attacker.CombatStats.SA} + ${Attacker.CombatStats.SA} SA | ${Defender.Name}: ${defJet - Defender.CombatStats.SD} + ${Defender.CombatStats.SD} SD`}];
 
     // Calcul CC
     const CCDiceRoll = rollDice(50);
-    let debuff: DebuffInterface | null = null;
 
     // Check CC
     const enableCC = (critCounter < Attacker.CombatStats.CC);
     if(CCDiceRoll < Attacker.CombatStats.CdC && Attacker.FightStyle?.Name !== "Position du Flamant Rose"){
-        if(enableCC && Defender.FightStyle?.Name === "Position de la Pieuvre"){
+        if(enableCC){
             msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
-            msgArray.push({ historyMsg: `Mais ${Defender.Name} esquive les effets néfastes !`, msgType: 'CC', msgTitle: ''});
-        }else if(enableCC){
-            msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
-            // Select debuff
-            const weaponTypeDebuffList = CCDebuffList[CCDebuffList.findIndex(debuff => debuff.Type === Attacker.Weapon.WeaponType)];
-
-            if(Defender.DebuffsList.length > 5){
-                msgArray.push({ historyMsg: `${Defender.Name} a trop de debuff !`, msgType: 'CC', msgTitle: ''});
+            if(!(Defender.FightStyle?.Name === "Position de la Pieuvre")){
+                const allDebuffs = getAllDebbuffs(Attacker.Weapon.WeaponType);
+                if(allDebuffs.every(debuff => Defender.DebuffsList.some(d => d.Name === debuff.Name))){
+                    msgArray.push({ historyMsg: `${Defender.Name} a trop de debuff !`, msgType: 'CC', msgTitle: ''});
+                }else{
+                    const debuff: DebuffInterface | null = selectRandomDebuff(Attacker.Weapon.WeaponType, Defender.DebuffsList);
+                    // Add new debuff
+                    if(debuff){
+                        Defender = addEffect(Defender, debuff, "Debuff");
+                        msgArray.push({ historyMsg: `${Defender.Name} reçoit ${debuff.Name}`, msgType: 'CC', msgTitle: ''});
+                    }
+                }
+                critCounter++;
             }else{
-                do{
-                    debuff = weaponTypeDebuffList.Debuffs[rollDice(6) - 1];
-                }while(Defender.DebuffsList.some(d => d.Name === debuff?.Name));
-
-                // Add new debuff
-                const newDebuff: DebuffInterface = { Name: debuff.Name, Desc: debuff.Desc, Effect: debuff.Effect };
-                if(debuff.Dmg) newDebuff.Dmg = debuff.Dmg;
-                if(debuff.Effect) newDebuff.Effect = debuff.Effect;
-                Defender = addEffect(Defender, newDebuff, "Debuff");
-                msgArray.push({ historyMsg: `${Defender.Name} reçoit ${debuff.Name}`, msgType: 'CC', msgTitle: ''});
+                msgArray.push({ historyMsg: `Mais ${Defender.Name} esquive les effets néfastes !`, msgType: 'CC', msgTitle: ''});
             }
-            critCounter++;
         }else{
             finalDmg += 30;
         }
@@ -147,7 +191,7 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
         }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
             msgArray.push({ historyMsg: `${Defender.Name} esquive le poison du serpent !`, msgType: 'CC', msgTitle: ''});
         }else{
-            const serpentDotDebuff = EffectPresetArray.find(effect => effect.Name === "Poison du Serpent");
+            const serpentDotDebuff = findPreset("Poison du Serpent");
             if(serpentDotDebuff){
                 Defender = addEffect(Defender, serpentDotDebuff, "Debuff");
                 msgArray.push({ historyMsg: `Position du Serpent inflige 50 dégats sur la durée ! (4 tour)`, msgType: 'Atk', msgTitle: ''});
@@ -165,7 +209,7 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
                 }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
                     msgArray.push({ historyMsg: `${Defender.Name} esquive le ${atkName} Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
                 }else if(enableCC){
-                    const rhinoDebuff = EffectPresetArray.find(effect => effect.Name === `${atkName} Coup du Rhinocéros`);
+                    const rhinoDebuff = findPreset(`${atkName} Coup du Rhinocéros`);
                     if (rhinoDebuff) {
                         Defender = addEffect(Defender, rhinoDebuff, "Debuff");
                         msgArray.push({ historyMsg: `Le ${atkName} Coup du Rhinocéros touche !`, msgType: 'CC', msgTitle: rhinoDebuff.Desc });
@@ -180,7 +224,7 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
             }
         }
     }
-    return({ Defender: Defender, dmg: finalDmg, msg: msgArray, debuff: debuff, critCounter: critCounter });
+    return({ Defender: Defender, dmg: finalDmg, msg: msgArray, critCounter: critCounter });
 }
 
 export function addEffect(charData: CharStatsInterface, effect: BuffInterface | DebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{
@@ -336,7 +380,7 @@ export function applyStance(charData: CharStatsInterface): CharStatsInterface{
     const newData = { ...charData };
     const stanceType = newData.FightStyle?.Type;
     if(stanceType){
-        const stanceTypeBuff = StanceBaseEffectArray[stanceType as keyof typeof StanceBaseEffectArray];
+        const stanceTypeBuff = StanceBaseEffect[stanceType as keyof typeof StanceBaseEffect];
         if(stanceTypeBuff){
             Object.keys(stanceTypeBuff).forEach((key) => {
                 const stanceBaseBuffKey = key as keyof typeof newData.CombatStats;
@@ -359,7 +403,7 @@ export function unapplyStance(charData: CharStatsInterface): CharStatsInterface{
     const newData = { ...charData };
     const stanceType = newData.FightStyle?.Type;
     if(stanceType){
-        const stanceTypeBuff = StanceBaseEffectArray[stanceType as keyof typeof StanceBaseEffectArray];
+        const stanceTypeBuff = StanceBaseEffect[stanceType as keyof typeof StanceBaseEffect];
         if(stanceTypeBuff){
             Object.keys(stanceTypeBuff).forEach((key) => {
                 const stanceBaseBuffKey = key as keyof typeof newData.CombatStats;
@@ -400,4 +444,50 @@ export function handleTurnManaCost (charData: CharStatsInterface, handleHistoryE
     }
 
     return newData;
+}
+
+export function handleIniCalc(actorA: CharStatsInterface, actorB: CharStatsInterface, handleHistoryEventAdd: (msg: string, type: string, title?: string) => void){
+    const actorAIni = actorA.CombatStats.Ini + rollDice(10);
+    const actorBIni = actorB.CombatStats.Ini + rollDice(10);
+    const initiativeDifference = Math.abs(actorAIni - actorBIni);
+
+    let iniBonus: BuffInterface | null = null;
+    if (initiativeDifference >= 2 && initiativeDifference <= 3) { 
+        iniBonus = findPreset("Bonus Initiative 1"); }
+    else if (initiativeDifference >= 4) { 
+        iniBonus = findPreset("Bonus Initiative 2");
+    };
+
+    let firstActor = { ...actorA };
+    let secondActor = { ...actorB };
+    if (actorBIni > actorAIni) {
+        firstActor = { ...actorB };
+        secondActor = { ...actorA };
+    }
+
+    if(iniBonus && !firstActor.BuffsList.some((buff) => buff.Name !== iniBonus.Name)) { firstActor = addEffect(firstActor, iniBonus, "Buff"); };
+
+    handleHistoryEventAdd(`${actorA.Name} a l'initiative sur ${actorB.Name}.`, 'Info', `Ini A : ${actorAIni} |  Ini B : ${actorBIni}`);
+    handleHistoryEventAdd(`
+        La différence d'Ini est de ${initiativeDifference}.
+        ${initiativeDifference < 2 ? `La différence est minime.` : ''}
+            ${iniBonus?.Effect?.CombatStats?.SA ? `${actorAIni > actorBIni? actorA.Name : actorB.Name} gagne SA: ${iniBonus?.Effect?.CombatStats?.SA}` : ''}
+            ${iniBonus?.Effect?.CombatStats?.SD ? `, SD: ${iniBonus?.Effect?.CombatStats?.SD}` : ''}
+            ${iniBonus?.Effect?.CombatStats?.CdC ? `, CdC: ${iniBonus?.Effect?.CombatStats?.CdC}` : ''}
+        `, "Info");
+
+    return { firstActor: firstActor , secondActor: secondActor };
+}
+
+export function applyTurnEffect(actorData: CharStatsInterface, handleHistoryEventAdd: (msg: string, type: string, title?: string) => void): CharStatsInterface {
+    if(actorData.TurnEffect.Dot !== 0){
+        handleHistoryEventAdd(`${actorData.Name} prend des dégâts sur la durée ! ( ${actorData.TurnEffect.Dot} )`, 'Atk');
+        actorData.Hp -= actorData.TurnEffect.Dot;
+    }
+    if(actorData.TurnEffect.Hot !== 0){
+        handleHistoryEventAdd(`${actorData.Name} reçoit un heal sur la durée ! ( ${actorData.TurnEffect.Hot} )`, 'Heal');
+        actorData.Hp += actorData.TurnEffect.Hot;
+    }
+    
+    return actorData;
 }

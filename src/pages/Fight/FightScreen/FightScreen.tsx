@@ -2,16 +2,14 @@ import { useContext, useEffect, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { DataContext } from "../../../context/DataContext";
 import { FightActorStatsDisplay } from "./FightDisplay/FightActorStatsDisplay";
-import { BuffInterface, CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../../../types/statsType";
+import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../../../types/statsType";
 import { FightListInterface } from "../../../types/fightType";
 import { Terminal } from "./FightDisplay/Terminal";
 import { Modal } from "../../../global/Modal";
-import { addEffect, applyStance, handleFightAtk, handleTurnManaCost, removeEffect, unapplyStance } from "../../../function/FightCalc";
+import { applyStance, handleFightAtk, handleTurnManaCost, removeEffect, unapplyStance, handleIniCalc, applyTurnEffect, handleTurn } from "../../../function/FightCalc";
 import { FightSettingsModal } from "./FightSettingsModal";
-import { rollDice } from "../../../function/GlobalFunction";
 import { FightStanceArray, findStance } from "../../../data/FightStance";
 import './fightScreen.css';
-import { findPreset } from "../../../data/EffectPreset";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -28,117 +26,26 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
 
     function handleTurnPrep(actorA: CharStatsInterface | null, actorB: CharStatsInterface | null): void{
         if(actorA === null || actorB === null){ return; };
+        const initActorA = { ...actorA };
+        const initActorB = { ...actorB };
 
         handleHistoryEventAdd('Début du tour de combat !', "Info", "");
 
-        // Dot & Hot
-        let afterTurnEffectActorAData = null;
-        let afterTurnEffectActorBData = null
-        if(actorA.TurnEffect.Dot !== 0 || actorA.TurnEffect.Hot !== 0) afterTurnEffectActorAData = applyTurnEffect(actorA);
-        if(actorB.TurnEffect.Dot !== 0 || actorB.TurnEffect.Hot !== 0) afterTurnEffectActorBData = applyTurnEffect(actorB);
-        if (afterTurnEffectActorAData !== null || afterTurnEffectActorBData !== null) {
-            setCharData(charData.map((char: CharStatsInterface) => {
-                switch(true){
-                    case (char.Id === afterTurnEffectActorAData?.Id && afterTurnEffectActorAData !== null): return afterTurnEffectActorAData;
-                    case (char.Id === afterTurnEffectActorBData?.Id && afterTurnEffectActorBData !== null): return afterTurnEffectActorBData;
-                    default: return char;
-                }
-            }));
-        }
+        // Turn effect
+        const turnEffectActorA = applyTurnEffect(initActorA, handleHistoryEventAdd);
+        const turnEffectActorB = applyTurnEffect(initActorB, handleHistoryEventAdd);
 
         // Coup en Mana
-        let actorAManaUsed = handleTurnManaCost(actorA, handleHistoryEventAdd);
-        let actorBManaUsed = handleTurnManaCost(actorB, handleHistoryEventAdd);
+        const actorAManaUsed = handleTurnManaCost(turnEffectActorA, handleHistoryEventAdd);
+        const actorBManaUsed = handleTurnManaCost(turnEffectActorB, handleHistoryEventAdd);
 
         // Initiative
-        const actorAIni = actorA.CombatStats.Ini + rollDice(10);
-        const actorBIni = actorB.CombatStats.Ini + rollDice(10);
-        const initiativeDifference = Math.abs(actorAIni - actorBIni);
+        const { firstActor, secondActor } = handleIniCalc(actorAManaUsed, actorBManaUsed, handleHistoryEventAdd);
 
-        let iniBonus: BuffInterface | null | undefined = null;
-        if (initiativeDifference >= 2 && initiativeDifference <= 3) { iniBonus = findPreset("Bonus Initiative 1"); } else if (initiativeDifference >= 4) { iniBonus = findPreset("Bonus Initiative 2"); };
-        
-        handleHistoryEventAdd(`
-            La différence d'Ini est de ${initiativeDifference}.
-            ${initiativeDifference < 2 ? `La différence est minime.` : ''}
-                ${iniBonus?.Effect?.CombatStats?.SA !== 0 ? `${actorAIni > actorBIni? actorA.Name : actorB.Name} gagne SA: ${iniBonus?.Effect?.CombatStats?.SA}` : ''}
-                ${iniBonus?.Effect?.CombatStats?.SD !== 0 ? `, SD: ${iniBonus?.Effect?.CombatStats?.SD}` : ''}
-                ${iniBonus?.Effect?.CombatStats?.CdC !== 0 ? `, CdC: ${iniBonus?.Effect?.CombatStats?.CdC}` : ''}
-            `, "Info");
+        // Fight Turn
+        const turnRes = handleTurn(firstActor, secondActor, charData, handleHistoryEventAdd);
 
-        if (actorAIni > actorBIni) {
-            handleHistoryEventAdd(`${actorA.Name} a l'initiative sur ${actorB.Name}.`, 'Info', `Ini A : ${actorAIni} |  Ini B : ${actorBIni}`);
-            if(iniBonus) actorAManaUsed = addEffect(actorAManaUsed, iniBonus, "Buff");
-            handleTurn(actorAManaUsed, actorB);
-        } else if (actorBIni > actorAIni) {
-            handleHistoryEventAdd(`${actorB.Name} a l'initiative sur ${actorA.Name}.`, 'Info', `Ini A : ${actorAIni} |  Ini B : ${actorBIni}`);
-            if(iniBonus) actorBManaUsed = addEffect(actorBManaUsed, iniBonus, "Buff");
-            handleTurn(actorBManaUsed, actorA);
-        }
-    }
-
-    function handleTurn(firstActor: CharStatsInterface | null, secondActor: CharStatsInterface | null, nbAtk?: number){
-        if(!firstActor || !secondActor){ return; };
-        let currentData = charData;
-       
-        // First ATK
-        const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, charData, handleHistoryEventAdd, nbAtk);
-
-        if(firstAtkRes){
-            currentData = currentData.map((char) => {
-                switch(true){
-                    case char.Id === firstAtkRes?.defenderData.Id: return firstAtkRes.defenderData;
-                    case char.Id === firstAtkRes?.attackerData.Id: return firstAtkRes.attackerData;
-                    default: return char;
-                }
-            })
-
-            // Second ATK
-            const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, currentData, handleHistoryEventAdd, nbAtk);
-
-            // Update character data
-            if(secondAtkRes){
-                let iniRemovedFirstActor = secondAtkRes.defenderData;
-                let iniRemovedSecondActor = secondAtkRes.attackerData;
-
-                // Remove Ini bonus
-                if(iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2" )){ const iniBuff = iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedFirstActor = removeEffect(iniRemovedFirstActor, iniBuff, "Buff"); };
-                if(iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2")){ const iniBuff = iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1"  || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedSecondActor = removeEffect(iniRemovedSecondActor, iniBuff, "Buff"); };
-
-                let manaRemovedFirstActor = iniRemovedFirstActor;
-                let manaRemovedSecondActor = iniRemovedSecondActor;
-                // Remove Mana debuff
-                if(manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedFirstActor = removeEffect(manaRemovedFirstActor, manaDebuff, "Debuff"); };
-                if(manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedSecondActor = removeEffect(manaRemovedSecondActor, manaDebuff, "Debuff"); };
-
-                // Dragon Stance
-                if(manaRemovedFirstActor.FightStyle?.Name === "Position du Dragon" && !manaRemovedFirstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
-                    const dragonBuff = findPreset("Déchainement du Dragon");
-                    if(dragonBuff){
-                        manaRemovedFirstActor = addEffect(manaRemovedFirstActor, dragonBuff, "Buff");
-                        handleHistoryEventAdd(`${manaRemovedFirstActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
-                    }
-                }
-                if(manaRemovedSecondActor.FightStyle?.Name === "Position du Dragon" && !manaRemovedSecondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
-                    const dragonBuff = findPreset("Déchainement du Dragon");
-                    if(dragonBuff){
-                        manaRemovedSecondActor = addEffect(manaRemovedSecondActor, dragonBuff, "Buff");
-                        handleHistoryEventAdd(`${manaRemovedSecondActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
-                    }
-                }
-
-                // Set Data
-                currentData = currentData.map((char) => {
-                    switch(true){
-                        case char.Id === manaRemovedFirstActor.Id: return manaRemovedFirstActor;
-                        case char.Id === manaRemovedSecondActor.Id: return manaRemovedSecondActor;
-                        default: return char;
-                    }
-                });
-            }
-        }
-
-        setCharData(currentData);
+        if(turnRes) setCharData(turnRes);
     }
 
     function handleSingleTurn(firstActor: CharStatsInterface | null, secondActor: CharStatsInterface | null, nbAtk?: number){
@@ -158,17 +65,33 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         setCharData(currentData);
     }
 
-    function applyTurnEffect(actorData: CharStatsInterface): CharStatsInterface {
-        if(actorData.TurnEffect.Dot !== 0){
-            handleHistoryEventAdd(`${actorData.Name} prend des dégâts sur la durée ! ( ${actorData.TurnEffect.Dot} )`, 'Atk');
-            actorData.Hp -= actorData.TurnEffect.Dot;
+    
+
+    function handleSingleManaCost(actorData: CharStatsInterface | null): void{
+        if(!actorData){ return; };
+        let newData = { ...actorData };
+
+        newData = handleTurnManaCost(newData, handleHistoryEventAdd);
+        setCharData(charData.map(char => char.Id === newData.Id? newData : char));
+    }
+
+    function handleSingleInitCalc(actorA: CharStatsInterface | null, actorB: CharStatsInterface | null): void {
+        if(!actorA || !actorB){ return; };
+        let newData = { ...charData };
+        const initActorA = { ...actorA };
+        const initActorB = { ...actorB };
+
+        const iniCalcRes = handleIniCalc(initActorA, initActorB, handleHistoryEventAdd);
+        if(iniCalcRes){
+            newData = charData.map((char) => {
+                switch(true){
+                    case char.Id === iniCalcRes.firstActor.Id: return iniCalcRes.firstActor;
+                    case char.Id === iniCalcRes.secondActor.Id: return iniCalcRes.secondActor;
+                    default: return char;
+                }
+            })
         }
-        if(actorData.TurnEffect.Hot !== 0){
-            handleHistoryEventAdd(`${actorData.Name} reçoit un heal sur la durée ! ( ${actorData.TurnEffect.Hot} )`, 'Heal');
-            actorData.Hp += actorData.TurnEffect.Hot;
-        }
-        
-        return actorData;
+        setCharData(newData);
     }
 
     function handleSetDisplayActorData (actorType: string, charName: string): void {
@@ -199,20 +122,21 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     function handleFightStanceChange(actorId: number | undefined, stanceName: string) {
         const actorData = charData.find((char) => char.Id === actorId);
         if(!actorData){ return; }
+        let currentData = { ...charData };
 
         const removedOldStanceBuffData = unapplyStance(actorData);
         const stanceData = findStance(stanceName);
         if(stanceData){
+            if(stanceData.Name === "Position du Golem" && stanceData.Effect.CombatStats){ stanceData.Effect.CombatStats.AA = -(Math.floor(actorData.CombatStats.AA / 2)); };
             removedOldStanceBuffData.FightStyle = stanceData;
 
-            if(stanceData.Name === "Position du Golem" && stanceData.Effect.CombatStats){ stanceData.Effect.CombatStats.AA = -(Math.floor(actorData.CombatStats.AA / 2)); };
-
             const addedNewStanceBuffData = applyStance(removedOldStanceBuffData);
-            setCharData(charData.map((char) => char.Id === actorId ? addedNewStanceBuffData : char));
+            currentData = currentData.map((char) => char.Id === actorId ? addedNewStanceBuffData : char);
         }else{
             removedOldStanceBuffData.FightStyle = null;
-            setCharData(charData.map((char) => char.Id === actorId ? removedOldStanceBuffData : char));
-        }   
+            currentData = currentData.map((char) => char.Id === actorId ? removedOldStanceBuffData : char);
+        }
+        setCharData(currentData);
     }
 
     function handleHistoryEventAdd(newHistoryEntry: string, newMsgType: string, msgTitle: string = ''): void { setActiveData(prevState => ({ ...prevState, fightHistory: [{historyMsg: newHistoryEntry, msgType: newMsgType, msgTitle: msgTitle}, ...prevState.fightHistory]})); };
@@ -270,10 +194,20 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                     <div className="flex flex-col items-center justify-around">
                         <div className="flex flex-col items-center gap-2">
                             <h2 className="input_label">Controles de combat: </h2>
-                            <div className="flex flex-row gap-2">
+                            <div className="flex flex-row gap-2 items-center">
+                                <h3 className="text-xl font-bold">Atk: </h3>
                                 <button onClick={() => handleSingleTurn(displayActorAData, displayActorBData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A &#8594; B</button>
                                 <button onClick={() => handleTurnPrep(displayActorAData, displayActorBData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Tour de combat</button>
                                 <button onClick={() => handleSingleTurn(displayActorBData, displayActorAData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A &#8592; B</button>
+                            </div>
+                            <div className="flex flex-row gap-2 items-center">
+                                <h3 className="text-xl font-bold">Coup Mana: </h3>
+                                <button onClick={() => handleSingleManaCost(displayActorAData)} disabled={displayActorAData === null} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Coup Mana A (1 tour)</button>
+                                <button onClick={() => handleSingleManaCost(displayActorBData)} disabled={displayActorBData === null} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Coup Mana B (1 tour)</button>
+                            </div>
+                            <div className="flex flex-row gap-2 items-center">
+                                <h3 className="text-xl font-bold">Calcul Ini: </h3>
+                                <button onClick={() => handleSingleInitCalc(displayActorAData, displayActorBData)} disabled={displayActorAData === null} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Calcul Initiative</button>
                             </div>
                             <div className="flex flex-col items-center gap-2">
                                 <h2 className="input_label">Choix Position de combat :</h2>

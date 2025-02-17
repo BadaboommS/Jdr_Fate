@@ -1,3 +1,21 @@
+import { rollDice } from "../function/GlobalFunction";
+import { DebuffInterface } from "../types/statsType";
+
+export function selectRandomDebuff ( debuffType: string, debuffList: DebuffInterface[] ){
+    const weaponTypeDebuffList = CCDebuffList[CCDebuffList.findIndex(debuff => debuff.Type === debuffType)];
+    if(!weaponTypeDebuffList) { return null; };
+
+    const availableDebuffs = weaponTypeDebuffList.Debuffs.filter(debuff => !debuffList.some(d => d.Name === debuff.Name));
+
+    if(availableDebuffs.length === 0){ return null; };
+
+    return weaponTypeDebuffList.Debuffs[rollDice(availableDebuffs.length) - 1];
+}
+
+export function getAllDebbuffs( DebuffType: string){
+    return CCDebuffList[CCDebuffList.findIndex(debuff => debuff.Type === DebuffType)].Debuffs;
+}
+
 export const CCDebuffList = [
     {
         Type : "Contondant",

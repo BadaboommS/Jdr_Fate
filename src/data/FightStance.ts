@@ -7,16 +7,42 @@ interface FightStanceInterface {
     Effect: EffectInterface,
 }
 
-export const StanceBaseEffectArray = {
+export const StanceBaseEffect = {
     "Offensif": { SA: 10, AA: 1, AD: -1 },
     "Defensif": { SD: 10, AD: 1, AA: -1 },
     "Neutre": { SA: 10, SD: 10 }
 }
 
-export function findStance ( Name?: string ){
-    let stance = null;
-    if(Name) stance = FightStanceArray.find(s => s.Name === Name);
-    return stance ? stance : null;
+export const StanceBaseEffectArray = [
+    { 
+        Name: "Stance Offensive",
+        Desc: `Vous êtes en position de combat.
+--------------------------
+# Ce buff est du à la selection de stance de combat et se retirera automatiquement au changement de celle-ci.`,
+        Effect: { SA: 10, AA: 1, AD: -1 }
+    },
+    { 
+        Name: "Stance Defensive",
+        Desc: `Vous êtes sur la defensive.
+--------------------------
+# Ce buff est du à la selection de stance de combat et se retirera automatiquement au changement de celle-ci.`,
+        Effect: { SD: 10, AD: 1, AA: -1 }
+    },
+    { 
+        Name: "Stance Neutre",
+        Desc: `Vous êtes prêt pour le combat.
+--------------------------
+# Ce buff est du à la selection de stance de combat et se retirera automatiquement au changement de celle-ci.`,
+        Effect: { SA: 10, SD: 10 }
+    }
+]
+
+export function findStance ( Name: string ){
+    return FightStanceArray.find(s => s.Name === Name);
+}
+
+export function findStanceBase (Name: string){
+    return StanceBaseEffectArray.find(s => s.Name === Name);
 }
 
 export const FightStanceArray: FightStanceInterface[] = [
