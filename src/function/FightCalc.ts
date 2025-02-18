@@ -46,14 +46,14 @@ export function handleTurn(
             if(manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedSecondActor = removeEffect(manaRemovedSecondActor, manaDebuff, "Debuff"); };
 
             // Dragon Stance
-            if(manaRemovedFirstActor.FightStyle?.Name === "Position du Dragon" && !manaRemovedFirstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
+            if(manaRemovedFirstActor.FightStyleList.some(stance => stance?.Name === "Position du Dragon") && !manaRemovedFirstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
                 const dragonBuff = findPreset("Déchainement du Dragon");
                 if(dragonBuff){
                     manaRemovedFirstActor = addEffect(manaRemovedFirstActor, dragonBuff, "Buff");
                     handleHistoryEventAdd(`${manaRemovedFirstActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
                 }
             }
-            if(manaRemovedSecondActor.FightStyle?.Name === "Position du Dragon" && !manaRemovedSecondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
+            if(manaRemovedSecondActor.FightStyleList.some(stance => stance?.Name  === "Position du Dragon") && !manaRemovedSecondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
                 const dragonBuff = findPreset("Déchainement du Dragon");
                 if(dragonBuff){
                     manaRemovedSecondActor = addEffect(manaRemovedSecondActor, dragonBuff, "Buff");
@@ -105,7 +105,7 @@ export function handleFightAtk(
     }
 
     // Stance Roseau
-    if(defenderData.FightStyle?.Name === "Position du Roseau"){
+    if(defenderData.FightStyleList.some(stance => stance?.Name === "Position du Roseau") ){
         const successfullDefCounter = Math.floor((atkCount - successAtkCounter) / 3);
         const roseauDebuff = findPreset("Revers de Roseau");
         if(roseauDebuff) {
@@ -122,11 +122,11 @@ export function handleFightAtk(
 }
 
 function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterface, atkNumber: number, critCounter: number, atkSuccessCounter: number) {
-    const atkJet = Attacker.FightStyle?.Name === "Position du Flamant Rose"? 50 : rollDice(100) + Attacker.CombatStats.SA;
-    const defJet = Defender.FightStyle?.Name === "Position du Flamant Rose"? 50 : rollDice(100) + Defender.CombatStats.SD;
+    const atkJet = Attacker.FightStyleList.some(stance => stance?.Name === "Position du Flamant Rose")? 50 : rollDice(100) + Attacker.CombatStats.SA;
+    const defJet = Defender.FightStyleList.some(stance => stance?.Name === "Position du Flamant Rose")? 50 : rollDice(100) + Defender.CombatStats.SD;
 
     // Calcul malus AD
-    const maxMalus = Defender.FightStyle?.Name === "Position du Lézard"? 45 : 90;
+    const maxMalus = Defender.FightStyleList.some(stance => stance?.Name === "Position du Lézard") ? 45 : 90;
     const malusAD = (atkNumber - Defender.CombatStats.AD) > 0 ? Math.min((atkNumber - Defender.CombatStats.AD) * -15, -maxMalus) : 0;
 
     // Calcul succès atk
@@ -160,10 +160,10 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
 
     // Check CC
     const enableCC = (critCounter < Attacker.CombatStats.CC);
-    if(CCDiceRoll < Attacker.CombatStats.CdC && Attacker.FightStyle?.Name !== "Position du Flamant Rose"){
+    if(CCDiceRoll < Attacker.CombatStats.CdC && Attacker.FightStyleList.some(stance => stance?.Name !== "Position du Flamant Rose")){
         if(enableCC){
             msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
-            if(!(Defender.FightStyle?.Name === "Position de la Pieuvre")){
+            if(!(Defender.FightStyleList.some(stance => stance?.Name === "Position de la Pieuvre"))){
                 const allDebuffs = getAllDebbuffs(Attacker.Weapon.WeaponType);
                 if(allDebuffs.every(debuff => Defender.DebuffsList.some(d => d.Name === debuff.Name))){
                     msgArray.push({ historyMsg: `${Defender.Name} a trop de debuff !`, msgType: 'CC', msgTitle: ''});
@@ -185,10 +185,10 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     }
 
     // Serpent Stance
-    if(atkSuccessCounter === 0 && Attacker.FightStyle?.Name === "Position du Serpent"){
+    if(atkSuccessCounter === 0 && Attacker.FightStyleList.some(stance => stance?.Name === "Position du Serpent")){
         if(Defender.DebuffsList.some(debuff => debuff.Name === "Poison du Serpent")){
             msgArray.push({ historyMsg: `Le poison de ${Defender.Name} est refresh (4 tours) !`, msgType: 'CC', msgTitle: ''});
-        }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+        }else if(Defender.FightStyleList.some(stance => stance?.Name === "Position de la Pieuvre")){
             msgArray.push({ historyMsg: `${Defender.Name} esquive le poison du serpent !`, msgType: 'CC', msgTitle: ''});
         }else{
             const serpentDotDebuff = findPreset("Poison du Serpent");
@@ -200,13 +200,13 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     }
 
     // Rhinocéros Stance
-    if(Attacker.FightStyle?.Name === "Position du Rhinocéros"){
+    if(Attacker.FightStyleList.some(stance => stance?.Name === "Position du Rhinocéros")){
         if(atkSuccessCounter === 0 || atkSuccessCounter === 1 || atkSuccessCounter === 2){
             const atkName = ["Premier", "Second", "Troisième"][atkSuccessCounter];
             if (rollDice(100) <= 50) {
                 if(Defender.DebuffsList.some(debuff => debuff.Name === `${atkName} Coup du Rhinocéros`)){
                     msgArray.push({ historyMsg: `${Defender.Name} a déjà le ${atkName} Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
-                }else if(Defender.FightStyle?.Name === "Position de la Pieuvre"){
+                }else if(Defender.FightStyleList.some(stance => stance?.Name === "Position de la Pieuvre")){
                     msgArray.push({ historyMsg: `${Defender.Name} esquive le ${atkName} Coup du Rhinocéros !`, msgType: 'CC', msgTitle: ''});
                 }else if(enableCC){
                     const rhinoDebuff = findPreset(`${atkName} Coup du Rhinocéros`);
@@ -376,49 +376,59 @@ export function unapplyAllCombatStatEffect(charData: CharStatsInterface): CharSt
     return newData;
 }
 
-export function applyStance(charData: CharStatsInterface): CharStatsInterface{
+export function applyAllStance(charData: CharStatsInterface): CharStatsInterface{
     const newData = { ...charData };
-    const stanceType = newData.FightStyle?.Type;
-    if(stanceType){
-        const stanceTypeBuff = StanceBaseEffect[stanceType as keyof typeof StanceBaseEffect];
-        if(stanceTypeBuff){
-            Object.keys(stanceTypeBuff).forEach((key) => {
-                const stanceBaseBuffKey = key as keyof typeof newData.CombatStats;
-                if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { newData.CombatStats[stanceBaseBuffKey] += (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
-            });
+    const stanceBuffArray = newData.FightStyleList;
+    if(stanceBuffArray){
+        for(let i = 0; i < stanceBuffArray.length; i++){
+            const stanceData = stanceBuffArray[i];
+            if(stanceData){
+                const stanceType = stanceBuffArray[i]?.Type;
+                const stanceTypeBuff = StanceBaseEffect[stanceType as keyof typeof StanceBaseEffect];
+                if(stanceTypeBuff){
+                    Object.keys(stanceTypeBuff).forEach((key) => {
+                        const stanceBaseBuffKey = key as keyof typeof newData.CombatStats;
+                        if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { newData.CombatStats[stanceBaseBuffKey] += (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
+                    });
+                }
+                const stanceBuff = stanceBuffArray[i]?.Effect?.CombatStats || null;
+                if (stanceBuff) {
+                    Object.keys(stanceBuff).forEach((key) => {
+                        const stanceBuffKey = key as keyof typeof newData.CombatStats;
+                        if (stanceBuff[stanceBuffKey]) { newData.CombatStats[stanceBuffKey] += stanceBuff[stanceBuffKey]; };
+                    });
+                }
+            }
         }
     }
-    const stanceBuff = newData.FightStyle?.Effect?.CombatStats || null;
-        if (stanceBuff) {
-            Object.keys(stanceBuff).forEach((key) => {
-                const stanceBuffKey = key as keyof typeof newData.CombatStats;
-                if (stanceBuff[stanceBuffKey]) { newData.CombatStats[stanceBuffKey] += stanceBuff[stanceBuffKey]; };
-            });
-        }
-
     return newData;
 }
 
-export function unapplyStance(charData: CharStatsInterface): CharStatsInterface{
+export function unapplyAllStance(charData: CharStatsInterface): CharStatsInterface{
     const newData = { ...charData };
-    const stanceType = newData.FightStyle?.Type;
-    if(stanceType){
-        const stanceTypeBuff = StanceBaseEffect[stanceType as keyof typeof StanceBaseEffect];
-        if(stanceTypeBuff){
-            Object.keys(stanceTypeBuff).forEach((key) => {
-                const stanceBaseBuffKey = key as keyof typeof newData.CombatStats;
-                if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { newData.CombatStats[stanceBaseBuffKey] -= (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
-            });
+    const stanceBuffArray = newData.FightStyleList;
+    if(stanceBuffArray){
+        for(let i = 0; i < stanceBuffArray.length; i++){
+            const stanceData = stanceBuffArray[i];
+            if(stanceData){
+                const stanceType = stanceBuffArray[i]?.Type;
+                const stanceTypeBuff = StanceBaseEffect[stanceType as keyof typeof StanceBaseEffect];
+                if(stanceTypeBuff){
+                    Object.keys(stanceTypeBuff).forEach((key) => {
+                        const stanceBaseBuffKey = key as keyof typeof newData.CombatStats;
+                        if ((stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]) { newData.CombatStats[stanceBaseBuffKey] -= (stanceTypeBuff as Record<string, number>)[stanceBaseBuffKey]; };
+                    });
+                }
+                const stanceBuff = stanceBuffArray[i]?.Effect?.CombatStats || null;
+                if (stanceBuff) {
+                    Object.keys(stanceBuff).forEach((key) => {
+                        const stanceBuffKey = key as keyof typeof newData.CombatStats;
+                        if (stanceBuff[stanceBuffKey]) { newData.CombatStats[stanceBuffKey] -= stanceBuff[stanceBuffKey]; };
+                    });
+                }
+            }
         }
     }
-    const stanceBuff = newData.FightStyle?.Effect?.CombatStats || null;
-        if (stanceBuff) {
-            Object.keys(stanceBuff).forEach((key) => {
-                const stanceBuffKey = key as keyof typeof newData.CombatStats;
-                if (stanceBuff[stanceBuffKey]) { newData.CombatStats[stanceBuffKey] -= stanceBuff[stanceBuffKey]; };
-            });
-        }
-
     return newData;
 }
 

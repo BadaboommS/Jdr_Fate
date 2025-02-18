@@ -19,7 +19,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
         defaultValues: {
             Name: charStats.Name, Joueur: charStats.Joueur, Type: charStats.Type, Variant: charStats.Variant,
             WeaponName: charStats.Weapon.WeaponName, WeaponDmg: charStats.Weapon.WeaponDmg, WeaponType: charStats.Weapon.WeaponType,
-            Armor: charStats.Armor, Hp: charStats.Hp, Mana: charStats.Mana,
+            Hp: charStats.Hp, Mana: charStats.Mana, Armor: charStats.Armor, MaxFightStyleAmount: charStats.MaxFightStyleAmount,
             STR: charStats.Caracteristics.STR, END: charStats.Caracteristics.END, AGI: charStats.Caracteristics.AGI, MANA: charStats.Caracteristics.MANA, MGK: charStats.Caracteristics.MGK, LUK: charStats.Caracteristics.LUK, SPD: charStats.Caracteristics.SPD,
             BuffsList: charStats.BuffsList, DebuffsList: charStats.DebuffsList            
         }
@@ -28,19 +28,19 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Confirmer l'Edit du character ?`)){ return;} ;
 
-        const { Name, Joueur, Type, Hp, Mana, WeaponName, WeaponDmg, WeaponType, Armor, Variant, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, Hp, Mana, WeaponName, WeaponDmg, WeaponType, Armor, MaxFightStyleAmount, Variant, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData: CharStatsInterface = {
             Id: charStats.Id, Name, Joueur, Type,
             Weapon: { WeaponName, WeaponDmg, WeaponType },
-            Armor, Hp: Number(Hp), InitHp: Number(Hp), Mana: Number(Mana), InitMana: Number(Mana),
+            Hp: Number(Hp), InitHp: Number(Hp), Mana: Number(Mana), InitMana: Number(Mana), Armor, MaxFightStyleAmount: MaxFightStyleAmount,
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             BuffsList: charStats.BuffsList.map(buff => ({ ...buff, Applied: false })), // remove applied from all buffs
             DebuffsList: charStats.DebuffsList.map(debuff => ({ ...debuff, Applied: false })), // remove applied from all debuffs
+            FightStyleList: charStats.FightStyleList,
             TurnEffect: charStats.TurnEffect,
-            FightStyle: null,
             CaracteristicsBuff: charStats.CaracteristicsBuff,
             CustomCaracteristicsValue: getCustomValues(),
             ...(showVariant && { Variant })
@@ -117,6 +117,10 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                             <div className="input_entry">
                                 <label htmlFor="input_Armor" className="input_label">Armure :</label>
                                 <input type="number" {...register("Armor", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_Armor" className="input_field" />
+                            </div>
+                            <div className="input_entry">
+                                <label htmlFor="input_stance_number" className="input_label">Nombre de stance :</label>
+                                <input type="number" {...register("MaxFightStyleAmount", {required: "Enter a Valid WeaponDmg Amount !", min: 0, max: 3})} id="input_stance_number" className="input_field" />
                             </div>
                             {["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"].map((stat) => (
                                 <div key={stat} className="input_entry">

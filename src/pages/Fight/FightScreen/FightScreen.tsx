@@ -6,7 +6,7 @@ import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../.
 import { FightListInterface } from "../../../types/fightType";
 import { Terminal } from "./FightDisplay/Terminal";
 import { Modal } from "../../../global/Modal";
-import { applyStance, handleFightAtk, handleTurnManaCost, removeEffect, unapplyStance, handleIniCalc, applyTurnEffect, handleTurn } from "../../../function/FightCalc";
+import { handleFightAtk, handleTurnManaCost, removeEffect, unapplyAllStance, applyAllStance, handleIniCalc, applyTurnEffect, handleTurn } from "../../../function/FightCalc";
 import { FightSettingsModal } from "./FightSettingsModal";
 import { FightStanceArray, findStance } from "../../../data/FightStance";
 import './fightScreen.css';
@@ -35,7 +35,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         const turnEffectActorA = applyTurnEffect(initActorA, handleHistoryEventAdd);
         const turnEffectActorB = applyTurnEffect(initActorB, handleHistoryEventAdd);
 
-        // Coup en Mana
+        // Coût en Mana
         const actorAManaUsed = handleTurnManaCost(turnEffectActorA, handleHistoryEventAdd);
         const actorBManaUsed = handleTurnManaCost(turnEffectActorB, handleHistoryEventAdd);
 
@@ -119,24 +119,23 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         handleHistoryEventAdd(`${name} ${memberListChangeMsg}`, 'Info');
     }
 
-    function handleFightStanceChange(actorId: number | undefined, stanceName: string) {
+    function handleFightStanceChange(actorId: number | undefined, stanceName: string, stanceNumber: number) {
         const actorData = charData.find((char) => char.Id === actorId);
         if(!actorData){ return; }
-        let currentData = { ...charData };
-
-        const removedOldStanceBuffData = unapplyStance(actorData);
-        const stanceData = findStance(stanceName);
-        if(stanceData){
-            if(stanceData.Name === "Position du Golem" && stanceData.Effect.CombatStats){ stanceData.Effect.CombatStats.AA = -(Math.floor(actorData.CombatStats.AA / 2)); };
-            removedOldStanceBuffData.FightStyle = stanceData;
-
-            const addedNewStanceBuffData = applyStance(removedOldStanceBuffData);
-            currentData = currentData.map((char) => char.Id === actorId ? addedNewStanceBuffData : char);
+        const currentData = [ ...charData ];
+        const newStanceData = findStance(stanceName);
+        const removedStanceBuffData = unapplyAllStance(actorData);
+        
+        if(newStanceData){
+            if(newStanceData.Name === "Position du Golem" && newStanceData.Effect.CombatStats){ newStanceData.Effect.CombatStats.AA = -(Math.floor(actorData.CombatStats.AA / 2)); };
+            removedStanceBuffData.FightStyleList[stanceNumber] = newStanceData;
         }else{
-            removedOldStanceBuffData.FightStyle = null;
-            currentData = currentData.map((char) => char.Id === actorId ? removedOldStanceBuffData : char);
+            removedStanceBuffData.FightStyleList[stanceNumber] = null;
         }
-        setCharData(currentData);
+        const appliedStanceBuffData = applyAllStance(removedStanceBuffData);
+        const finalData = currentData.map((char) => char.Id === actorId ? appliedStanceBuffData : char);
+
+        setCharData(finalData);
     }
 
     function handleHistoryEventAdd(newHistoryEntry: string, newMsgType: string, msgTitle: string = ''): void { setActiveData(prevState => ({ ...prevState, fightHistory: [{historyMsg: newHistoryEntry, msgType: newMsgType, msgTitle: msgTitle}, ...prevState.fightHistory]})); };
@@ -194,41 +193,48 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                     <div className="flex flex-col items-center justify-around">
                         <div className="flex flex-col items-center gap-2">
                             <h2 className="input_label">Controles de combat: </h2>
-                            <div className="flex flex-row gap-2 items-center">
-                                <h3 className="text-xl font-bold">Atk: </h3>
-                                <button onClick={() => handleSingleTurn(displayActorAData, displayActorBData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A &#8594; B</button>
-                                <button onClick={() => handleTurnPrep(displayActorAData, displayActorBData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Tour de combat</button>
-                                <button onClick={() => handleSingleTurn(displayActorBData, displayActorAData)} disabled={(displayActorAData === null || displayActorBData === null)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A &#8592; B</button>
+                            <div className="flex gap-2 items-center">
+                                <h3 className="text-xl font-bold">Tour complet: </h3>
+                                <button onClick={() => handleTurnPrep(displayActorAData, displayActorBData)} disabled={(!displayActorAData || !displayActorBData)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed" title="Tour complet (Ini, Coût Mana, Dot&Hot, Tour d'attaque">Tour de combat</button>
                             </div>
-                            <div className="flex flex-row gap-2 items-center">
-                                <h3 className="text-xl font-bold">Coup Mana: </h3>
-                                <button onClick={() => handleSingleManaCost(displayActorAData)} disabled={displayActorAData === null} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Coup Mana A (1 tour)</button>
-                                <button onClick={() => handleSingleManaCost(displayActorBData)} disabled={displayActorBData === null} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Coup Mana B (1 tour)</button>
+                            <div className="flex gap-2 items-center">
+                                <h3 className="text-xl font-bold">Simple Attaque: </h3>
+                                <button onClick={() => handleSingleTurn(displayActorAData, displayActorBData)} disabled={(!displayActorAData || !displayActorBData)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed" title="Attaque de A sur B Uniquement">A &#8594; B</button>
+                                <button onClick={() => handleSingleTurn(displayActorBData, displayActorAData)} disabled={(!displayActorAData|| !displayActorBData)} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed" title="Attaque de B sur A Uniquement">A &#8592; B</button>
                             </div>
-                            <div className="flex flex-row gap-2 items-center">
+                            <div className="flex gap-2 items-center">
+                                <h3 className="text-xl font-bold">Calcul Coût Mana: </h3>
+                                <button onClick={() => handleSingleManaCost(displayActorAData)} disabled={!displayActorAData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed" title="Calcul Auto du coût en mana pour l'acteur A">A</button>
+                                <button onClick={() => handleSingleManaCost(displayActorBData)} disabled={!displayActorBData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed" title="Calcul Auto du coût en mana pour l'acteur B">B</button>
+                            </div>
+                            <div className="flex gap-2 items-center">
                                 <h3 className="text-xl font-bold">Calcul Ini: </h3>
-                                <button onClick={() => handleSingleInitCalc(displayActorAData, displayActorBData)} disabled={displayActorAData === null} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Calcul Initiative</button>
+                                <button onClick={() => handleSingleInitCalc(displayActorAData, displayActorBData)} disabled={!displayActorAData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed" title="Calcul auto de l'initiave">Calcul</button>
                             </div>
                             <div className="flex flex-col items-center gap-2">
                                 <h2 className="input_label">Choix Position de combat :</h2>
                                 <div className="grid grid-cols-2 gap-2 w-full">
                                     <div className="flex flex-col">
                                         <h2 className="text-center input_label">Acteur A :</h2>
-                                        <select className="input_field" id="actorA_stance_select" onChange={(e) => handleFightStanceChange(displayActorAData?.Id, e.currentTarget.value)} defaultValue={displayActorAData?.FightStyle?.Name || "None"}>
-                                            <option value="None">None</option>
-                                            {FightStanceArray.map((stance) => {
-                                                return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
-                                            })}
-                                        </select>
+                                        {displayActorAData && Array.from({ length: displayActorAData?.MaxFightStyleAmount }).map((_, index) => {
+                                            return <select key={index} className="input_field" id={`actorA_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorAData?.Id, e.currentTarget.value, index)} defaultValue={displayActorAData?.FightStyleList[index]?.Name || "None"}>
+                                                        <option value="None">None</option>
+                                                        {FightStanceArray.map((stance) => {
+                                                            return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
+                                                        })}
+                                                    </select>
+                                        })}
                                     </div>
                                     <div className="flex flex-col">
                                         <h2 className="text-center input_label">Acteur B :</h2>
-                                        <select className="input_field" id="actorB_stance_select" onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value)} defaultValue={displayActorBData?.FightStyle?.Name || "None"}>
-                                            <option value="None">None</option>
-                                            {FightStanceArray.map((stance) => {
-                                                return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
-                                            })}
-                                        </select>
+                                        {displayActorBData && Array.from({ length: displayActorBData?.MaxFightStyleAmount }).map((_, index) => {
+                                            return <select key={index} className="input_field" id={`actorB_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value, index)} defaultValue={displayActorAData?.FightStyleList[index]?.Name || "None"}>
+                                                        <option value="None">None</option>
+                                                        {FightStanceArray.map((stance) => {
+                                                            return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
+                                                        })}
+                                                    </select>
+                                        })}
                                     </div>
                                 </div>
                             </div>

@@ -1,6 +1,6 @@
 import { EffectInterface } from "../types/statsType";
 
-interface FightStanceInterface {
+export interface FightStanceInterface {
     Name: string;
     Desc: string;
     Type: "Offensif" | "Defensif" | "Neutre";

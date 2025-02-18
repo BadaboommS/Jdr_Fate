@@ -1,25 +1,19 @@
+import { FightStanceInterface } from "../data/FightStance";
+
 export interface CharStatsInterface {
     Id: number;
-    Name: string;
-    Joueur: string;
-    Type: string;
-    Variant?: string;
-    Weapon: WeaponType;
-    Armor: number;
-    Hp: number;
-    InitHp: number;
-    Mana: number;
-    InitMana: number;
-    Caracteristics: CharStatsCaracteristicsInterface;
-    CombatStats: CharStatsCombatStatsInterface;
-    InitCaracteristics: CharStatsCaracteristicsInterface;
-    InitCombatStats: CharStatsCombatStatsInterface;
-    BuffsList: CharBuffInterface[];
-    DebuffsList: CharDebuffInterface[];
-    TurnEffect: TurnEffectInterface;
-    FightStyle: FightStyleInterface | null;
-    CaracteristicsBuff: CharStatsCaracteristicsValueInterface;
-    CustomCaracteristicsValue: Partial<CharStatsCaracteristicsInterface>;
+    Name: string; Joueur: string;
+    Type: string; Variant?: string;
+    Weapon: WeaponType; Armor: number;
+    Hp: number; InitHp: number;
+    Mana: number; InitMana: number;
+    Caracteristics: CharStatsCaracteristicsInterface; InitCaracteristics: CharStatsCaracteristicsInterface;
+    CombatStats: CharStatsCombatStatsInterface; InitCombatStats: CharStatsCombatStatsInterface;
+    BuffsList: CharBuffInterface[]; DebuffsList: CharDebuffInterface[];
+    TurnEffect: TurnEffectInterface; // Dot & Hot
+    FightStyleList: (FightStanceInterface | null)[]; MaxFightStyleAmount: number; // Stances Buffs
+    CaracteristicsBuff: CharStatsCaracteristicsValueInterface; // After Buff / Debuff Caracteristics
+    CustomCaracteristicsValue: Partial<CharStatsCaracteristicsInterface>; // EX & S
 }
 
 export interface CharDebuffInterface extends DebuffInterface {
@@ -129,6 +123,7 @@ export interface CreateCharFormInputInterface {
     WeaponDmg: number;
     WeaponType: string;
     Armor: number;
+    MaxFightStyleAmount: number;
     //Caracteristics
     STR: string;
     END: string;

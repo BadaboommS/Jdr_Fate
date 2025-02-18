@@ -95,9 +95,8 @@ export const EffectPresetArray: EffectPresetInterface[] = [
         Name: "Bonus Initiative 1",
         Desc: `Vous avez l'initiative.
 --------------------------
-# Ce buff sera rajouté automatiquement lors des jets d'initiatives.
-# Il sera retiré automatiquement après la résolution du tour.
-.`, 
+# Si ce buff est visible, le calcul d'initiative custom a été activé.
+# Dans ce cas précis, le MJ devras retirer manuellement le buff à la fin du tour.`, 
         EffectType: "Buff",
         Effect: { CombatStats: { SA: 15, SD: 15 } }
     },
@@ -106,9 +105,8 @@ export const EffectPresetArray: EffectPresetInterface[] = [
         Name: "Bonus Initiative 2",
         Desc: `Vous avez grandement l'initiative.
 --------------------------
-# Ce buff sera rajouté automatiquement lors des jets d'initiatives.
-# Il sera retiré automatiquement après la résolution du tour.
-.`, 
+# Si ce buff est visible, le calcul d'initiative custom a été activé.
+# Dans ce cas précis, le MJ devras retirer manuellement le buff à la fin du tour.`, 
         EffectType: "Buff",
         Effect: { CombatStats: { SA: 30, SD: 30, CdC: 2 } }
     },
@@ -117,8 +115,8 @@ export const EffectPresetArray: EffectPresetInterface[] = [
         Name: "Mal de mana",
         Desc: `Vous n'avez pas assez de mana pour vous mouvoir correctement ce tour.
 --------------------------
-# Ce buff sera rajouté automatiquement lors du début du tour si vous n'avez pas assez de mana.
-# Il sera retiré automatiquement après la résolution du tour.`, 
+# Si ce buff est visible, le calcul des coûts en mana custom a été activé.
+# Dans ce cas précis, le MJ devras retirer manuellement le buff à la fin du tour.`, 
         EffectType: "Debuff",
         Effect: { CombatStats: { AA: 0, AD: 0, SA: 50, SD: 50 } }
     }

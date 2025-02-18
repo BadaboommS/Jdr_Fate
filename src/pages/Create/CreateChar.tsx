@@ -10,27 +10,25 @@ export function CreateChar() {
     const { charData, setCharData, playerData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(false);
 
-    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', WeaponName: '', WeaponType: '', WeaponDmg: 0, Armor: 0, Hp: 0, Mana: 0 }});
+    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', WeaponName: '', WeaponType: '', WeaponDmg: 0, Armor: 0, Hp: 0, Mana: 0, MaxFightStyleAmount: 0 }});
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Valider l'ajout du personnage ?`)){
             return;
         }
 
-        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, MaxFightStyleAmount, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Id: charData[0] ? charData[charData.length - 1].Id + 1 : 0,
             Name, Joueur, Type,
             Weapon: { WeaponName, WeaponDmg: Number(WeaponDmg), WeaponType },
-            Hp: Number(Hp), InitHp: Number(Hp), Mana: Number(Mana), InitMana: Number(Mana), Armor: Number(Armor),
+            Hp: Number(Hp), InitHp: Number(Hp), Mana: Number(Mana), InitMana: Number(Mana), Armor: Number(Armor), MaxFightStyleAmount: Number(MaxFightStyleAmount),
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
-            BuffsList: [],
-            DebuffsList: [],
+            BuffsList: [], DebuffsList: [], FightStyleList: [],
             TurnEffect: { Dot: 0, Hot: 0 },
-            FightStyle: null,
             CaracteristicsBuff: { STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0 },
             CustomCaracteristicsValue: getCustomValues(),
             ...(showVariant && { Variant })
@@ -117,6 +115,10 @@ export function CreateChar() {
                         <div className="input_entry">
                             <label htmlFor="input_Armor" className="input_label">Armure :</label>
                             <input type="number" {...register("Armor", {required: "Enter a Valid Armor Amount !"})} id="input_Armor" className="input_field" />
+                        </div>
+                        <div className="input_entry">
+                            <label htmlFor="input_stance_number" className="input_label">Nombre de stance :</label>
+                            <input type="number" {...register("MaxFightStyleAmount", {required: "Enter a Valid WeaponDmg Amount !", min: 0})} id="input_stance_number" className="input_field" />
                         </div>
                         <h3 className="input_label">Caracteristics :</h3>
                         {["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"].map((stat) => (

@@ -74,6 +74,20 @@ export function FightActorStatsDisplay({ characterData, handleRemoveEffect }: Fi
                         </div>
                     ))}
                     {
+                        (characterData.FightStyleList.length > 0 && characterData.FightStyleList.some(stance => stance !== null))
+                            ?   <>
+                                    <h3 className="input_label">Fight Stance :</h3>
+                                    {Object.entries(characterData.FightStyleList).map(([key, value]) => {
+                                        if(value){
+                                            return  <div key={key} className="input_entry">
+                                                        <span className="input_field cursor-help" title={value.Desc}>{value.Name}</span>
+                                                    </div>
+                                        }
+                                    })}
+                                </>
+                            : <></>
+                    }
+                    {
                         (characterData.BuffsList.length > 0)
                             ?   <>
                                     <h3 className="input_label">Buffs List :</h3>
