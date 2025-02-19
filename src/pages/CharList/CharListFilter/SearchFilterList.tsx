@@ -1,8 +1,8 @@
 import { useContext } from 'react';
+import { TbZoomReset } from "react-icons/tb";
 import { DataContext } from '../../../context/DataContext';
 import { SearchFilterItem } from './SearchFilterItem';
 import { SearchFilterAdd } from './SearchFilterAdd';
-import { TbZoomReset } from "react-icons/tb";
 
 interface SearchFilterListPropsInterface {
     changeQuery: (query: string) => void;

@@ -2,15 +2,15 @@ import { useContext, useEffect, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { DataContext } from "../../../context/DataContext";
 import { CharacterStatsDisplay } from "../../../global/CharacterStatsDisplay";
+import { Modal } from "../../../global/Modal";
+import { FightSettingsModal } from "./FightSettingsModal";
+import { FightEditCharModal } from "./FightCustomControl/FightEditCharModal";
+import { FightControl } from "./FightControl/FightControl";
+import { FightANModal } from "./FightCustomControl/FightANModal";
+import { FightStatsEdit } from "./FightCustomControl/FightStatsEdit";
 import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../../../types/statsType";
 import { FightListInterface } from "../../../types/fightType";
-import { Modal } from "../../../global/Modal";
 import { removeEffect } from "../../../function/FightCalc";
-import { FightEditCharModal } from "./FightControl/FightEditCharModal";
-import { FightControl } from "./FightControl/FightControl";
-import { FightSettingsModal } from "./FightControl/FightSettingsModal";
-import { FightANModal } from "./FightControl/FightANModal";
-import { FightStatsEdit } from "./FightControl/FightStatsEdit";
 import './fightScreen.css';
 
 
@@ -53,7 +53,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     }
 
     function handleHistoryEventAdd(newHistoryEntry: string, newMsgType: string, msgTitle: string = ''): void { 
-        setActiveData(prevState => ({ ...prevState, fightHistory: [{historyMsg: newHistoryEntry, msgType: newMsgType, msgTitle: msgTitle}, ...prevState.fightHistory]}));
+        setActiveData(prevState => ({ ...prevState, fightHistory: [{ historyMsg: newHistoryEntry, msgType: newMsgType, msgTitle: msgTitle }, ...prevState.fightHistory]}));
     };
 
     function handleFightModalClose(): void {

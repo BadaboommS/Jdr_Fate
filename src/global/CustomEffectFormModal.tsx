@@ -1,8 +1,8 @@
 import { useContext, useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { DataContext } from '../context/DataContext';
 import { FaEdit } from "react-icons/fa";
 import { BsBookmarkPlusFill } from 'react-icons/bs';
+import { DataContext } from '../context/DataContext';
 import { Modal } from './Modal';
 import { CharBuffInterface, CharStatsInterface, EffectFormInputInterface } from '../types/statsType';
 import { addEffect, removeEffect } from '../function/FightCalc';

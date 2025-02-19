@@ -1,6 +1,5 @@
-import { FilterSettingsInterface } from "../../../types/filterType";
 import { RxCross1 } from "react-icons/rx";
-
+import { FilterSettingsInterface } from "../../../types/filterType";
 
 interface FilterItemPropsInterface {
     filter: FilterSettingsInterface;

@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
+import { DataContext } from "../../context/DataContext";
 import { Modal } from "../../global/Modal";
 import { EditChar } from './EditChar';
 import { CharInfo } from "./CharInfo";
 import { CharStatsInterface } from "../../types/statsType";
-import { DataContext } from "../../context/DataContext";
 import './charItem.css';
 
 interface CharItemPropsInterface {

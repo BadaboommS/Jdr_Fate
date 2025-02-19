@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
-import { DataContext } from "../../context/DataContext";
 import { MdSave } from "react-icons/md";
+import { DataContext } from "../../context/DataContext";
 
 export function SaveFileControl () {
     const { charData } = useContext(DataContext);

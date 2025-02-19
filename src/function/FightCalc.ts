@@ -1,9 +1,9 @@
 import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, BuffInterface, DebuffInterface, CharStatsCaracteristicsInterface } from "../types/statsType";
-import { StanceBaseEffect } from "../data/FightStance";
-import { rollDice } from "./GlobalFunction";
+import { updateCombatStatsCalc } from "./BaseStatsCalc";
+import { rollDice, updateCharData } from "./GlobalFunction";
 import { getAllDebbuffs, selectRandomDebuff } from "../data/CCDebuff";
 import { findPreset } from "../data/EffectPreset";
-import { updateCombatStatsCalc } from "./BaseStatsCalc";
+import { StanceBaseEffect } from "../data/FightStance";
 
 export function handleTurn(
     firstActor: CharStatsInterface | null,
@@ -13,7 +13,7 @@ export function handleTurn(
     nbAtk?: number
 ){
     if(!firstActor || !secondActor){ return; };
-    let currentData = [...charData];
+    let currentData = [ ...charData ];
 
     // Turn effect
     const turnEffectActorA = applyTurnEffect(firstActor, handleHistoryEventAdd);
@@ -27,25 +27,13 @@ export function handleTurn(
     const { iniFirstActor, iniSecondActor } = handleIniCalc(actorAManaUsed, actorBManaUsed, handleHistoryEventAdd);
 
     // Set Data
-    currentData = currentData.map((char) => {
-        switch(true){
-            case char.Id === iniFirstActor.Id: return iniFirstActor;
-            case char.Id === iniSecondActor.Id: return iniSecondActor;
-            default: return char;
-        }
-    });
+    currentData = updateCharData(currentData, iniFirstActor, iniSecondActor); // Set Data
    
     // First ATK
     const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, currentData, handleHistoryEventAdd, nbAtk);
     if(!firstAtkRes){ return currentData };
 
-    currentData = currentData.map((char) => {
-        switch(true){
-            case char.Id === firstAtkRes?.defenderData.Id: return firstAtkRes.defenderData;
-            case char.Id === firstAtkRes?.attackerData.Id: return firstAtkRes.attackerData;
-            default: return char;
-        }
-    })
+    currentData = updateCharData(currentData, firstAtkRes.defenderData, firstAtkRes.attackerData); // Set Data
 
     // Second ATK
     const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, currentData, handleHistoryEventAdd, nbAtk);
@@ -65,14 +53,7 @@ export function handleTurn(
     const dragonStanceFirstActor = applyDragonBuff(manaRemovedFirstActor, handleHistoryEventAdd);
     const dragonStanceSecondActor = applyDragonBuff(manaRemovedSecondActor, handleHistoryEventAdd);
 
-    // Set Data
-    currentData = currentData.map((char) => {
-        switch(true){
-            case char.Id === dragonStanceFirstActor.Id: return dragonStanceFirstActor;
-            case char.Id === dragonStanceSecondActor.Id: return dragonStanceSecondActor;
-            default: return char;
-        }
-    });
+    currentData = updateCharData(currentData, dragonStanceFirstActor, dragonStanceSecondActor); // Set Data
 
     return currentData;
 }

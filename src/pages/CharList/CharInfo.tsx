@@ -1,9 +1,9 @@
 import { useContext } from "react";
-import { CharStatsInterface } from "../../types/statsType";
 import { DataContext } from "../../context/DataContext";
-import { removeEffect } from "../../function/FightCalc";
-import { CharBuffInterface, CharDebuffInterface } from "../../types/statsType";
 import { CharacterStatsDisplay } from "../../global/CharacterStatsDisplay";
+import { CharStatsInterface } from "../../types/statsType";
+import { CharBuffInterface, CharDebuffInterface } from "../../types/statsType";
+import { removeEffect } from "../../function/FightCalc";
 
 interface CharInfoPropsInterface {
     charStats: CharStatsInterface;

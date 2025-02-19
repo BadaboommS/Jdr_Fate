@@ -1,6 +1,5 @@
-import { FightListInterface } from "../../types/fightType";
 import { RxCross1 } from "react-icons/rx";
-
+import { FightListInterface } from "../../types/fightType";
 
 interface FilterItemPropsInterface {
     fightData: FightListInterface;

@@ -1,6 +1,6 @@
-import { CharStatsInterface, CharBuffInterface, CharDebuffInterface, CombatStatsTitle } from "../types/statsType";
 import { RxCross1 } from "react-icons/rx";
 import { CustomEffectFormModal } from "./CustomEffectFormModal";
+import { CharStatsInterface, CharBuffInterface, CharDebuffInterface, CombatStatsTitle } from "../types/statsType";
 
 interface CharacterStatsDisplayProps {
     charStats: CharStatsInterface;

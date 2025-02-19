@@ -11,7 +11,6 @@ interface ModalProps {
 export function Modal ({ isOpen, onClose, children }: ModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
 
-    // Focus on first input when modal is opened
     useEffect(() => {
         if (isOpen && modalRef.current) {
             const firstInput = modalRef.current.querySelector('input');
@@ -21,7 +20,6 @@ export function Modal ({ isOpen, onClose, children }: ModalProps) {
         }
     }, [isOpen]);
 
-    // Close modal when pressing escape key
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
           if (event.key === 'Escape') {

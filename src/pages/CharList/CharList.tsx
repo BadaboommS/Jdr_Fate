@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import { DataContext } from "../../context/DataContext";
-import { CharStatsInterface } from "../../types/statsType";
 import { CharItem } from "./CharItem";
 import { SearchBar } from "./CharListFilter/SearchBar";
+import { CharStatsInterface } from "../../types/statsType";
 
 export function CharList() {
     const { charData } = useContext(DataContext);

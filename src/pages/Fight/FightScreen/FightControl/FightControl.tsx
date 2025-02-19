@@ -3,7 +3,8 @@ import { DataContext } from "../../../../context/DataContext";
 import { Terminal } from "../FightDisplay/Terminal";
 import { FightListInterface } from "../../../../types/fightType";
 import { CharStatsInterface } from "../../../../types/statsType";
-import { applyAllStance, handleFightAtk, handleIniCalc, handleTurn, handleTurnManaCost, unapplyAllStance } from "../../../../function/FightCalc";
+import { applyAllStance, applyTurnEffect, handleFightAtk, handleIniCalc, handleTurn, handleTurnManaCost, unapplyAllStance } from "../../../../function/FightCalc";
+import { updateCharData } from "../../../../function/GlobalFunction";
 import { FightStanceArray, findStance } from "../../../../data/FightStance";
 
 interface FightControlProps {
@@ -28,45 +29,27 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
 
     function handleSingleTurn(firstActor: CharStatsInterface | null, secondActor: CharStatsInterface | null, nbAtk?: number){
         if(!firstActor || !secondActor){ return; };
-        let currentData = charData;
-        const singleAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, charData, handleHistoryEventAdd, nbAtk);
+        let currentData = [ ...charData ];
 
-        if(singleAtkRes){
-            currentData = currentData.map((char) => {
-                switch(true){
-                    case char.Id === singleAtkRes?.defenderData.Id: return singleAtkRes.defenderData;
-                    case char.Id === singleAtkRes?.attackerData.Id: return singleAtkRes.attackerData;
-                    default: return char;
-                }
-            })
-        }
+        const singleAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, charData, handleHistoryEventAdd, nbAtk);
+        if(singleAtkRes){ currentData = updateCharData(currentData, singleAtkRes.defenderData, singleAtkRes.attackerData); }; // Set Data
+
         setCharData(currentData);
     }
 
     function handleSingleManaCost(actorData: CharStatsInterface | null): void{
         if(!actorData){ return; };
-        let newData = { ...actorData };
-
-        newData = handleTurnManaCost(newData, handleHistoryEventAdd);
+        const newData = handleTurnManaCost(actorData, handleHistoryEventAdd);
         setCharData(charData.map(char => char.Id === newData.Id? newData : char));
     }
 
     function handleSingleInitCalc(actorA: CharStatsInterface | null, actorB: CharStatsInterface | null): void {
         if(!actorA || !actorB){ return; };
-        let newData = { ...charData };
-        const initActorA = { ...actorA };
-        const initActorB = { ...actorB };
+        let newData = [ ...charData ];
 
-        const iniCalcRes = handleIniCalc(initActorA, initActorB, handleHistoryEventAdd);
-        if(iniCalcRes){
-            newData = charData.map((char) => {
-                switch(true){
-                    case char.Id === iniCalcRes.iniFirstActor.Id: return iniCalcRes.iniFirstActor;
-                    case char.Id === iniCalcRes.iniSecondActor.Id: return iniCalcRes.iniSecondActor;
-                    default: return char;
-                }
-            })
-        }
+        const iniCalcRes = handleIniCalc(actorA, actorB, handleHistoryEventAdd);
+        if(iniCalcRes){ newData = updateCharData(charData, actorA, actorB); };
+
         setCharData(newData);
     }
 
@@ -89,6 +72,12 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
         setCharData(finalData);
     }
 
+    function handleSingleTurnEffectCalc(actorData: CharStatsInterface | null): void {
+        if(!actorData){ return; };
+        const newActordata = applyTurnEffect(actorData, handleHistoryEventAdd);
+        if(newActordata){ setCharData(charData.map(char => char.Id === newActordata.Id? newActordata : char)); };
+    }
+
     return (
         <div className="flex flex-col items-center justify-around" id="ChatGPT">
             <div className="flex flex-col items-center gap-2">
@@ -106,6 +95,11 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
                     <h3 className="text-xl font-bold">Calcul Coût Mana: </h3>
                     <button onClick={() => handleSingleManaCost(displayActorAData)} disabled={!displayActorAData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A</button>
                     <button onClick={() => handleSingleManaCost(displayActorBData)} disabled={!displayActorBData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">B</button>
+                </div>
+                <div className="flex gap-2 items-center">
+                    <h3 className="text-xl font-bold">Calcul Dot & Hot: </h3>
+                    <button onClick={() => handleSingleTurnEffectCalc(displayActorAData)} disabled={!displayActorAData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">A</button>
+                    <button onClick={() => handleSingleTurnEffectCalc(displayActorBData)} disabled={!displayActorBData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">B</button>
                 </div>
                 <div className="flex gap-2 items-center">
                     <h3 className="text-xl font-bold">Calcul Ini: </h3>

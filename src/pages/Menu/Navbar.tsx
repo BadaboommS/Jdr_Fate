@@ -4,8 +4,8 @@ import { LuSwords } from "react-icons/lu";
 import { IoIosCreate } from "react-icons/io";
 import { FaList } from "react-icons/fa";
 import { SaveFileControl } from './SaveFileControl';
-import './Navbar.css';
 import { PlayerListControl } from './PlayerListControls';
+import './Navbar.css';
 
 export function Navbar () {
   return (

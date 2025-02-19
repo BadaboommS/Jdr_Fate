@@ -1,5 +1,5 @@
-import { FightListInterface } from "../../../../types/fightType";
-import { CharStatsInterface } from "../../../../types/statsType";
+import { FightListInterface } from "../../../types/fightType";
+import { CharStatsInterface } from "../../../types/statsType";
 
 interface FightScreenPropsInterface {
     charData: CharStatsInterface[];

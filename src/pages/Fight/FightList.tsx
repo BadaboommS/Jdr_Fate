@@ -1,10 +1,10 @@
 import { useContext, useState } from "react";
 import { DataContext } from "../../context/DataContext";
-import { AddFightControl } from "./AddFightControl";
-import { FightListInterface } from "../../types/fightType";
-import { FightItem } from "./FightItem";
 import { Modal } from "../../global/Modal";
+import { AddFightControl } from "./AddFightControl";
+import { FightItem } from "./FightItem";
 import { FightScreen } from "./FightScreen/FightScreen";
+import { FightListInterface } from "../../types/fightType";
 
 export function FightList() {
     const { fightData, setFightData } = useContext(DataContext);
