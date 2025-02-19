@@ -14,6 +14,7 @@ export interface CharStatsInterface {
     FightStyleList: (FightStanceInterface | null)[]; MaxFightStyleAmount: number; // Stances Buffs
     CaracteristicsBuff: CharStatsCaracteristicsValueInterface; // After Buff / Debuff Caracteristics
     CustomCaracteristicsValue: Partial<CharStatsCaracteristicsInterface>; // EX & S
+    CharSpeed: number;
 }
 
 export interface CharDebuffInterface extends DebuffInterface {
@@ -148,6 +149,7 @@ export interface CreateCharFormInputInterface {
     AN: number;
     BuffsList: CharBuffInterface[];
     DebuffsList: CharDebuffInterface[];
+    CharSpeed: number;
 }
 
 export interface EffectFormInputInterface {

@@ -52,16 +52,6 @@ function calcAD(END: number, AGI: number, SPD: number): number {
     return Math.floor((END + AGI + SPD) / 2);
 }
 
-/* // Calcul du Score d'Attaque (SA)
-function calcSA(STR: number, AGI: number, SPD: number): number {
-    return 300 + (STR * 3) + (AGI * 2) + (SPD * 1);
-}
-
-// Calcul du Score de Défense (SD)
-function calcSD(END: number, AGI: number, SPD: number): number {
-    return 300 + (END * 3) + (AGI * 2) + (SPD * 1);
-} */
-
 // Calcul des Dégâts Physiques
 function calcDMG(STR: number): number {
     return (STR * 5);
@@ -75,6 +65,11 @@ function calcReD(END: number, armure: number): number {
 // Calcul de la Chance de Coup Critique (CdC)
 function calcCC(LUK: number): number {
     return 51 - LUK;
+}
+
+// Calcul Vitesse
+function calcVitesse(SPD: number): number {
+    return (25 * SPD) + 15;
 }
 
 export function caracToStatsCalc (caracLetters: CharStatsCaracteristicsInterface, customValues: Partial<CharStatsCaracteristicsInterface>, armor: number) {
@@ -93,6 +88,7 @@ export function caracToStatsCalc (caracLetters: CharStatsCaracteristicsInterface
         "CdC": calcCC(caracValues.LUK),
         "CC": 2,
         "AN": 0,
+        "CharSpeed": calcVitesse(caracValues.SPD)
     }
 }
 
@@ -115,7 +111,9 @@ export function updateCombatStatsCalc (charData: CharStatsInterface){
         "ReD": calcReD(caracValues.END, newCharData.Armor),
         "CdC": calcCC(caracValues.LUK),
         "CC": newCharData.CombatStats.CC,
-        "AN": newCharData.CombatStats.AN
+        "AN": newCharData.CombatStats.AN,
     }
+    newCharData.CharSpeed = calcVitesse(caracValues.SPD);
+
     return newCharData;
 }

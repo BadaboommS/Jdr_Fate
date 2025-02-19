@@ -10,14 +10,14 @@ export function CreateChar() {
     const { charData, setCharData, playerData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(false);
 
-    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', WeaponName: '', WeaponType: '', WeaponDmg: 0, Armor: 0, Hp: 0, Mana: 0, MaxFightStyleAmount: 0 }});
+    const { register, handleSubmit, reset, watch, setValue, getValues} = useForm<CreateCharFormInputInterface>({ defaultValues: { Name: '', Joueur: '', WeaponName: '', WeaponType: '', WeaponDmg: 0, Armor: 0, Hp: 0, Mana: 0, MaxFightStyleAmount: 1, CharSpeed: 0 }});
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Valider l'ajout du personnage ?`)){
             return;
         }
 
-        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, MaxFightStyleAmount, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, MaxFightStyleAmount, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, CharSpeed, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Id: charData[0] ? charData[charData.length - 1].Id + 1 : 0,
             Name, Joueur, Type,
@@ -31,6 +31,7 @@ export function CreateChar() {
             TurnEffect: { Dot: 0, Hot: 0 },
             CaracteristicsBuff: { STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0 },
             CustomCaracteristicsValue: getCustomValues(),
+            CharSpeed: CharSpeed,
             ...(showVariant && { Variant })
         };
 
@@ -44,6 +45,7 @@ export function CreateChar() {
         Object.entries(CARAC_VALUES).forEach(([key, value]) => {
             setValue(key as keyof CreateCharFormInputInterface, value);
         });
+        setValue("CharSpeed", CARAC_VALUES.CharSpeed);
     }
 
     function getCustomValues() {
@@ -85,7 +87,7 @@ export function CreateChar() {
                             <label htmlFor="input_type" className="input_label">Character Type :</label>
                             <select {...register("Type")} id="input_type" defaultValue="Master" onChange={(e) => e.target.value === "Servant"? setShowVariant(true): setShowVariant(false)} className="input_field !indent-1">
                                 {["Master", "Servant", "PNJ"].map((value) => (
-                                    <option value={value}>{value}</option>
+                                    <option key={value} value={value}>{value}</option>
                                 ))}
                             </select>
                             {(showVariant) && 
@@ -159,7 +161,6 @@ export function CreateChar() {
                         <button type="submit" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Créer</button>
                         <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleReset()}>Reset</button>
                         <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleCalculStats()}>Init Stats</button>
-                        <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => getCustomValues()}>Test</button>
                     </div>
                 </div>
             </form>

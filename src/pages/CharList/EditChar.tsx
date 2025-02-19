@@ -43,6 +43,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
             TurnEffect: charStats.TurnEffect,
             CaracteristicsBuff: charStats.CaracteristicsBuff,
             CustomCaracteristicsValue: getCustomValues(),
+            CharSpeed: charStats.CharSpeed,
             ...(showVariant && { Variant })
         };
 
@@ -93,7 +94,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                                 {(showVariant) && 
                                 <select {...register("Variant")} defaultValue="Archer" id="input_variant" className="input_field !indent-1">
                                     {["Archer", "Assassin", "Berserker", 'Caster', "Lancer", "Rider", "Saber", "Slayer", "Shielder", "Outsider", "Monster", "Launcher", "Avenger", "Elder"].map((variant) => (
-                                        <option value={variant}>{variant}</option>
+                                        <option key={variant} value={variant}>{variant}</option>
                                     ))}
                                 </select>
                                 }

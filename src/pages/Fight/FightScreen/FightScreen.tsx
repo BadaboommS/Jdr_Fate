@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { DataContext } from "../../../context/DataContext";
-import { FightActorStatsDisplay } from "./FightDisplay/FightActorStatsDisplay";
+import { CharacterStatsDisplay } from "../../../global/CharacterStatsDisplay";
 import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../../../types/statsType";
 import { FightListInterface } from "../../../types/fightType";
 import { Terminal } from "./FightDisplay/Terminal";
@@ -10,6 +10,9 @@ import { handleFightAtk, handleTurnManaCost, removeEffect, unapplyAllStance, app
 import { FightSettingsModal } from "./FightSettingsModal";
 import { FightStanceArray, findStance } from "../../../data/FightStance";
 import './fightScreen.css';
+import { FightEditCharModal } from "./FightDisplay/FightEditCharModal";
+import { FightStatsEdit } from "./FightDisplay/FightStatsEdit";
+import { FightANModal } from "./FightDisplay/FightANModal";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -188,7 +191,20 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                                     }))
                             }
                         </select>
-                        {(displayActorAData !== null) && <FightActorStatsDisplay characterData={displayActorAData} handleRemoveEffect={handleRemoveEffect}/>}
+                        {(displayActorAData !== null) && 
+                            <CharacterStatsDisplay 
+                                charStats={displayActorAData} 
+                                handleRemoveEffect={handleRemoveEffect}
+                                showEditButtons={true} 
+                                extraButtons={
+                                    <>
+                                        <FightEditCharModal toEditCharData={displayActorAData} />
+                                        <FightStatsEdit toEditCharData={displayActorAData} />
+                                        <FightANModal toEditCharData={displayActorAData} />
+                                    </>
+                                }
+                            />
+                        }
                     </div>
                     <div className="flex flex-col items-center justify-around">
                         <div className="flex flex-col items-center gap-2">
@@ -274,7 +290,20 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                                     }))
                             }
                         </select>
-                        {(displayActorBData !== null) && <FightActorStatsDisplay characterData={displayActorBData} handleRemoveEffect={handleRemoveEffect}/>}
+                        {(displayActorBData !== null) && 
+                            <CharacterStatsDisplay 
+                                charStats={displayActorBData} 
+                                handleRemoveEffect={handleRemoveEffect}
+                                showEditButtons={true} 
+                                extraButtons={
+                                    <>
+                                        <FightEditCharModal toEditCharData={displayActorBData} />
+                                        <FightStatsEdit toEditCharData={displayActorBData} />
+                                        <FightANModal toEditCharData={displayActorBData} />
+                                    </>
+                                }
+                            />
+                        }
                     </div>
                 </div>
             </div>
