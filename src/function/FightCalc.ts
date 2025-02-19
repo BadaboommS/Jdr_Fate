@@ -13,64 +13,66 @@ export function handleTurn(
     nbAtk?: number
 ){
     if(!firstActor || !secondActor){ return; };
-    let currentData = charData;
+    let currentData = [...charData];
+
+    // Turn effect
+    const turnEffectActorA = applyTurnEffect(firstActor, handleHistoryEventAdd);
+    const turnEffectActorB = applyTurnEffect(secondActor, handleHistoryEventAdd);
+
+    // Coût en Mana
+    const actorAManaUsed = handleTurnManaCost(turnEffectActorA, handleHistoryEventAdd);
+    const actorBManaUsed = handleTurnManaCost(turnEffectActorB, handleHistoryEventAdd);
+
+    // Initiative
+    const { iniFirstActor, iniSecondActor } = handleIniCalc(actorAManaUsed, actorBManaUsed, handleHistoryEventAdd);
+
+    // Set Data
+    currentData = currentData.map((char) => {
+        switch(true){
+            case char.Id === iniFirstActor.Id: return iniFirstActor;
+            case char.Id === iniSecondActor.Id: return iniSecondActor;
+            default: return char;
+        }
+    });
    
     // First ATK
-    const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, charData, handleHistoryEventAdd, nbAtk);
+    const firstAtkRes = handleFightAtk(firstActor.Id, secondActor.Id, currentData, handleHistoryEventAdd, nbAtk);
+    if(!firstAtkRes){ return currentData };
 
-    if(firstAtkRes){
-        currentData = currentData.map((char) => {
-            switch(true){
-                case char.Id === firstAtkRes?.defenderData.Id: return firstAtkRes.defenderData;
-                case char.Id === firstAtkRes?.attackerData.Id: return firstAtkRes.attackerData;
-                default: return char;
-            }
-        })
-
-        // Second ATK
-        const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, currentData, handleHistoryEventAdd, nbAtk);
-
-        // Update character data
-        if(secondAtkRes){
-            let iniRemovedFirstActor = secondAtkRes.defenderData;
-            let iniRemovedSecondActor = secondAtkRes.attackerData;
-
-            // Remove Ini bonus
-            if(iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2" )){ const iniBuff = iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedFirstActor = removeEffect(iniRemovedFirstActor, iniBuff, "Buff"); };
-            if(iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2")){ const iniBuff = iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1"  || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedSecondActor = removeEffect(iniRemovedSecondActor, iniBuff, "Buff"); };
-
-            let manaRemovedFirstActor = iniRemovedFirstActor;
-            let manaRemovedSecondActor = iniRemovedSecondActor;
-            // Remove Mana debuff
-            if(manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedFirstActor = removeEffect(manaRemovedFirstActor, manaDebuff, "Debuff"); };
-            if(manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedSecondActor = removeEffect(manaRemovedSecondActor, manaDebuff, "Debuff"); };
-
-            // Dragon Stance
-            if(manaRemovedFirstActor.FightStyleList.some(stance => stance?.Name === "Position du Dragon") && !manaRemovedFirstActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
-                const dragonBuff = findPreset("Déchainement du Dragon");
-                if(dragonBuff){
-                    manaRemovedFirstActor = addEffect(manaRemovedFirstActor, dragonBuff, "Buff");
-                    handleHistoryEventAdd(`${manaRemovedFirstActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
-                }
-            }
-            if(manaRemovedSecondActor.FightStyleList.some(stance => stance?.Name  === "Position du Dragon") && !manaRemovedSecondActor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")){
-                const dragonBuff = findPreset("Déchainement du Dragon");
-                if(dragonBuff){
-                    manaRemovedSecondActor = addEffect(manaRemovedSecondActor, dragonBuff, "Buff");
-                    handleHistoryEventAdd(`${manaRemovedSecondActor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
-                }
-            }
-
-            // Set Data
-            currentData = currentData.map((char) => {
-                switch(true){
-                    case char.Id === manaRemovedFirstActor.Id: return manaRemovedFirstActor;
-                    case char.Id === manaRemovedSecondActor.Id: return manaRemovedSecondActor;
-                    default: return char;
-                }
-            });
+    currentData = currentData.map((char) => {
+        switch(true){
+            case char.Id === firstAtkRes?.defenderData.Id: return firstAtkRes.defenderData;
+            case char.Id === firstAtkRes?.attackerData.Id: return firstAtkRes.attackerData;
+            default: return char;
         }
-    }
+    })
+
+    // Second ATK
+    const secondAtkRes = handleFightAtk(secondActor.Id, firstActor.Id, currentData, handleHistoryEventAdd, nbAtk);
+    if(!secondAtkRes){ return currentData };
+
+    // Remove Ini bonus
+    let iniRemovedFirstActor = secondAtkRes.defenderData; let iniRemovedSecondActor = secondAtkRes.attackerData;
+    if(iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2" )){ const iniBuff = iniRemovedFirstActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedFirstActor = removeEffect(iniRemovedFirstActor, iniBuff, "Buff"); };
+    if(iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1" || effect.Name === "Bonus Initiative 2")){ const iniBuff = iniRemovedSecondActor.BuffsList.find((effect) => effect.Name === "Bonus Initiative 1"  || effect.Name === "Bonus Initiative 2"); if(iniBuff) iniRemovedSecondActor = removeEffect(iniRemovedSecondActor, iniBuff, "Buff"); };
+
+    // Remove Mana debuff
+    let manaRemovedFirstActor = iniRemovedFirstActor; let manaRemovedSecondActor = iniRemovedSecondActor;
+    if(manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedFirstActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedFirstActor = removeEffect(manaRemovedFirstActor, manaDebuff, "Debuff"); };
+    if(manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana")){ const manaDebuff = manaRemovedSecondActor.DebuffsList.find((effect) => effect.Name === "Mal de mana"); if(manaDebuff) manaRemovedSecondActor = removeEffect(manaRemovedSecondActor, manaDebuff, "Debuff"); };
+
+    // Dragon Stance
+    const dragonStanceFirstActor = applyDragonBuff(manaRemovedFirstActor, handleHistoryEventAdd);
+    const dragonStanceSecondActor = applyDragonBuff(manaRemovedSecondActor, handleHistoryEventAdd);
+
+    // Set Data
+    currentData = currentData.map((char) => {
+        switch(true){
+            case char.Id === dragonStanceFirstActor.Id: return dragonStanceFirstActor;
+            case char.Id === dragonStanceSecondActor.Id: return dragonStanceSecondActor;
+            default: return char;
+        }
+    });
 
     return currentData;
 }
@@ -116,7 +118,6 @@ export function handleFightAtk(
     }
 
     handleHistoryEventAdd(`-- ${defenderData.Name} subit au total : ${dmgCounter} --`, 'Atk');
-    handleHistoryEventAdd(`-- Fin de l'attaque --`, 'Text');
 
     return { attackerData, defenderData };
 }
@@ -486,7 +487,7 @@ export function handleIniCalc(actorA: CharStatsInterface, actorB: CharStatsInter
             ${iniBonus?.Effect?.CombatStats?.CdC ? `, CdC: ${iniBonus?.Effect?.CombatStats?.CdC}` : ''}
         `, "Info");
 
-    return { firstActor: firstActor , secondActor: secondActor };
+    return { iniFirstActor: firstActor , iniSecondActor: secondActor };
 }
 
 export function applyTurnEffect(actorData: CharStatsInterface, handleHistoryEventAdd: (msg: string, type: string, title?: string) => void): CharStatsInterface {
@@ -500,4 +501,15 @@ export function applyTurnEffect(actorData: CharStatsInterface, handleHistoryEven
     }
     
     return actorData;
+}
+
+function applyDragonBuff(actor: CharStatsInterface, handleHistoryEventAdd: (msg: string, type: string, title?: string) => void,){
+    if (actor.FightStyleList.some(stance => stance?.Name === "Position du Dragon") && !actor.BuffsList.some(buff => buff.Name === "Déchainement du Dragon")) {
+        const dragonBuff = findPreset("Déchainement du Dragon");
+        if (dragonBuff) {
+            actor = addEffect(actor, dragonBuff, "Buff");
+            handleHistoryEventAdd(`${actor.Name} est prêt à se déchainer !`, 'Atk', dragonBuff.Desc);
+        }
+    }
+    return actor;
 }
