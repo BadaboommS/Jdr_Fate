@@ -18,7 +18,7 @@ export interface CharStatsInterface {
     Caracteristics: CharStatsCaracteristicsInterface; InitCaracteristics: CharStatsCaracteristicsInterface;
     CustomCaracteristicsValue: Partial<CharStatsCaracteristicsInterface>; // EX & S
     CaracteristicsBuff: CharStatsCaracteristicsValueInterface; // After Buff / Debuff Caracteristics
-    CaracteristicsOverload: CharStatsCaracteristicsValueInterface; // Caracteristics + Using Mana
+    CaracteristicsOverload: { active: CharStatsCaracteristicsValueInterface, capacity: CharStatsCaracteristicsValueInterface }; // Caracteristics + Using Mana
     CombatStats: CharStatsCombatStatsInterface; InitCombatStats: CharStatsCombatStatsInterface;
     BuffsList: CharBuffInterface[]; DebuffsList: CharDebuffInterface[];
     TurnEffect: TurnEffectInterface; // Dot & Hot
@@ -27,13 +27,11 @@ export interface CharStatsInterface {
 }
 
 export interface CharDebuffInterface extends DebuffInterface {
-    Applied: boolean;
     Id: number;
     EffectType?: string;
 }
 
 export interface CharBuffInterface extends BuffInterface {
-    Applied: boolean;
     Id: number;
     EffectType?: string;
 }
@@ -58,10 +56,9 @@ export interface FightStyleInterface {
 }
 
 export interface EffectInterface {
-    CharCaracteristics?: Partial<CharStatsCaracteristicsValueInterface>;
+    CaracteristicsBuff?: Partial<CharStatsCaracteristicsValueInterface>;
     CombatStats?: Partial<CharStatsCombatStatsInterface>;
-    Dot?: number;
-    Hot?: number;
+    TurnEffect?: Partial<TurnEffectInterface>;
 }
 
 export interface CharSkillsInteface {
@@ -127,6 +124,8 @@ export interface CreateCharFormInputInterface {
     WeaponType: string;
     Armor: number;
     MaxFightStyleAmount: number;
+    Hp: number;
+    Mana: number;
     // Caracteristics
     STR: string;
     END: string;
@@ -144,8 +143,6 @@ export interface CreateCharFormInputInterface {
     LUKOverload: number;
     SPDOverload: number;
     // Combat_stats
-    Hp: number;
-    Mana: number;
     Ini: number;
     SA: number;
     AA: number;

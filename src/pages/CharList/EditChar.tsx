@@ -1,9 +1,9 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
-import { CharStatsInterface, CreateCharFormInputInterface, CombatStatsTitle, CharTypeArray, ServantVariantArray, WeaponTypeArray, CharCaracteristicsArray, CharCaracteristicsKeyArray, CharCombatStatsArray } from "../../types/statsType";
-import { applyCombatStatsEffect } from "../../function/FightCalc";
+import { CharStatsInterface, CreateCharFormInputInterface, CharTypeArray, ServantVariantArray, WeaponTypeArray, CharCaracteristicsArray, CharCaracteristicsKeyArray, CharStatsCaracteristicsInterface } from "../../types/statsType";
 import { caracToStatsCalc } from "../../function/BaseStatsCalc";
+import { applyAllEffect } from "../../function/FightCalc";
 
 interface EditCharPropsInterface {
     charStats: CharStatsInterface;
@@ -16,40 +16,61 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
     const { charData, setCharData } = useContext( DataContext );
     const [showVariant, setShowVariant] = useState(charStats.Type === "Servant");
 
-    const { register, handleSubmit, reset, watch, setValue, getValues } = useForm<CreateCharFormInputInterface>({
+    const { register, handleSubmit, reset, watch, getValues } = useForm<CreateCharFormInputInterface>({
         defaultValues: {
             Name: charStats.Name, Joueur: charStats.Joueur, Type: charStats.Type, Variant: charStats.Variant,
             WeaponName: charStats.Weapon.WeaponName, WeaponDmg: charStats.Weapon.WeaponDmg, WeaponType: charStats.Weapon.WeaponType,
-            Hp: charStats.Hp, Mana: charStats.Mana, Armor: charStats.Armor, MaxFightStyleAmount: charStats.MaxFightStyleAmount,
-            BuffsList: charStats.BuffsList, DebuffsList: charStats.DebuffsList            
+            Hp: charStats.InitHp, Mana: charStats.InitMana, Armor: charStats.Armor, MaxFightStyleAmount: charStats.MaxFightStyleAmount
         }
     });
 
     const onSubmit: SubmitHandler<CreateCharFormInputInterface> = (data) => {
         if(!window.confirm(`Confirmer l'Edit du character ?`)){ return;} ;
 
-        const { Name, Joueur, Type, Hp, Mana, WeaponName, WeaponDmg, WeaponType, Armor, MaxFightStyleAmount, Variant, STR, END, AGI, MANA, MGK, LUK, SPD, STROverload, ENDOverload, AGIOverload, MANAOverload, MGKOverload, LUKOverload, SPDOverload, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        const { Name, Joueur, Type, Hp, Mana, WeaponName, WeaponDmg, WeaponType, Armor, MaxFightStyleAmount, Variant, STR, END, AGI, MANA, MGK, LUK, SPD, STROverload, ENDOverload, AGIOverload, MANAOverload, MGKOverload, LUKOverload, SPDOverload } = data;
+        
+        // Update effect if Carac / Armor / WeaponDmg are modified
+        const newCaracteristics = { STR, END, AGI, MANA, MGK, LUK, SPD };
+        let newCombatStats = charStats.InitCombatStats;
+        let newCharSpeed = charStats.CharSpeed;
+        if(Object.keys(newCaracteristics).some(key => newCaracteristics[key as keyof typeof charStats.Caracteristics] !== charStats.Caracteristics[key as keyof typeof charStats.Caracteristics] ||
+            charStats.Armor !== Armor ||
+            charStats.Weapon.WeaponDmg !== WeaponDmg
+        )){
+            newCombatStats = handleUpdateCombatStats().CombatStats;
+            newCharSpeed = handleUpdateCombatStats().CharSpeed;
+        }
+
+        // Update Hp / Mana if modified
+        const newInitHp = Hp;
+        const newInitMana = Mana;
+        let newHp = charStats.Hp;
+        let newMana = charStats.Mana;
+        if(charStats.InitHp !== newInitHp){ newHp = newInitHp - (charStats.InitHp - charStats.Hp); };
+        if(charStats.InitMana !== newInitMana){ newMana = newInitMana - (charStats.InitMana - charStats.Mana); };
+
         const newCharacterData: CharStatsInterface = {
             Id: charStats.Id, Name, Joueur, Type,
             Weapon: { WeaponName, WeaponDmg, WeaponType },
-            Hp: Number(Hp), InitHp: Number(Hp), Mana: Number(Mana), InitMana: Number(Mana), Armor, MaxFightStyleAmount: MaxFightStyleAmount,
-            Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
-            InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
+            Hp: newHp, InitHp: newInitHp, Mana: newMana, InitMana: newInitMana,
+            Armor, MaxFightStyleAmount: MaxFightStyleAmount,
+            Caracteristics: newCaracteristics,
+            InitCaracteristics: newCaracteristics,
             CustomCaracteristicsValue: getCustomValues(),
             CaracteristicsBuff: charStats.CaracteristicsBuff,
-            CaracteristicsOverload: { STR: Number(STROverload), END: Number(ENDOverload), AGI: Number(AGIOverload), MANA: Number(MANAOverload), MGK: Number(MGKOverload), LUK: Number(LUKOverload), SPD: Number(SPDOverload) },
-            CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
-            InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
-            BuffsList: charStats.BuffsList.map(buff => ({ ...buff, Applied: false })), // remove applied from all buffs
-            DebuffsList: charStats.DebuffsList.map(debuff => ({ ...debuff, Applied: false })), // remove applied from all debuffs
+            CaracteristicsOverload: { capacity: {STR: STROverload, END: ENDOverload, AGI: AGIOverload, MANA: MANAOverload, MGK: MGKOverload, LUK: LUKOverload, SPD: SPDOverload}, active: { STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0 } },
+            CombatStats: newCombatStats,
+            InitCombatStats: newCombatStats,
+            BuffsList: charStats.BuffsList,
+            DebuffsList: charStats.DebuffsList,
             FightStyleList: charStats.FightStyleList,
             TurnEffect: charStats.TurnEffect,
-            CharSpeed: charStats.CharSpeed,
+            CharSpeed: newCharSpeed,
             ...(showVariant && { Variant })
         };
 
-        const effectUpdatedCharData = applyCombatStatsEffect(newCharacterData);
-        setCharData(charData.map(char => char.Id === charStats.Id ? effectUpdatedCharData : char));
+        const appliedEffectData = applyAllEffect(newCharacterData, true);
+        setCharData(charData.map(char => char.Id === charStats.Id ? appliedEffectData : char));
     }
 
     function handleUpdateCombatStats(){
@@ -57,10 +78,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
             const customValues = getCustomValues();
             const CaracOverload = { STR: getValues("STROverload"), END: getValues("ENDOverload"), AGI: getValues("AGIOverload"), MANA: getValues("MANAOverload"), MGK: getValues("MGKOverload"), LUK: getValues("LUKOverload"), SPD: getValues("SPDOverload") };
             const CARAC_VALUES = caracToStatsCalc(CARACS, customValues, Number(getValues('Armor')), CaracOverload);
-            Object.entries(CARAC_VALUES).forEach(([key, value]) => {
-                if(key !== "Hp" && key !== "Mana") setValue(key as keyof CreateCharFormInputInterface, value);
-            });
-            setValue("CharSpeed", CARAC_VALUES.CharSpeed);
+            return { CombatStats: { Ini: CARAC_VALUES.Ini, SA: CARAC_VALUES.SA, AA: CARAC_VALUES.AA, DMG: CARAC_VALUES.DMG, PA: CARAC_VALUES.PA, SD: CARAC_VALUES.SD, AD: CARAC_VALUES.AD, ReD: CARAC_VALUES.ReD, CdC: CARAC_VALUES.CdC, CC: CARAC_VALUES.CC, AN: CARAC_VALUES.AN }, CharSpeed: CARAC_VALUES.CharSpeed };
         }
 
     function getCustomValues() {
@@ -86,7 +104,7 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                 {(handleDeleteChar !== undefined && <button type="button" className="bg-red-500 hover:bg-white text-white hover:text-red-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer transition-all" onClick={() => handleDeleteChar(charStats.Id)}>Delete</button>)}
                 <form onSubmit={handleSubmit(onSubmit)} className="bg-[#DFDDCF] text-[#E0E1E4] flex flex-col justify-center p-4 gap-2">
                     <h2 className="font-bold text-xl text-black">Attention: Le mode Edit modifie les valeurs de bases du personnage et non pas les valeurs actuelles.</h2>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className={`grid ${showVariant? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
                         <div className="input_group">
                             <div className="flex flex-row input_entry">
                                 <label htmlFor="input_name" className="input_label">Name :</label>
@@ -125,34 +143,20 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                             </div>
                             <div className="input_entry">
                                 <label htmlFor="input_weapon_dmg" className="input_label">Arme Dmg :</label>
-                                <input type="number" {...register("WeaponDmg", {required: "Enter a Valid WeaponDmg Amount !"})} id="input_weapon_dmg" className="input_field" />
+                                <input type="number" {...register("WeaponDmg", {required: "Enter a Valid WeaponDmg Amount !", valueAsNumber: true })} id="input_weapon_dmg" className="input_field" />
                             </div>
                             <div className="input_entry">
                                 <label htmlFor="input_Armor" className="input_label">Armure :</label>
-                                <input type="number" {...register("Armor", {required: "Enter a Valid ArmeDMG Amount !"})} id="input_Armor" className="input_field" />
+                                <input type="number" {...register("Armor", {required: "Enter a Valid Armor Amount !", valueAsNumber: true})} id="input_Armor" className="input_field" />
                             </div>
                             <div className="input_entry">
                                 <label htmlFor="input_stance_number" className="input_label">Nombre de stance :</label>
-                                <input type="number" {...register("MaxFightStyleAmount", {required: "Enter a Valid WeaponDmg Amount !", min: 0, max: 3})} id="input_stance_number" className="input_field" />
+                                <input type="number" {...register("MaxFightStyleAmount", {required: "Enter a Valid WeaponDmg Amount !", min: 0, max: 3, valueAsNumber: true})} id="input_stance_number" className="input_field" />
                             </div>
-                            {CharCaracteristicsArray.map((stat) => (
-                                <div className="input_entry" key={stat}>
-                                    <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
-                                    <select {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`})} defaultValue={charStats.Caracteristics[stat as keyof typeof charStats.Caracteristics]} className="input_field">
-                                        {CharCaracteristicsKeyArray.map((value) => {
-                                            return <option key={`${stat}_${value}`} value={value}>{value}</option>
-                                        })}
-                                    </select>
-                                    {(watch(stat as keyof CreateCharFormInputInterface) === 'EX' || watch(stat as keyof CreateCharFormInputInterface) === 'S') && 
-                                        <input type="number" id={`${stat}_custom_value`} className="input_field" placeholder={`Enter ${watch(stat as keyof CreateCharFormInputInterface)} value`} defaultValue={charStats.CustomCaracteristicsValue[stat as keyof typeof charStats.CustomCaracteristicsValue]} required />
-                                    }
-                                    <input type="number" {...register(`${stat}Overload` as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`})} className="input_field cursor-help" defaultValue={charStats.CaracteristicsOverload[stat as keyof typeof charStats.CaracteristicsOverload]} title="Nombre de + ou - à la Caracteristique"/>
-                                </div>
-                            ))}
                         </div>
                         {
                             (showVariant)
-                            ?   <div>
+                            ?   <div className="flex justify-center">
                                     <img src={`./assets/servant_img/${watch("Variant") === undefined? "Archer" : watch("Variant")}.png`} className="w-fit h-fit variant_img"/>
                                 </div>
                             : <></>
@@ -160,24 +164,32 @@ export function EditChar ({ charStats, handleSetEdit = undefined, handleCloseMod
                         <div className="input_group">
                             <div className="input_entry">
                                 <label htmlFor="input_hp" className="input_label">Hp :</label>
-                                <input type="number" {...register("Hp", {required: "Enter a Valid Hp Amount !"})} id="input_hp" className="input_field" />
+                                <input type="number" {...register("Hp", {required: "Enter a Valid Hp Amount !", valueAsNumber: true})} id="input_hp" className="input_field" />
                             </div>
                             <div className="input_entry">
                                 <label htmlFor="input_mana2" className="input_label">Mana :</label>
-                                <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !"})} id="input_mana2" className="input_field" />
+                                <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !", valueAsNumber: true})} id="input_mana2" className="input_field" />
                             </div>
-                            {CharCombatStatsArray.map((stat) => {
-                                return  <div className="input_entry" key={stat}>
-                                            <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label cursor-help" title={CombatStatsTitle[stat as keyof typeof CombatStatsTitle]}>{stat} :</label>
-                                            <input type="number" {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} defaultValue={charStats.CombatStats[stat as keyof typeof charStats.CombatStats]} id={`input_${stat.toLowerCase()}`} className="input_field" />
-                                        </div>
-                            })}
+                            {CharCaracteristicsArray.map((stat) => (
+                                <div className="input_entry" key={stat}>
+                                    <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
+                                    <select {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`})} id={`input_${stat.toLowerCase()}`} defaultValue={charStats.InitCaracteristics[stat as keyof typeof charStats.InitCaracteristics]} className="input_field">
+                                        {CharCaracteristicsKeyArray.map((value) => {
+                                            return <option key={`${stat}_${value}`} value={value}>{value}</option>
+                                        })}
+                                    </select>
+                                    {((watch(stat as keyof CreateCharFormInputInterface) === 'EX' || watch(stat as keyof CreateCharFormInputInterface) === 'S') || 
+                                    (handleSetEdit && (charStats.Caracteristics[stat as keyof CharStatsCaracteristicsInterface] === 'EX' || charStats.Caracteristics[stat as keyof CharStatsCaracteristicsInterface] === 'S')))
+                                        && <input type="number" id={`${stat}_custom_value`} className="input_field cursor-help" placeholder={`Enter ${watch(stat as keyof CreateCharFormInputInterface)} value`} defaultValue={charStats.CustomCaracteristicsValue[stat as keyof typeof charStats.CustomCaracteristicsValue]} title="Valeur du parametre" required />
+                                    }
+                                    <input type="number" {...register(`${stat}Overload` as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`, valueAsNumber: true})} className="input_field cursor-help" defaultValue={charStats.CaracteristicsOverload.capacity[stat as keyof typeof charStats.CaracteristicsOverload.capacity]} title="Nombre de + ou - à la Caracteristique"/>
+                                </div>
+                            ))}
                         </div>
                     </div>
                     <div className="flex justify-center py-5">
                         <div className="min-w-80 flex justify-around">
                             <button type="submit" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Update</button>
-                            <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleUpdateCombatStats()}>Update Combat Stats</button>
                             {(handleSetEdit !== undefined && <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleReset()}>Cancel Edit</button>)}
                             <button type="button" className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => handleCloseModal()}>Cancel</button>
                         </div>

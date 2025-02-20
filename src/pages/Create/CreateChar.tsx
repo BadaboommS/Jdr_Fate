@@ -21,15 +21,15 @@ export function CreateChar() {
         const newCharacterData = {
             Id: charData[0] ? charData[charData.length - 1].Id + 1 : 0,
             Name, Joueur, Type,
-            Weapon: { WeaponName, WeaponDmg: Number(WeaponDmg), WeaponType },
-            Hp: Number(Hp), InitHp: Number(Hp), Mana: Number(Mana), InitMana: Number(Mana), Armor: Number(Armor), MaxFightStyleAmount: Number(MaxFightStyleAmount),
+            Weapon: { WeaponName, WeaponDmg: WeaponDmg, WeaponType },
+            Hp: Hp, InitHp: Hp, Mana: Mana, InitMana: Mana, Armor: Armor, MaxFightStyleAmount: MaxFightStyleAmount,
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
             CustomCaracteristicsValue: getCustomValues(),
             CaracteristicsBuff: { STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0 },
-            CaracteristicsOverload: { STR: Number(STROverload), END: Number(ENDOverload), AGI: Number(AGIOverload), MANA: Number(MANAOverload), MGK: Number(MGKOverload), LUK: Number(LUKOverload), SPD: Number(SPDOverload) },
-            CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
-            InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
+            CaracteristicsOverload: { capacity: {STR: STROverload, END: ENDOverload, AGI: AGIOverload, MANA: MANAOverload, MGK: MGKOverload, LUK: LUKOverload, SPD: SPDOverload }, active: { STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0 } },
+            CombatStats: { Ini: Ini, SA: SA, AA: AA, DMG: DMG, PA: PA, SD: SD, AD: AD, ReD: ReD, CdC: CdC, CC: CC, AN: AN },
+            InitCombatStats: { Ini: Ini, SA: SA, AA: AA, DMG: DMG, PA: PA, SD: SD, AD: AD, ReD: ReD, CdC: CdC, CC: CC, AN: AN },
             BuffsList: [], DebuffsList: [], FightStyleList: [],
             TurnEffect: { Dot: 0, Hot: 0 },
             CharSpeed: CharSpeed,
@@ -52,11 +52,11 @@ export function CreateChar() {
 
     function getCustomValues() {
         const customInputs = document.querySelectorAll('input[id$="_custom_value"]');
-        const values: Record<string, string> = {};
+        const values: Record<string, number> = {};
 
         customInputs.forEach(input => {
             const inputElement = input as HTMLInputElement;
-            if(inputElement.value.trim() !== '') values[inputElement.id.split('_')[0]] = inputElement.value.trim();
+            if(inputElement.value.trim() !== '') values[inputElement.id.split('_')[0]] = Number(inputElement.value.trim());
         });
         return values;
     }
@@ -114,15 +114,15 @@ export function CreateChar() {
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_weapon_dmg" className="input_label">Dégâts arme :</label>
-                            <input type="number" {...register("WeaponDmg", {required: "Enter a Valid WeaponDmg Amount !"})} id="input_weapon_dmg" className="input_field" />
+                            <input type="number" {...register("WeaponDmg", {required: "Enter a Valid WeaponDmg Amount !", valueAsNumber: true})} id="input_weapon_dmg" className="input_field" />
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_Armor" className="input_label">Armure :</label>
-                            <input type="number" {...register("Armor", {required: "Enter a Valid Armor Amount !"})} id="input_Armor" className="input_field" />
+                            <input type="number" {...register("Armor", {required: "Enter a Valid Armor Amount !", valueAsNumber: true})} id="input_Armor" className="input_field" />
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_stance_number" className="input_label">Nombre de stance :</label>
-                            <input type="number" {...register("MaxFightStyleAmount", {required: "Enter a Valid WeaponDmg Amount !", min: 0})} id="input_stance_number" className="input_field" />
+                            <input type="number" {...register("MaxFightStyleAmount", {required: "Enter a Valid WeaponDmg Amount !", min: 0, max: 3, valueAsNumber: true})} id="input_stance_number" className="input_field" />
                         </div>
                         <h3 className="input_label">Caracteristics :</h3>
                         {CharCaracteristicsArray.map((stat) => (
@@ -136,29 +136,30 @@ export function CreateChar() {
                                 {(watch(stat as keyof CreateCharFormInputInterface) === 'EX' || watch(stat as keyof CreateCharFormInputInterface) === 'S') && 
                                     <input type="number" id={`${stat}_custom_value`} className="input_field" placeholder={`Enter ${watch(stat as keyof CreateCharFormInputInterface)} value`} defaultValue={0} required />
                                 }
-                                <input type="number" {...register(`${stat}Overload` as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`})} className="input_field cursor-help" defaultValue={0} title="Nombre de + ou - à la Caracteristique"/>
+                                <input type="number" {...register(`${stat}Overload` as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`, valueAsNumber: true})} className="input_field cursor-help" defaultValue={0} title="Nombre de + ou - à la Caracteristique"/>
                             </div>
                         ))}
                     </div>
                     {(showVariant)
-                    ?   <div>
-                            <img src={`./assets/servant_img/${watch("Variant") === undefined? 'Archer' : watch("Variant")}.png`} className="w-fit h-fit variant_img"/>
-                        </div>
-                    : <></>}
+                        ?   <div>
+                                <img src={`./assets/servant_img/${watch("Variant") === undefined? 'Archer' : watch("Variant")}.png`} className="w-fit h-fit variant_img"/>
+                            </div>
+                        : <></>
+                    }
                     <div className="input_group">
                         <h3 className="input_label">Combat Stats :</h3>
                         <div className="input_entry">
                             <label htmlFor="input_hp" className="input_label">Hp :</label>
-                            <input type="number" {...register("Hp", {required: "Enter a Valid Hp Amount !"})} id="input_hp" className="input_field" />
+                            <input type="number" {...register("Hp", {required: "Enter a Valid Hp Amount !", valueAsNumber: true})} id="input_hp" className="input_field" />
                         </div>
                         <div className="input_entry">
                             <label htmlFor="input_mana2" className="input_label">Mana :</label>
-                            <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !"})} id="input_mana2" className="input_field" />
+                            <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !", valueAsNumber: true})} id="input_mana2" className="input_field" />
                         </div>
                         {CharCombatStatsArray.map((stat) => ( 
                             <div className="input_entry" key={stat}>
                                 <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label cursor-help" title={CombatStatsTitle[stat as keyof typeof CombatStatsTitle]}>{stat} :</label>
-                                <input type="number" {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} defaultValue={0} id={`input_${stat.toLowerCase()}`} className="input_field" />
+                                <input type="number" {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`, valueAsNumber: true})} defaultValue={0} id={`input_${stat.toLowerCase()}`} className="input_field" />
                             </div>
                         ))}
                     </div>

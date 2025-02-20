@@ -1,4 +1,4 @@
-import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, BuffInterface, DebuffInterface, CharStatsCaracteristicsInterface } from "../types/statsType";
+import { CharDebuffInterface, CharStatsInterface, CharBuffInterface, BuffInterface, DebuffInterface } from "../types/statsType";
 import { updateCombatStatsCalc } from "./BaseStatsCalc";
 import { rollDice, updateCharData } from "./GlobalFunction";
 import { getAllDebbuffs, selectRandomDebuff } from "../data/CCDebuff";
@@ -212,150 +212,94 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
 export function addEffect(charData: CharStatsInterface, effect: BuffInterface | DebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{
     const effectList = effectType === 'Buff' ? charData.BuffsList : charData.DebuffsList;
     const newEffect = {...effect, Applied: false, Id: effectList[0]? effectList[effectList.length - 1].Id + 1: 0}
-    let newCharData = charData;
-    if(newEffect.Effect?.CharCaracteristics){
-        const removedEffectCharData = unapplyAllCombatStatEffect(charData);
-        newCharData = applyCaracStatsEffect(removedEffectCharData, newEffect);
-    }
+    const newCharData = applyAllEffect(charData, false);
+
     const updatedEffectList = [...effectList, newEffect];
     const updatedcharData = { ...newCharData, BuffsList: effectType === 'Buff' ? updatedEffectList : newCharData.BuffsList, DebuffsList: effectType === 'Debuff' ? updatedEffectList : newCharData.DebuffsList};
-    const effectUpdatedcharData = applyCombatStatsEffect(updatedcharData);
+    const effectUpdatedcharData = applyAllEffect(updatedcharData, true);
     return effectUpdatedcharData;
 }
 
 export function removeEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: 'Buff' | 'Debuff'): CharStatsInterface{
     const effectList = effectType === 'Buff' ? charData.BuffsList : charData.DebuffsList;
-    let newCharData = charData;
-    if(effect.Effect?.CharCaracteristics){
-        const removedEffectCharData = unapplyAllCombatStatEffect(newCharData);
-        const removedCarEffect = unapplyCaracStatsEffect(removedEffectCharData, effect);
-        newCharData = applyCombatStatsEffect(removedCarEffect);
-    }
+    const newCharData = applyAllEffect(charData, false);
+    
     const updatedEffectList = effectList.filter((e) => e.Id !== effect.Id);
     const updatedcharData = { ...newCharData, BuffsList: effectType === 'Buff' ? updatedEffectList : newCharData.BuffsList, DebuffsList: effectType === 'Debuff' ? updatedEffectList : newCharData.DebuffsList};
-    const effectUpdatedcharData = unapplyCombatStatEffect(updatedcharData, effect);
+    const effectUpdatedcharData = applyAllEffect(updatedcharData, true);
     return effectUpdatedcharData;
 }
 
-export function updateEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
-    const unappliedCharData = unapplyCombatStatEffect(charData, effect);
-    const reAppliedCharData = applyCombatStatsEffect(unappliedCharData);
-    return reAppliedCharData;
+export function updateEffect(charData: CharStatsInterface): CharStatsInterface {
+    const removedEffectData = applyAllEffect(charData, false);
+    const appliedEffectData = applyAllEffect(removedEffectData, true);
+    return appliedEffectData;
 }
 
-export function applyCaracStatsEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
-    const caracEffect = effect.Effect?.CharCaracteristics || null;
-    const newData = { ...charData };
-    if (caracEffect) {
-        Object.keys(caracEffect).forEach((key) => {
-            const caracKey = key as keyof CharStatsCaracteristicsInterface;
-            if (caracEffect[caracKey]) { newData.CaracteristicsBuff[caracKey] += caracEffect[caracKey]; };
-        });
-    }
-    const returnData = updateCombatStatsCalc(newData);
-    return returnData;
-}
+export function applyAllEffect(charData: CharStatsInterface, apply: boolean): CharStatsInterface{
+    let currentData = { ...charData };
 
-export function unapplyCaracStatsEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
-    const caracEffect = effect.Effect?.CharCaracteristics || null;
-    const newData = { ...charData };
-    if (caracEffect) {
-        Object.keys(caracEffect).forEach((key) => {
-            const caracKey = key as keyof CharStatsCaracteristicsInterface;
-            if (caracEffect[caracKey]) { newData.CaracteristicsBuff[caracKey] -= caracEffect[caracKey]; };
-        });
-    }
-    const returnData = updateCombatStatsCalc(newData);
-    return returnData;
-}
-
-export function applyCombatStatsEffect(charData: CharStatsInterface): CharStatsInterface {
-    const newData = { ...charData };
-    
+    // Carac Buff
     ["Buff", "Debuff"].forEach((type) => {
-        const list = type === 'Buff' ? newData.BuffsList : newData.DebuffsList;
-
+        const list = type === 'Buff' ? currentData.BuffsList : currentData.DebuffsList;
         list.forEach((effect) => {
-            if(!effect.Applied){
-                if("Dmg" in effect && typeof(effect.Dmg) === "number"){ newData.Hp += effect.Dmg || 0; }
-    
-                if(effect.Effect){
-                    // Debuff CombatStats
-                    const debuffCombatStats = effect.Effect.CombatStats || null;
-                    if (debuffCombatStats) {
-                        Object.keys(debuffCombatStats).forEach((key) => {
-                            const combatStatKey = key as keyof typeof newData.CombatStats;
-                            if (debuffCombatStats[combatStatKey]) { newData.CombatStats[combatStatKey] += debuffCombatStats[combatStatKey]; };
-                        });
-                    }
-    
-                    // Dot & Hot
-                    const effectDot = effect.Effect.Dot || null;
-                    const effectHot = effect.Effect.Hot || null;
-                    if(effectDot) newData.TurnEffect.Dot += effectDot;
-                    if(effectHot) newData.TurnEffect.Hot += effectHot;
-                }
-                effect.Applied = true;
+            if(effect.Effect){ currentData = apply? applyCaracStatsEffect(currentData, effect) : unapplyCaracStatsEffect(currentData, effect); };
+        })
+    });
+
+    // Refresh Combat Stat values
+    currentData = updateCombatStatsCalc(currentData);
+
+    // CombatStat Buff
+    ["Buff", "Debuff"].forEach((type) => {
+        const list = type === 'Buff' ? currentData.BuffsList : currentData.DebuffsList;
+        list.forEach((effect) => {
+            if(effect.Effect){
+                currentData = apply? applyCombatStatsEffect(currentData, effect) : unapplyCombatStatsEffect(currentData, effect) ;
+
+                const effectDot = effect.Effect.TurnEffect?.Dot || null; const effectHot = effect.Effect.TurnEffect?.Hot || null;
+                if(effectDot) currentData.TurnEffect.Dot += apply? effectDot : -effectDot;
+                if(effectHot) currentData.TurnEffect.Hot += apply? effectHot : -effectHot;
             }
         })
     })
-    return newData;
+    return currentData;
 }
 
-export function unapplyCombatStatEffect(charData: CharStatsInterface, effectData: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
-    if (!effectData) { return charData; }
-    const newData = { ...charData };
-    if (effectData.Applied) {
-        if (effectData.Effect) {
+export function applyEffect( charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, statKey: "CaracteristicsBuff" | "CombatStats", isApplying: boolean): CharStatsInterface {
+    const effectData = effect.Effect?.[statKey] as CharStatsInterface[typeof statKey];
+    const newData = { ...charData, [statKey]: { ...charData[statKey] } };
 
-            // Effect CombatStats
-            const effectCombatStats = effectData.Effect.CombatStats || null;
-            if (effectCombatStats) {
-                Object.keys(effectCombatStats).forEach((key) => {
-                    const combatStatKey = key as keyof typeof newData.CombatStats;
-                    if (effectCombatStats[combatStatKey]) { newData.CombatStats[combatStatKey] -= effectCombatStats[combatStatKey]; }
-                });
-            }
-
-            // Dot & Hot
-            const effectDot = effectData.Effect.Dot || null;
-            const effectHot = effectData.Effect.Hot || null;
-            if(effectDot) newData.TurnEffect.Dot -= effectDot;
-            if(effectHot) newData.TurnEffect.Hot -= effectHot;
-        }
-        effectData.Applied = false;
-    }
-    return newData;
-}
-
-export function unapplyAllCombatStatEffect(charData: CharStatsInterface): CharStatsInterface {
-    const newData = { ...charData };
-    ["Buff", "Debuff"].forEach((type) => {
-        const list = type === 'Buff' ? newData.BuffsList : newData.DebuffsList;
-
-        list.forEach((effect) => {
-            if (effect.Applied) {
-                if (effect.Effect) {
-                    // Effect CombatStats
-                    const effectCombatStats = effect.Effect.CombatStats || null;
-                    if (effectCombatStats) {
-                        Object.keys(effectCombatStats).forEach((key) => {
-                            const combatStatKey = key as keyof typeof newData.CombatStats;
-                            if (effectCombatStats[combatStatKey]) { newData.CombatStats[combatStatKey] -= effectCombatStats[combatStatKey]; }
-                        });
-                    }
-
-                    // Dot & Hot
-                    const effectDot = effect.Effect.Dot || null;
-                    const effectHot = effect.Effect.Hot || null;
-                    if (effectDot) newData.TurnEffect.Dot -= effectDot;
-                    if (effectHot) newData.TurnEffect.Hot -= effectHot;
-                }
-                effect.Applied = false;
+    if (effectData) {
+        Object.keys(effectData).forEach((key) => {
+            if (statKey === "CaracteristicsBuff") {
+                const effectData = effect.Effect?.[statKey] as CharStatsInterface[typeof statKey];
+                const typedKey = key as keyof CharStatsInterface["CaracteristicsBuff"];
+                newData.CaracteristicsBuff[typedKey] += isApplying ? effectData[typedKey] : -effectData[typedKey];
+            } else {
+                const typedKey = key as keyof CharStatsInterface["CombatStats"];
+                const effectData = effect.Effect?.[statKey] as CharStatsInterface[typeof statKey];
+                newData.CombatStats[typedKey] += isApplying ? effectData[typedKey] : -effectData[typedKey];
             }
         });
-    });
-    return newData;
+    }
+    return statKey === "CaracteristicsBuff" ? updateCombatStatsCalc(newData) : newData;
+}
+
+export function applyCaracStatsEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
+    return applyEffect(charData, effect, "CaracteristicsBuff", true);
+}
+
+export function unapplyCaracStatsEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
+    return applyEffect(charData, effect, "CaracteristicsBuff", false);
+}
+
+export function applyCombatStatsEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
+    return applyEffect(charData, effect, "CombatStats", true);
+}
+
+export function unapplyCombatStatsEffect(charData: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface): CharStatsInterface {
+    return applyEffect(charData, effect, "CombatStats", false);
 }
 
 export function applyAllStance(charData: CharStatsInterface): CharStatsInterface{

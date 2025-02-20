@@ -5,9 +5,10 @@ import { DataContext } from "../../../../context/DataContext";
 
 interface CharItemPropsInterface {
     toEditCharData: CharStatsInterface;
+    handleHistoryEventAdd?: (msg: string, type: string, title?: string) => void,
 }
 
-export function FightStatsEdit ({ toEditCharData }: CharItemPropsInterface) {
+export function FightStatsEdit ({ toEditCharData, handleHistoryEventAdd }: CharItemPropsInterface) {
     const { charData, setCharData } = useContext(DataContext);
     const [showModal, setShowModal] = useState(false);
 
@@ -15,7 +16,6 @@ export function FightStatsEdit ({ toEditCharData }: CharItemPropsInterface) {
         const HpModif = Number((document.getElementById('input_hp') as HTMLInputElement).value);
         const ManaModif = Number((document.getElementById('input_mana') as HTMLInputElement).value);
         const ANModif = Number((document.getElementById('input_an') as HTMLInputElement).value);
-        console.log(HpModif, ManaModif, ANModif);
         const newData = { 
             ...toEditCharData,
             Hp: toEditCharData.Hp + HpModif,
@@ -25,6 +25,7 @@ export function FightStatsEdit ({ toEditCharData }: CharItemPropsInterface) {
                 AN: toEditCharData.CombatStats.AN + ANModif,
             }
         }
+        if(handleHistoryEventAdd) handleHistoryEventAdd(`${toEditCharData.Name} a reçu: ${HpModif !== 0? `${HpModif} Hp ` : ''} ${ManaModif !== 0? `${ManaModif} Mana ` : ''} ${ANModif !== 0? `${ANModif} AN` : ''}`, 'Info');
         setCharData(charData.map((char) => char.Id === newData.Id? newData : char));
     }
 

@@ -2,19 +2,20 @@ import { useContext, useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { FaEdit } from "react-icons/fa";
 import { BsBookmarkPlusFill } from 'react-icons/bs';
-import { DataContext } from '../context/DataContext';
-import { Modal } from './Modal';
-import { CharBuffInterface, CharStatsInterface, EffectFormInputInterface } from '../types/statsType';
-import { addEffect, removeEffect } from '../function/FightCalc';
-import { EffectPresetArray } from '../data/EffectPreset';
+import { DataContext } from '../../../../context/DataContext';
+import { Modal } from '../../../../global/Modal';
+import { CharBuffInterface, CharCaracteristicsArray, CharCombatStatsArray, CharStatsInterface, EffectFormInputInterface } from '../../../../types/statsType';
+import { addEffect, removeEffect } from '../../../../function/FightCalc';
+import { EffectPresetArray } from '../../../../data/EffectPreset';
 
 interface AddCustomEffectFormProps {
     toUpdateCharData: CharStatsInterface;
+    handleHistoryEventAdd?: (msg: string, type: string, title?: string) => void,
     toEdit?: CharBuffInterface;
     toEditEffectType?: "Buff" | "Debuff";
 }
 
-export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectType }: AddCustomEffectFormProps) {
+export function CustomEffectFormModal ({ toUpdateCharData, handleHistoryEventAdd, toEdit, toEditEffectType }: AddCustomEffectFormProps) {
     const { charData, setCharData } = useContext(DataContext);
     const [showCustomEffectModal, setShowCustomEffectModal] = useState(false);
     const [effectType, setEffectType] = useState<"Buff" | "Debuff">('Buff');
@@ -37,16 +38,16 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
             setValue('Name', toEdit.Name);
             setValue('Desc', toEdit.Desc);
             if (toEdit.Effect) {
-                Object.entries(toEdit.Effect.CharCaracteristics || {}).forEach(([key, value]) => setValue(key as keyof EffectFormInputInterface, value));
+                Object.entries(toEdit.Effect.CaracteristicsBuff || {}).forEach(([key, value]) => setValue(key as keyof EffectFormInputInterface, value));
                 Object.entries(toEdit.Effect.CombatStats || {}).forEach(([key, value]) => setValue(key as keyof EffectFormInputInterface, value));
-                if (toEdit.Effect.Dot) setValue('Dot', toEdit.Effect.Dot);
-                if (toEdit.Effect.Hot) setValue('Hot', toEdit.Effect.Hot);
+                if (toEdit.Effect.TurnEffect?.Dot) setValue('Dot', toEdit.Effect.TurnEffect.Dot);
+                if (toEdit.Effect.TurnEffect?.Hot) setValue('Hot', toEdit.Effect.TurnEffect.Hot);
             }
         }
     }, [toEdit, setValue, toEditEffectType, showCustomEffectModal]);
 
     const onSubmit: SubmitHandler<EffectFormInputInterface> = (data) => {
-        if(!window.confirm(`Confirmer l'atout de ${data.Name} ?`)){ return charData; };
+        if(!window.confirm(`Confirmer l'atout de ${data.Name} ?`)){ return; };
         
         // Remove effect if edit
         let effectRemovedCharData = null;
@@ -57,26 +58,26 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
         const newEffect: CharBuffInterface = {
             Id: toEdit ? toEdit.Id : (effectList[0] ? effectList[effectList.length - 1].Id + 1 : 0),
             Name: data.Name,
-            Desc: data.Desc,
-            Applied: false
+            Desc: data.Desc
         };
 
-        const newEffectCharCarac = { STR: Number(data.STR), END: Number(data.END), AGI: Number(data.AGI), MGK: Number(data.MGK), LUK: Number(data.LUK), SPD: Number(data.SPD) };
-        const newEffectCombatStats = { Ini: Number(data.Ini), SA: Number(data.SA), AA: Number(data.AA), DMG: Number(data.DMG), PA: Number(data.PA), SD: Number(data.SD), AD: Number(data.AD), ReD: Number(data.ReD), CdC: Number(data.CdC), CC: Number(data.CC), AN: Number(data.AN) };
+        const { STR, END, AGI, MGK, LUK, SPD, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN, Dot, Hot } = data;
+        const newEffectCharCarac = { STR: Number(STR), END: Number(END), AGI: Number(AGI), MGK: Number(MGK), LUK: Number(LUK), SPD: Number(SPD) };
+        const newEffectCombatStats = { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) };
         const charCaracStock = Object.fromEntries(Object.entries(newEffectCharCarac).filter(([, value]) => value !== 0));
         const combatStatsStock = Object.fromEntries(Object.entries(newEffectCombatStats).filter(([, value]) => value !== 0));
-        const dotStock = Number(data.Dot) !== 0 ? Number(data.Dot) : null;
-        const hotStock = Number(data.Hot) !== 0 ? Number(data.Hot) : null;
+        const dotStock = Number(Dot) !== 0 ? Number(Dot) : null;
+        const hotStock = Number(Hot) !== 0 ? Number(Hot) : null;
 
         if (Object.keys(charCaracStock).length > 0 || Object.keys(combatStatsStock).length > 0 || dotStock !== null || hotStock !== null) {
             newEffect.Effect = {
-                ...(Object.keys(charCaracStock).length > 0 && { CharCaracteristics: charCaracStock }),
+                ...(Object.keys(charCaracStock).length > 0 && { CaracteristicsBuff: charCaracStock }),
                 ...(Object.keys(combatStatsStock).length > 0 && { CombatStats: combatStatsStock }),
                 ...(dotStock !== null && { Dot: dotStock }),
                 ...(hotStock !== null && { Hot: hotStock })
             };
         }
-        
+        if(handleHistoryEventAdd) handleHistoryEventAdd(`${toUpdateCharData.Name} a reçu l'effet ${newEffect.Name}.`, 'Text');
         const updatedCharData = addEffect(toUpdateData, newEffect, effectType);
         setCharData(charData.map((char) => char.Id === toUpdateData.Id ? updatedCharData : char));
         handleModalClose();
@@ -93,10 +94,10 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
         setEffectType(presetData.EffectType);
         setValue("Name", presetData.Name);
         setValue("Desc", presetData.Desc);
-        ['STR', 'END', 'AGI', 'MANA', 'MGK', 'LUK', 'SPD'].forEach((carac) => setValue(carac as keyof EffectFormInputInterface, presetData.Effect?.CharCaracteristics?.[carac as keyof typeof presetData.Effect.CharCaracteristics] ?? 0));
+        ['STR', 'END', 'AGI', 'MANA', 'MGK', 'LUK', 'SPD'].forEach((carac) => setValue(carac as keyof EffectFormInputInterface, presetData.Effect?.CaracteristicsBuff?.[carac as keyof typeof presetData.Effect.CaracteristicsBuff] ?? 0));
         ['Ini', 'SA', 'AA', 'DMG', 'PA', 'SD', 'AD', 'ReD', 'CdC', 'CC', 'AN'].forEach((stat) => setValue(stat as keyof EffectFormInputInterface, presetData.Effect?.CombatStats?.[stat as keyof typeof presetData.Effect.CombatStats] ?? 0));
-        setValue("Dot", presetData.Effect?.Dot || 0);
-        setValue("Hot", presetData.Effect?.Hot || 0);
+        setValue("Dot", presetData.Effect?.TurnEffect?.Dot || 0);
+        setValue("Hot", presetData.Effect?.TurnEffect?.Hot || 0);
         setFilterQuery('');
     }
 
@@ -148,16 +149,16 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
                                 <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-2'>
                                     <div className='input_entry'>
                                         <label className='input_label' htmlFor='name'>Name</label>
-                                        <input id='name' {...register("Name", {required: "Enter a Name !"})} placeholder='Enter Effect Name here' className='input_field p-1'/>
+                                        <input id='name' {...register("Name", {required: "Enter a Name !"})} placeholder='Enter Effect Name here' className='input_field p-1' autoComplete='false'/>
                                     </div>
                                     <div className='input_entry !flex-col'>
                                         <label className='input_label' htmlFor='desc'>Description</label>
-                                        <input id='desc' {...register('Desc', {required: "Enter a Description !"})} placeholder='Enter Effect Description here' className='input_field'/>
+                                        <input id='desc' {...register('Desc', {required: "Enter a Description !"})} placeholder='Enter Effect Description here' className='input_field' autoComplete='false' />
                                     </div>
                                     <h2 className='text-center text-xl'>Effets : </h2>
                                     <div className='grid grid-cols-2 gap-2'>
                                         <div className='input_group'>
-                                            {['STR', 'END', 'AGI', 'MANA', 'MGK', 'LUK', 'SPD'].map((prop) => (
+                                            {CharCaracteristicsArray.map((prop) => (
                                                 <div key={prop} className='input_entry'>
                                                     <label className='input_label' htmlFor={prop.toLowerCase()}>{prop}</label>
                                                     <input id={prop.toLowerCase()} type='number' {...register(prop as keyof EffectFormInputInterface)} defaultValue={0} className='input_field' />
@@ -175,7 +176,7 @@ export function CustomEffectFormModal ({ toUpdateCharData, toEdit, toEditEffectT
                                             </div>
                                         </div>
                                         <div className='input_group'>
-                                            {['Ini', 'SA', 'AA', 'DMG', 'PA', 'SD', 'AD', 'ReD', 'CdC', 'CC', 'AN'].map((prop) => (
+                                            {CharCombatStatsArray.map((prop) => (
                                                 <div key={prop} className='input_entry'>
                                                     <label className='input_label' htmlFor={prop.toLowerCase()}>{prop}</label>
                                                     <input id={prop.toLowerCase()} type='number' {...register(prop as keyof EffectFormInputInterface)} defaultValue={0} className='input_field' />

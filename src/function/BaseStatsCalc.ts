@@ -102,7 +102,9 @@ export function updateCombatStatsCalc (charData: CharStatsInterface){
     const caracValues = convertLetterToValue(newCharData.Caracteristics, customCaracteristicsValue);
     Object.keys(caracValues).forEach((key) => {
         const caracKey = key as keyof CharStatsCaracteristicsInterface;
-        if (newCharData.CaracteristicsBuff[caracKey]) { caracValues[caracKey] += newCharData.CaracteristicsBuff[caracKey]; };
+        if(newCharData.CaracteristicsBuff[caracKey]) { caracValues[caracKey] += newCharData.CaracteristicsBuff[caracKey]; };
+        if(newCharData.CaracteristicsOverload.capacity[caracKey] < 0) { caracValues[caracKey] += newCharData.CaracteristicsOverload.capacity[caracKey]; };
+        if(newCharData.CaracteristicsOverload.active[caracKey] > 0) { caracValues[caracKey] += newCharData.CaracteristicsOverload.active[caracKey]; };
     });
     newCharData.CombatStats = {
         "Ini": caracValues.SPD,
@@ -118,6 +120,5 @@ export function updateCombatStatsCalc (charData: CharStatsInterface){
         "AN": newCharData.CombatStats.AN,
     }
     newCharData.CharSpeed = calcVitesse(caracValues.SPD);
-
     return newCharData;
 }

@@ -12,6 +12,8 @@ import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../.
 import { FightListInterface } from "../../../types/fightType";
 import { removeEffect } from "../../../function/FightCalc";
 import './fightScreen.css';
+import { CustomEffectFormModal } from "./FightCustomControl/CustomEffectFormModal";
+import { CustomCaracOverload } from "./FightCustomControl/CustomCaracOverload";
 
 
 interface FightScreenPropsInterface {
@@ -71,83 +73,89 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     }, [charData, activeData]);
 
     return (
-        <div className="w-screen h-screen">
-            <div className="flex flex-col items-center gap-2 border border-black p-2 bg-[#DFDDCF] text-black rounded">
-                <nav className="flex justify p-2 items-center justify-around gap-3 w-screen">
-                    <div className="flex gap-3 items-center text-2xl">
-                        <p className="text-bold">{activeData.fightName} : </p>
-                        <p className={`${activeData.fightState? 'text-green-500' : 'text-gray-500'}`}>{activeData.fightState? 'En Cours' : 'Fini'}</p>
-                    </div>
-                    <div className="flex gap-2 items-center">
-                        <button onClick={() => setFightSettingsModal(true)} className="cursor-pointer" title="Fight Settings"><MdSettings size={32} /></button>
+        <div className="w-screen h-screen p-2 bg-[#DFDDCF] text-black">
+            <div className="flex grid grid-cols-3 w-full">
+                <div className="flex flex-col items-center">
+                    <h2 className="text-xl text-center">Acteur A: </h2>
+                    <select onChange={(e) => handleSetDisplayActorData('A', e.currentTarget.value)} name="actorASelect" defaultValue={displayActorAData?.Name || 'None'} className="text-lg bg-white p-2 my-2 border border-black rounded">
+                        <option value="None">None</option>
                         {
-                            (fightSettingsModal)
-                                ?   <Modal isOpen={fightSettingsModal} onClose={() => handleFightModalClose()}>
-                                        <FightSettingsModal charData={charData} activeData={activeData} handleFightStateChange={handleFightStateChange} handleMemberListChange={handleMemberListChange} handleSettingsModalClose={handleFightModalClose} />
-                                    </Modal>
-                                :   <></>
+                            (activeData.fightMembers.length > 0) &&
+                                (activeData.fightMembers.map((member, index) => {
+                                    return <option key={`${member}_${index}`} value={member}>{member}</option>
+                                }))
                         }
-                        <div className='flex justify-end gap-2 py-2'>
-                            <button title="Cancel" className='bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer' onClick={() => handleModalClose()}>Cancel</button>
+                    </select>
+                    {(displayActorAData !== null) && 
+                        <CharacterStatsDisplay 
+                            charStats={displayActorAData}
+                            handleHistoryEventAdd={handleHistoryEventAdd}
+                            handleRemoveEffect={handleRemoveEffect}
+                            showVariant={false}
+                            showEditButtons={true} 
+                            extraButtons={
+                                <>
+                                    <CustomEffectFormModal toUpdateCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    <CustomCaracOverload toUpdateCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd}/>
+                                    <FightEditCharModal toEditCharData={displayActorAData} />
+                                    <FightStatsEdit toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    <FightANModal toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                </>
+                            }
+                        />
+                    }
+                </div>
+                <div className="flex flex-col gap-2">
+                    <nav className="flex p-2 items-center justify-around gap-3 w-full">
+                        <div className="flex gap-3 items-center text-2xl">
+                            <p className="text-bold">{activeData.fightName} : </p>
+                            <p className={`${activeData.fightState? 'text-green-500' : 'text-gray-500'}`}>{activeData.fightState? 'En Cours' : 'Fini'}</p>
                         </div>
-                    </div>
-                </nav>
-                <div className="flex grid grid-cols-3 w-full min-h-[90vh]">
-                    <div className="flex flex-col items-center">
-                        <h2 className="text-xl text-center">Acteur A: </h2>
-                        <select onChange={(e) => handleSetDisplayActorData('A', e.currentTarget.value)} name="actorASelect" defaultValue={displayActorAData?.Name || 'None'} className="text-lg bg-white p-2 my-2 border border-black rounded">
-                            <option value="None">None</option>
+                        <div className="flex gap-2 items-center">
+                            <button onClick={() => setFightSettingsModal(true)} className="cursor-pointer" title="Fight Settings"><MdSettings size={32} /></button>
                             {
-                                (activeData.fightMembers.length > 0) &&
-                                    (activeData.fightMembers.map((member, index) => {
-                                        return <option key={`${member}_${index}`} value={member}>{member}</option>
-                                    }))
+                                (fightSettingsModal)
+                                    ?   <Modal isOpen={fightSettingsModal} onClose={() => handleFightModalClose()}>
+                                            <FightSettingsModal charData={charData} activeData={activeData} handleFightStateChange={handleFightStateChange} handleMemberListChange={handleMemberListChange} handleSettingsModalClose={handleFightModalClose} />
+                                        </Modal>
+                                    :   <></>
                             }
-                        </select>
-                        {(displayActorAData !== null) && 
-                            <CharacterStatsDisplay 
-                                charStats={displayActorAData} 
-                                handleRemoveEffect={handleRemoveEffect}
-                                showVariant={false}
-                                showEditButtons={true} 
-                                extraButtons={
-                                    <>
-                                        <FightEditCharModal toEditCharData={displayActorAData} />
-                                        <FightStatsEdit toEditCharData={displayActorAData} />
-                                        <FightANModal toEditCharData={displayActorAData} />
-                                    </>
-                                }
-                            />
-                        }
-                    </div>
+                            <div className='flex justify-end gap-2 py-2'>
+                                <button title="Cancel" className='bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer' onClick={() => handleModalClose()}>Cancel</button>
+                            </div>
+                        </div>
+                    </nav>
                     <FightControl activeData={activeData} displayActorAData={displayActorAData} displayActorBData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd}/>
-                    <div className="flex flex-col items-center">
-                        <h2 className="text-xl text-center">Acteur B: </h2>
-                        <select onChange={(e) => handleSetDisplayActorData('B', e.currentTarget.value)} name="actorBSelect" defaultValue={displayActorBData?.Name || 'None'} className="text-lg bg-white p-2 my-2 border border-black rounded">
-                            <option value="None">None</option>
-                            {
-                                (activeData.fightMembers.length > 1) &&
-                                    (activeData.fightMembers.map((member, index) => {
-                                        return <option key={`${member}_${index}`} value={member}>{member}</option>
-                                    }))
-                            }
-                        </select>
-                        {(displayActorBData !== null) && 
-                            <CharacterStatsDisplay 
-                                charStats={displayActorBData} 
-                                handleRemoveEffect={handleRemoveEffect}
-                                showVariant={false}
-                                showEditButtons={true} 
-                                extraButtons={
-                                    <>
-                                        <FightEditCharModal toEditCharData={displayActorBData} />
-                                        <FightStatsEdit toEditCharData={displayActorBData} />
-                                        <FightANModal toEditCharData={displayActorBData} />
-                                    </>
-                                }
-                            />
+                </div>
+                <div className="flex flex-col items-center">
+                    <h2 className="text-xl text-center">Acteur B: </h2>
+                    <select onChange={(e) => handleSetDisplayActorData('B', e.currentTarget.value)} name="actorBSelect" defaultValue={displayActorBData?.Name || 'None'} className="text-lg bg-white p-2 my-2 border border-black rounded">
+                        <option value="None">None</option>
+                        {
+                            (activeData.fightMembers.length > 1) &&
+                                (activeData.fightMembers.map((member, index) => {
+                                    return <option key={`${member}_${index}`} value={member}>{member}</option>
+                                }))
                         }
-                    </div>
+                    </select>
+                    {(displayActorBData !== null) && 
+                        <CharacterStatsDisplay 
+                            charStats={displayActorBData}
+                            handleHistoryEventAdd={handleHistoryEventAdd}
+                            handleRemoveEffect={handleRemoveEffect}
+                            showVariant={false}
+                            showEditButtons={true} 
+                            extraButtons={
+                                <>
+                                    <CustomEffectFormModal toUpdateCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    <CustomCaracOverload toUpdateCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    <FightEditCharModal toEditCharData={displayActorBData} />
+                                    <FightStatsEdit toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    <FightANModal toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                </>
+                            }
+                        />
+                    }
                 </div>
             </div>
         </div>

@@ -6,9 +6,10 @@ import { addEffect } from "../../../../function/FightCalc";
 
 interface CharItemPropsInterface {
     toEditCharData: CharStatsInterface;
+    handleHistoryEventAdd?: (msg: string, type: string, title?: string) => void,
 }
 
-export function FightANModal ({ toEditCharData }: CharItemPropsInterface) {
+export function FightANModal ({ toEditCharData, handleHistoryEventAdd }: CharItemPropsInterface) {
     const { charData, setCharData } = useContext(DataContext);
     const [showModal, setShowModal] = useState(false);
 
@@ -24,6 +25,7 @@ export function FightANModal ({ toEditCharData }: CharItemPropsInterface) {
         const addedANCharData = { ...toEditCharData, CombatStats: { ...toEditCharData.CombatStats, AN: (toEditCharData.CombatStats.AN + ANGet) }}
         const debuff: BuffInterface = { Name: "Sacrifice de AN", Desc: `Vous avez sacrifié ${AAUse} AA et ${ADUse} AD pour gagner ${ANGet} AN ce tour.
 # Effet a enlever manuellement par le MJ.`, Effect: { CombatStats: { AA: -AAUse, AD: -ADUse }}}
+        if(handleHistoryEventAdd) handleHistoryEventAdd(`${toEditCharData.Name} a utilisé ${AAUse} AA et ${ADUse} AD pour gagner ${ANGet} AN ce tour.`, 'Text');
         const addedBuffCharData = addEffect(addedANCharData, debuff, "Debuff");
         setCharData(charData.map((char) => char.Id === addedBuffCharData.Id? addedBuffCharData: char));
     }
@@ -40,6 +42,7 @@ export function FightANModal ({ toEditCharData }: CharItemPropsInterface) {
         const removedANCharData = { ...toEditCharData, CombatStats: { ...toEditCharData.CombatStats, AN: (toEditCharData.CombatStats.AN - ANUse) }}
         const buff: BuffInterface = { Name: "Sacrifice de AA | AD", Desc: `Vous avez utilisé ${ANUse} AN pour gagner ${AAGet} AA et ${ADGet} AD ce tour.
 # Effet a enlever manuellement par le MJ.` };
+        if(handleHistoryEventAdd) handleHistoryEventAdd(`${toEditCharData.Name} a utilisé ${ANUse} AN pour gagner ${AAGet} AA et ${ADGet} AD ce tour.`, 'Text');
         const addedDebuffCharData = addEffect(removedANCharData, buff, "Buff");
         setCharData(charData.map((char) => char.Id === addedDebuffCharData.Id? addedDebuffCharData: char));
     }

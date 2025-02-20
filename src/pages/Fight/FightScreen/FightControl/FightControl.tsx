@@ -48,8 +48,7 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
         let newData = [ ...charData ];
 
         const iniCalcRes = handleIniCalc(actorA, actorB, handleHistoryEventAdd);
-        if(iniCalcRes){ newData = updateCharData(charData, actorA, actorB); };
-
+        if(iniCalcRes){ newData = updateCharData(newData, iniCalcRes.iniFirstActor, iniCalcRes.iniSecondActor); };
         setCharData(newData);
     }
 
@@ -79,7 +78,7 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
     }
 
     return (
-        <div className="flex flex-col items-center justify-around" id="ChatGPT">
+        <div className="flex flex-col items-center justify-around gap-2">
             <div className="flex flex-col items-center gap-2">
                 <h2 className="input_label">Controles de combat: </h2>
                 <div className="flex gap-2 items-center">
@@ -103,7 +102,7 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
                 </div>
                 <div className="flex gap-2 items-center">
                     <h3 className="text-xl font-bold">Calcul Ini: </h3>
-                    <button onClick={() => handleSingleInitCalc(displayActorAData, displayActorBData)} disabled={!displayActorAData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Calcul</button>
+                    <button onClick={() => handleSingleInitCalc(displayActorAData, displayActorBData)} disabled={!displayActorAData || !displayActorBData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Calcul</button>
                 </div>
             </div>
             <div className="flex flex-col items-center gap-2">
@@ -134,7 +133,6 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
                 </div>
             </div>
             <div className="flex flex-col items-center">
-                <h2>Historique de combat :</h2>
                 <Terminal fightHistory={activeData.fightHistory} />
             </div>
         </div>
