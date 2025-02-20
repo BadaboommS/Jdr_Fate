@@ -1,13 +1,13 @@
-import { CharStatsCaracteristicsInterface, CharStatsInterface, StatKey } from "../types/statsType";
+import { CharStatsCaracteristicsInterface, CharStatsInterface, CharCaracteristicsKeyType, CharStatsCaracteristicsValueInterface } from "../types/statsType";
 
 function convertLetterToValue(caracs: CharStatsCaracteristicsInterface, customValues: Partial<CharStatsCaracteristicsInterface>) {
-    const STRValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0, "S": 0 };
-    const ENDValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0, "S": 0 };
-    const AGIValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0, "S": 0 };
-    const MANAValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0, "S": 0 };
-    const MGKValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0, "S": 0 };
-    const LUKValue: Record<StatKey, number> = { "E": 50, "E+": 50, "D-": 49, "D": 49, "D+": 48, "C-": 48, "C": 47, "C+": 47, "B-": 46, "B": 46, "B+": 45, "A-": 45, "A": 44, "A+": 43, "EX": 0, "S": 0 }
-    const SPDValue: Record<StatKey, number> = { "E": 1, "E+": 1, "D-": 2, "D": 2, "D+": 3, "C-": 3, "C": 4, "C+": 4, "B-": 5, "B": 5, "B+": 6, "A-": 6, "A": 7, "A+": 8, "EX": 0, "S": 0 };
+    const STRValue: Record<CharCaracteristicsKeyType, number> = { "E": 1, "D": 2, "C": 4, "B": 5, "A": 7, "EX": 0, "S": 0 };
+    const ENDValue: Record<CharCaracteristicsKeyType, number> = { "E": 1, "D": 2, "C": 4, "B": 5, "A": 7, "EX": 0, "S": 0 };
+    const AGIValue: Record<CharCaracteristicsKeyType, number> = { "E": 1, "D": 2, "C": 4, "B": 5, "A": 7, "EX": 0, "S": 0 };
+    const MANAValue: Record<CharCaracteristicsKeyType, number> = { "E": 1, "D": 2, "C": 4, "B": 5, "A": 7, "EX": 0, "S": 0 };
+    const MGKValue: Record<CharCaracteristicsKeyType, number> = { "E": 1, "D": 2, "C": 4, "B": 5, "A": 7, "EX": 0, "S": 0 };
+    const LUKValue: Record<CharCaracteristicsKeyType, number> = { "E": 50, "D": 49, "C": 47, "B": 46, "A": 44, "EX": 0, "S": 0 }
+    const SPDValue: Record<CharCaracteristicsKeyType, number> = { "E": 1, "D": 2, "C": 4, "B": 5, "A": 7, "EX": 0, "S": 0 };
 
     const returnCaracValues = {
         STR: STRValue[caracs.STR as keyof typeof STRValue],
@@ -31,15 +31,19 @@ function convertLetterToValue(caracs: CharStatsCaracteristicsInterface, customVa
 }
 
 // Calcul des Points de Vie (PV Max)
-function calcPVMax(END: StatKey): number {
-    const ENDValue: Record<StatKey, number | null> = { "E": 5000, "E+": 6000, "D-": 6000, "D": 7000, "D+": 8000, "C-": 9000, "C": 10000, "C+": 11000, "B-": 11000, "B": 12000, "B+": 13000, "A-": 14000, "A": 15000, "A+": 16000, "EX": 0, "S": 0 };
-    return ENDValue[END] || 5000;
+function calcPVMax(END: CharCaracteristicsKeyType, ENDOverload?: number): number {
+    const ENDValue: Record<CharCaracteristicsKeyType, number | null> = { "E": 5000, "D": 7000, "C": 10000, "B": 12000, "A": 15000, "EX": 0, "S": 0 };
+    let Hp = ENDValue[END] || 5000;
+    if(ENDOverload) Hp += (ENDOverload * 500);
+    return Hp;
 }
 
 // Calcul du Mana
-function calcManaMax(MANA: StatKey): number {
-    const MANAValue: Record<StatKey, number | null> = { "E": 5000, "E+": 6000, "D-": 6000, "D": 7000, "D+": 8000, "C-": 9000, "C": 10000, "C+": 11000, "B-": 11000, "B": 12000, "B+": 13000, "A-": 14000, "A": 15000, "A+": 16000, "EX": 0, "S": 0 };
-    return MANAValue[MANA] || 5000;
+function calcManaMax(MANA: CharCaracteristicsKeyType, MANAOverload?: number): number {
+    const MANAValue: Record<CharCaracteristicsKeyType, number | null> = { "E": 500, "D": 700, "C": 1000, "B": 1200, "A": 1500, "EX": 0, "S": 0 };
+    let Mana = MANAValue[MANA] || 5000;
+    if(MANAOverload) Mana += (MANAOverload * 500);
+    return Mana;
 }
 
 // Calcul des Actions d'Attaque (AA)
@@ -72,11 +76,11 @@ function calcVitesse(SPD: number): number {
     return (25 * SPD) + 15;
 }
 
-export function caracToStatsCalc (caracLetters: CharStatsCaracteristicsInterface, customValues: Partial<CharStatsCaracteristicsInterface>, armor: number) {
+export function caracToStatsCalc (caracLetters: CharStatsCaracteristicsInterface, customValues: Partial<CharStatsCaracteristicsInterface>, armor: number, caracOverload: CharStatsCaracteristicsValueInterface) {
     const caracValues = convertLetterToValue(caracLetters, customValues);
     return {
-        "Hp" : calcPVMax(caracLetters.END as StatKey),
-        "Mana" : calcManaMax(caracLetters.MANA as StatKey),
+        "Hp" : calcPVMax(caracLetters.END as CharCaracteristicsKeyType, caracOverload.END),
+        "Mana" : calcManaMax(caracLetters.MANA as CharCaracteristicsKeyType, caracOverload.MANA),
         "Ini": caracValues.SPD,
         "SA": 0,
         "AA": calcAA(caracValues.STR, caracValues.AGI, caracValues.SPD),

@@ -1,5 +1,13 @@
 import { FightStanceInterface } from "../data/FightStance";
 
+export type CharCaracteristicsKeyType = 'E' | 'D' | 'C' | 'B' | 'A' | 'EX' | 'S';
+export const CharCaracteristicsKeyArray = ['E', 'D' , 'C' , 'B' , 'A' , 'EX', 'S'];
+export const CharCaracteristicsArray = ["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"];
+export const CharCombatStatsArray = ["Ini", "SA", "AA", "DMG", "PA", "SD", "AD", "ReD", "CdC", "CC", "AN"];
+export const CharTypeArray = ["Master", "Servant", "PNJ"];
+export const ServantVariantArray = ["Archer", "Assassin", "Berserker", "Caster", "Lancer", "Rider", "Saber", "Slayer", "Shielder", "Outsider", "Monster", "Launcher", "Avenger", "Elder"];
+export const WeaponTypeArray = ["Contondant", "Perçant", "Tranchant"];
+
 export interface CharStatsInterface {
     Id: number;
     Name: string; Joueur: string;
@@ -8,12 +16,13 @@ export interface CharStatsInterface {
     Hp: number; InitHp: number;
     Mana: number; InitMana: number;
     Caracteristics: CharStatsCaracteristicsInterface; InitCaracteristics: CharStatsCaracteristicsInterface;
+    CustomCaracteristicsValue: Partial<CharStatsCaracteristicsInterface>; // EX & S
+    CaracteristicsBuff: CharStatsCaracteristicsValueInterface; // After Buff / Debuff Caracteristics
+    CaracteristicsOverload: CharStatsCaracteristicsValueInterface; // Caracteristics + Using Mana
     CombatStats: CharStatsCombatStatsInterface; InitCombatStats: CharStatsCombatStatsInterface;
     BuffsList: CharBuffInterface[]; DebuffsList: CharDebuffInterface[];
     TurnEffect: TurnEffectInterface; // Dot & Hot
     FightStyleList: (FightStanceInterface | null)[]; MaxFightStyleAmount: number; // Stances Buffs
-    CaracteristicsBuff: CharStatsCaracteristicsValueInterface; // After Buff / Debuff Caracteristics
-    CustomCaracteristicsValue: Partial<CharStatsCaracteristicsInterface>; // EX & S
     CharSpeed: number;
 }
 
@@ -68,10 +77,6 @@ interface TurnEffectInterface {
     Hot: number;
 }
 
-/* enum CharEnum { Master, Servant, PNJ };
-enum ClassicServantEnum { Archer, Assassin, Berserker, Caster, Lancer, Rider, Saber };
-enum SpecialServantEnum { Slayer, Shielder, Outsider, Monster, Launcher, Avenger, Elder }; */
-
 type WeaponType = {
     WeaponName: string,
     WeaponDmg: number,
@@ -98,9 +103,6 @@ export interface CharStatsCaracteristicsValueInterface {
     SPD: number;
 }
 
-export type StatKey = 'E' | 'E+' | 'D-' | 'D' | 'D+' | 'C-' | 'C' | 'C+' | 'B-' | 'B' | 'B+' | 'A-' | 'A' | 'A+' | 'EX' | 'S';
-export const StatKeyArray = ['E' , 'E+' , 'D-' , 'D' , 'D+' , 'C-' , 'C' , 'C+' , 'B-' , 'B' , 'B+' , 'A-' , 'A' , 'A+' , 'EX', 'S'];
-
 export interface CharStatsCombatStatsInterface {
     Ini: number;
     SA: number;
@@ -125,15 +127,23 @@ export interface CreateCharFormInputInterface {
     WeaponType: string;
     Armor: number;
     MaxFightStyleAmount: number;
-    //Caracteristics
+    // Caracteristics
     STR: string;
     END: string;
     AGI: string;
     MANA: string;
     MGK: string;
     LUK: string;
-    SPD: string
-    //Combat_stats
+    SPD: string;
+    // CaracteristicsOverload
+    STROverload: number;
+    ENDOverload: number;
+    AGIOverload: number;
+    MANAOverload: number;
+    MGKOverload: number;
+    LUKOverload: number;
+    SPDOverload: number;
+    // Combat_stats
     Hp: number;
     Mana: number;
     Ini: number;

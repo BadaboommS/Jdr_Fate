@@ -40,37 +40,10 @@
       "Mana": 1200,
       "InitHp": 10000,
       "InitMana": 1200,
-      "Caracteristics": {
-        "STR": "B",
-        "END": "C",
-        "AGI": "A",
-        "MANA": "B",
-        "MGK": "A",
-        "LUK": "C",
-        "SPD": "B"
-      },
-      "InitCaracteristics": {
-        "STR": "B",
-        "END": "C",
-        "AGI": "A",
-        "MANA": "B",
-        "MGK": "A",
-        "LUK": "C",
-        "SPD": "B"
-      },
-      "CombatStats": {
-        "Ini": 5,
-        "SA": 80,
-        "AA": 9,
-        "DMG": 25,
-        "PA": 5,
-        "SD": 70,
-        "AD": 8,
-        "ReD": 22,
-        "CdC": 4,
-        "CC": 2,
-        "AN": 0
-      },
+      "Caracteristics": { "STR": "B", "END": "C", "AGI": "A", "MANA": "B", "MGK": "A", "LUK": "C", "SPD": "B" },
+      "CaracteristicsOverload": { "STR": 0, "END": 0, "AGI": 0, "MANA": 0, "MGK": 0, "LUK": 0, "SPD": 0 },
+      "InitCaracteristics": { "STR": "B", "END": "C", "AGI": "A", "MANA": "B", "MGK": "A", "LUK": "C", "SPD": "B"},
+      "CombatStats": { "Ini": 5, "SA": 80, "AA": 9, "DMG": 25, "PA": 5, "SD": 70, "AD": 8, "ReD": 22, "CdC": 4, "CC": 2, "AN": 0 },
       "InitCombatStats": {
         "Ini": 5,
         "SA": 80,
@@ -116,6 +89,7 @@
         "LUK": "A",
         "SPD": "A"
       },
+      "CaracteristicsOverload": { "STR": 0, "END": 0, "AGI": 0, "MANA": 0, "MGK": 0, "LUK": 0, "SPD": 0 },
       "InitCaracteristics": {
         "STR": "A",
         "END": "B",
@@ -182,6 +156,7 @@
         "LUK": "B",
         "SPD": "C"
       },
+      "CaracteristicsOverload": { "STR": 0, "END": 0, "AGI": 0, "MANA": 0, "MGK": 0, "LUK": 0, "SPD": 0 },
       "InitCaracteristics": {
         "STR": "C",
         "END": "D",

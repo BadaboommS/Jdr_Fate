@@ -108,6 +108,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                             <CharacterStatsDisplay 
                                 charStats={displayActorAData} 
                                 handleRemoveEffect={handleRemoveEffect}
+                                showVariant={false}
                                 showEditButtons={true} 
                                 extraButtons={
                                     <>
@@ -135,6 +136,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                             <CharacterStatsDisplay 
                                 charStats={displayActorBData} 
                                 handleRemoveEffect={handleRemoveEffect}
+                                showVariant={false}
                                 showEditButtons={true} 
                                 extraButtons={
                                     <>

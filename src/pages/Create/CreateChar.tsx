@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
-import { CreateCharFormInputInterface, CombatStatsTitle, StatKeyArray, StatKey } from "../../types/statsType";
+import { CreateCharFormInputInterface, CombatStatsTitle, CharCaracteristicsKeyArray, CharCaracteristicsArray, CharCombatStatsArray, CharTypeArray, ServantVariantArray, WeaponTypeArray } from "../../types/statsType";
 import { caracToStatsCalc } from "../../function/BaseStatsCalc";
 import './createChar.css';
 
@@ -16,21 +16,22 @@ export function CreateChar() {
         if(!window.confirm(`Valider l'ajout du personnage ?`)){
             return;
         }
-
-        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, MaxFightStyleAmount, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, CharSpeed, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
+        
+        const { Name, Joueur, Type, WeaponName, WeaponDmg, WeaponType, Armor, MaxFightStyleAmount, Variant, Hp, Mana, STR, END, AGI, MANA, MGK, LUK, SPD, STROverload, ENDOverload, AGIOverload, MANAOverload, MGKOverload, LUKOverload, SPDOverload, CharSpeed, Ini, SA, AA, DMG, PA, SD, AD, ReD, CdC, CC, AN } = data;
         const newCharacterData = {
             Id: charData[0] ? charData[charData.length - 1].Id + 1 : 0,
             Name, Joueur, Type,
             Weapon: { WeaponName, WeaponDmg: Number(WeaponDmg), WeaponType },
             Hp: Number(Hp), InitHp: Number(Hp), Mana: Number(Mana), InitMana: Number(Mana), Armor: Number(Armor), MaxFightStyleAmount: Number(MaxFightStyleAmount),
             Caracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
-            CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             InitCaracteristics: { STR, END, AGI, MANA, MGK, LUK, SPD },
+            CustomCaracteristicsValue: getCustomValues(),
+            CaracteristicsBuff: { STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0 },
+            CaracteristicsOverload: { STR: Number(STROverload), END: Number(ENDOverload), AGI: Number(AGIOverload), MANA: Number(MANAOverload), MGK: Number(MGKOverload), LUK: Number(LUKOverload), SPD: Number(SPDOverload) },
+            CombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             InitCombatStats: { Ini: Number(Ini), SA: Number(SA), AA: Number(AA), DMG: Number(DMG), PA: Number(PA), SD: Number(SD), AD: Number(AD), ReD: Number(ReD), CdC: Number(CdC), CC: Number(CC), AN: Number(AN) },
             BuffsList: [], DebuffsList: [], FightStyleList: [],
             TurnEffect: { Dot: 0, Hot: 0 },
-            CaracteristicsBuff: { STR: 0, END: 0, AGI: 0, MANA: 0, MGK: 0, LUK: 0, SPD: 0 },
-            CustomCaracteristicsValue: getCustomValues(),
             CharSpeed: CharSpeed,
             ...(showVariant && { Variant })
         };
@@ -40,8 +41,9 @@ export function CreateChar() {
     
     function handleCalculStats(){
         const CARACS = { STR: getValues("STR"), END: getValues("END"), AGI: getValues("AGI"), MANA: getValues("MANA"), MGK: getValues("MGK"), LUK: getValues("LUK"), SPD: getValues("SPD") };
+        const CaracOverload = { STR: getValues("STROverload"), END: getValues("ENDOverload"), AGI: getValues("AGIOverload"), MANA: getValues("MANAOverload"), MGK: getValues("MGKOverload"), LUK: getValues("LUKOverload"), SPD: getValues("SPDOverload") };
         const customValues = getCustomValues();
-        const CARAC_VALUES = caracToStatsCalc(CARACS, customValues, Number(getValues('Armor')));
+        const CARAC_VALUES = caracToStatsCalc(CARACS, customValues, Number(getValues('Armor')), CaracOverload);
         Object.entries(CARAC_VALUES).forEach(([key, value]) => {
             setValue(key as keyof CreateCharFormInputInterface, value);
         });
@@ -86,14 +88,14 @@ export function CreateChar() {
                         <div className="input_entry">
                             <label htmlFor="input_type" className="input_label">Character Type :</label>
                             <select {...register("Type")} id="input_type" defaultValue="Master" onChange={(e) => e.target.value === "Servant"? setShowVariant(true): setShowVariant(false)} className="input_field !indent-1">
-                                {["Master", "Servant", "PNJ"].map((value) => (
+                                {CharTypeArray.map((value) => (
                                     <option key={value} value={value}>{value}</option>
                                 ))}
                             </select>
                             {(showVariant) && 
                                 <select {...register("Variant")} defaultValue="Archer" id="input_variant" className="input_field !indent-1">
-                                    {["Archer", "Assassin", "Berserker", 'Caster', "Lancer", "Rider", "Saber", "Slayer", "Shielder", "Outsider", "Monster", "Launcher", "Avenger", "Elder"].map((variant) => (
-                                        <option value={variant}>{variant}</option>
+                                    {ServantVariantArray.map((variant) => (
+                                        <option key={variant} value={variant}>{variant}</option>
                                     ))}
                                 </select>
                             }
@@ -105,7 +107,7 @@ export function CreateChar() {
                         <div className="input_entry">
                             <label htmlFor="input_weapon_type" className="input_label">Type Arme :</label>
                             <select {...register("WeaponType")} id="input_weapon_type" defaultValue='Contondant' className="input_field">
-                                {["Contondant", "Perçant", "Tranchant"].map((weaponType) => (
+                                {WeaponTypeArray.map((weaponType) => (
                                     <option key={weaponType} value={weaponType}>{weaponType}</option>
                                 ))}
                             </select>
@@ -123,13 +125,18 @@ export function CreateChar() {
                             <input type="number" {...register("MaxFightStyleAmount", {required: "Enter a Valid WeaponDmg Amount !", min: 0})} id="input_stance_number" className="input_field" />
                         </div>
                         <h3 className="input_label">Caracteristics :</h3>
-                        {["STR", "END", "AGI", "MANA", "MGK", "LUK", "SPD"].map((stat) => (
+                        {CharCaracteristicsArray.map((stat) => (
                             <div className="input_entry" key={stat}>
                                 <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label">{stat} :</label>
-                                <input {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`, validate: (value) =>  StatKeyArray.includes(value as StatKey) || `Invalid ${stat} value! Must be: ${StatKeyArray.join(", ")}`})} defaultValue={'E'} id={`input_${stat.toLowerCase()}`} className="input_field" />
+                                <select {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`})} id={`input_${stat.toLowerCase()}`} defaultValue={"E"} className="input_field">
+                                    {CharCaracteristicsKeyArray.map((value) => {
+                                        return <option key={`${stat}_${value}`} value={value}>{value}</option>
+                                    })}
+                                </select>
                                 {(watch(stat as keyof CreateCharFormInputInterface) === 'EX' || watch(stat as keyof CreateCharFormInputInterface) === 'S') && 
-                                    <input type="number" id={`${stat}_custom_value`} className="input_field" placeholder={`Enter ${watch(stat as keyof CreateCharFormInputInterface)} value`} required />
+                                    <input type="number" id={`${stat}_custom_value`} className="input_field" placeholder={`Enter ${watch(stat as keyof CreateCharFormInputInterface)} value`} defaultValue={0} required />
                                 }
+                                <input type="number" {...register(`${stat}Overload` as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !`})} className="input_field cursor-help" defaultValue={0} title="Nombre de + ou - à la Caracteristique"/>
                             </div>
                         ))}
                     </div>
@@ -148,7 +155,7 @@ export function CreateChar() {
                             <label htmlFor="input_mana2" className="input_label">Mana :</label>
                             <input type="number" {...register("Mana", {required: "Enter a Valid Mana Amount !"})} id="input_mana2" className="input_field" />
                         </div>
-                        {["Ini", "SA", "AA", "DMG", "PA", "SD", "AD", "ReD", "CdC", "CC", "AN"].map((stat) => (
+                        {CharCombatStatsArray.map((stat) => ( 
                             <div className="input_entry" key={stat}>
                                 <label htmlFor={`input_${stat.toLowerCase()}`} className="input_label cursor-help" title={CombatStatsTitle[stat as keyof typeof CombatStatsTitle]}>{stat} :</label>
                                 <input type="number" {...register(stat as keyof CreateCharFormInputInterface, { required: `Enter a Valid ${stat} Amount !` })} defaultValue={0} id={`input_${stat.toLowerCase()}`} className="input_field" />
