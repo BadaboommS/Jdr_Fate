@@ -77,7 +77,7 @@ export function CharSlidePannel({ charStats, side, handleHistoryEventAdd }: Slid
                                 <div key={index} className="input_entry bg-[#DFDDCF]">
                                     <span className="input_field cursor-help" title={debuff.Desc}>{debuff.Name}</span>
                                     <CustomEffectFormModal toEditCharData={charStats} toEdit={debuff} toEditEffectType='Debuff' />
-                                    {handleRemoveEffect && <button onClick={() => handleRemoveEffect(charStats, debuff, "Debuff")} className="bg-red-900 text-white hover:text-red-900 hover:bg-white transition-all p-1 cursor-pointer" title="Supprimer Effet"><RxCross1 size={20} /></button>}
+                                    {handleRemoveEffect && <button onClick={() => handleRemoveEffect(charStats, debuff, "Debuff")} className="bg-red-900 text-white hover:text-red-900 hover:bg-white transition-all p-1 px-2 cursor-pointer" title="Supprimer Effet"><RxCross1 size={18} /></button>}
                                 </div>
                             ))
                             : <p className="input_field bg-[#DFDDCF]">No debuffs.</p>
