@@ -24,21 +24,14 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
     }
 
     return (
-        <CharacterStatsDisplay
-            charStats={charStats}
-            handleRemoveEffect={handleRemoveEffect} 
-            showEditButtons={true}
-            showVariant={true}
-            extraButtons={
-                <>
-                    <CustomEffectFormModal toEditCharData={charStats} />
-                    <CustomCaracOverload toEditCharData={charStats} />
-                    <FightStatsEdit toEditCharData={charStats} />
-                    <FightANModal toEditCharData={charStats} />
-                    <button onClick={handleSetEdit} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Edit</button>
-                    <button onClick={handleCloseModal} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Cancel</button>
-                </>
-            }
-        />
+        <>
+            <CharacterStatsDisplay charStats={charStats} handleRemoveEffect={handleRemoveEffect} showVariant={true} />
+            <CustomEffectFormModal toEditCharData={charStats} />
+            <CustomCaracOverload toEditCharData={charStats} />
+            <FightStatsEdit toEditCharData={charStats} />
+            <FightANModal toEditCharData={charStats} />
+            <button onClick={handleSetEdit} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Edit</button>
+            <button onClick={handleCloseModal} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Cancel</button>
+        </>
     );
 };

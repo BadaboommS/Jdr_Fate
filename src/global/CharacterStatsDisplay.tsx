@@ -1,19 +1,15 @@
 import { RxCross1 } from "react-icons/rx";
 import { CustomEffectFormModal } from "../pages/Fight/FightScreen/FightCustomControl/CustomEffectFormModal";
 import { CharStatsInterface, CharBuffInterface, CharDebuffInterface, CombatStatsTitle } from "../types/statsType";
-import { FightStanceArray } from "../data/FightStance";
 
 interface CharacterStatsDisplayProps {
     charStats: CharStatsInterface;
     handleHistoryEventAdd?: (msg: string, type: string, title?: string) => void,
     handleRemoveEffect?: (charD: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: "Buff" | "Debuff") => void;
-    handleFightStanceChange?: (actorId: number | undefined, stanceName: string, stanceNumber: number) => void;
     showVariant?: boolean;
-    showEditButtons?: boolean;
-    extraButtons?: React.ReactNode;
 }
 
-export function CharacterStatsDisplay({ charStats, handleRemoveEffect, handleFightStanceChange, showVariant, showEditButtons = false, extraButtons }: CharacterStatsDisplayProps) {
+export function CharacterStatsDisplay({ charStats, handleRemoveEffect, showVariant }: CharacterStatsDisplayProps) {
     const charCarOverloadCapacity = charStats.CaracteristicsOverload.capacity;
     const charCarOverloadActive = charStats.CaracteristicsOverload.active;
     const charCarBuff = charStats.CaracteristicsBuff;
@@ -95,24 +91,6 @@ export function CharacterStatsDisplay({ charStats, handleRemoveEffect, handleFig
                     }
                 </div>
             </div>
-            {handleFightStanceChange && Array.from({ length: charStats?.MaxFightStyleAmount }).map((_, index) => (
-                <div className="input_group w-50 mx-auto">
-                    <h3 className="input_label">Position de combat:</h3>
-                    <select key={index} className="input_field" id={`${charStats.Name}_stance_select_${index}`} onChange={(e) => handleFightStanceChange(charStats?.Id, e.currentTarget.value, index)} defaultValue={charStats?.FightStyleList[index]?.Name || "None"}>
-                        <option value="None">None</option>
-                        {FightStanceArray.map((stance) => {
-                            return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
-                        })} 
-                    </select>
-                </div>
-            ))}
-            {showEditButtons && (
-                <div className="flex justify-center py-5">
-                    <div className="min-w-80 flex justify-around">
-                        {extraButtons}
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

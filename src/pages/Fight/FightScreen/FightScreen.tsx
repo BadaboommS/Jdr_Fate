@@ -12,7 +12,7 @@ import { FightStatsEdit } from "./FightCustomControl/FightStatsEdit";
 import { CharStatsInterface } from "../../../types/statsType";
 import { FightListInterface } from "../../../types/fightType";
 import './fightScreen.css';
-import { findStance } from "../../../data/FightStance";
+import { FightStanceArray, findStance } from "../../../data/FightStance";
 import { applyAllStance, unapplyAllStance } from "../../../function/FightCalc";
 
 interface FightScreenPropsInterface {
@@ -103,20 +103,25 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                     {(displayActorAData !== null) &&
                         <>
                             <CharSlidePannel side="Left" charStats={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                            <CharacterStatsDisplay 
-                                charStats={displayActorAData}
-                                handleHistoryEventAdd={handleHistoryEventAdd}
-                                handleFightStanceChange={handleFightStanceChange}
-                                showVariant={false}
-                                showEditButtons={true} 
-                                extraButtons={
-                                    <>
-                                        <FightEditCharModal toEditCharData={displayActorAData} />
-                                        <FightStatsEdit toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                        <FightANModal toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                    </>
-                                }
-                            />
+                            <CharacterStatsDisplay charStats={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} showVariant={false} />
+                            {Array.from({ length: displayActorAData?.MaxFightStyleAmount }).map((_, index) => (
+                                <div className="input_group w-50 mx-auto py-2">
+                                    <h3 className="input_label">Position de combat:</h3>
+                                    <select key={index} className="input_field" id={`${displayActorAData.Name}_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorAData?.Id, e.currentTarget.value, index)} defaultValue={displayActorAData?.FightStyleList[index]?.Name || "None"}>
+                                        <option value="None">None</option>
+                                        {FightStanceArray.map((stance) => {
+                                            return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
+                                        })} 
+                                    </select>
+                                </div>
+                            ))}
+                            <div className="flex justify-center py-2">
+                                <div className="min-w-80 flex justify-around">
+                                    <FightEditCharModal toEditCharData={displayActorAData} />
+                                    <FightStatsEdit toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    <FightANModal toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                </div>
+                            </div>
                         </>
                     }
                 </div>
@@ -156,22 +161,28 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                     {(displayActorBData !== null) && 
                         <>
                             <CharSlidePannel side="Right" charStats={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                            <CharacterStatsDisplay 
-                                charStats={displayActorBData}
-                                handleHistoryEventAdd={handleHistoryEventAdd}
-                                handleFightStanceChange={handleFightStanceChange}
-                                showVariant={false}
-                                showEditButtons={true} 
-                                extraButtons={
-                                    <>
-                                        <FightEditCharModal toEditCharData={displayActorBData} />
-                                        <FightStatsEdit toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                        <FightANModal toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                    </>
-                                }
-                            />
+                            <CharacterStatsDisplay charStats={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} showVariant={false} />
+                            {Array.from({ length: displayActorBData?.MaxFightStyleAmount }).map((_, index) => (
+                                <div className="input_group w-50 mx-auto py-2">
+                                    <h3 className="input_label">Position de combat:</h3>
+                                    <select key={index} className="input_field" id={`${displayActorBData.Name}_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value, index)} defaultValue={displayActorAData?.FightStyleList[index]?.Name || "None"}>
+                                        <option value="None">None</option>
+                                        {FightStanceArray.map((stance) => {
+                                            return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
+                                        })} 
+                                    </select>
+                                </div>
+                            ))}
+                            <div className="flex justify-center py-2">
+                                <div className="min-w-80 flex justify-around">
+                                    <FightEditCharModal toEditCharData={displayActorBData} />
+                                    <FightStatsEdit toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    <FightANModal toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                </div>
+                            </div>
                         </>
                     }
+                    
                 </div>
             </div>
         </div>
