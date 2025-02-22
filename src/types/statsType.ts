@@ -18,7 +18,7 @@ export interface CharStatsInterface {
     Caracteristics: CharStatsCaracteristicsInterface; InitCaracteristics: CharStatsCaracteristicsInterface;
     CustomCaracteristicsValue: Partial<CharStatsCaracteristicsInterface>; // EX & S
     CaracteristicsBuff: CharStatsCaracteristicsValueInterface; // After Buff / Debuff Caracteristics
-    CaracteristicsOverload: { active: CharStatsCaracteristicsValueInterface, capacity: CharStatsCaracteristicsValueInterface }; // Caracteristics + Using Mana
+    CaracteristicsOverload: CharCaracteristicsOverloadInterface; // Caracteristics + Using Mana
     CombatStats: CharStatsCombatStatsInterface; InitCombatStats: CharStatsCombatStatsInterface;
     BuffsList: CharBuffInterface[]; DebuffsList: CharDebuffInterface[];
     TurnEffect: TurnEffectInterface; // Dot & Hot
@@ -69,7 +69,7 @@ export interface CharSkillsInteface {
     Enabled: boolean;
 }
 
-interface TurnEffectInterface {
+export interface TurnEffectInterface {
     Dot: number;
     Hot: number;
 }
@@ -112,6 +112,11 @@ export interface CharStatsCombatStatsInterface {
     CdC: number;
     CC: number;
     AN: number;
+}
+
+export interface CharCaracteristicsOverloadInterface {
+    active: CharStatsCaracteristicsValueInterface;
+    capacity: CharStatsCaracteristicsValueInterface;
 }
 
 export interface CreateCharFormInputInterface {

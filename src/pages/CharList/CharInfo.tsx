@@ -8,6 +8,7 @@ import { CustomEffectFormModal } from "../Fight/FightScreen/FightCustomControl/C
 import { CustomCaracOverload } from "../Fight/FightScreen/FightCustomControl/CustomCaracOverload";
 import { FightANModal } from "../Fight/FightScreen/FightCustomControl/FightANModal";
 import { FightStatsEdit } from "../Fight/FightScreen/FightCustomControl/FightStatsEdit";
+import { CharSlidePannel } from "../Fight/FightScreen/FightDisplay/CharSlidePannel";
 
 interface CharInfoPropsInterface {
     charStats: CharStatsInterface;
@@ -25,6 +26,7 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
 
     return (
         <>
+            <CharSlidePannel side="Left" charStats={charStats} />
             <CharacterStatsDisplay charStats={charStats} handleRemoveEffect={handleRemoveEffect} showVariant={true} />
             <CustomEffectFormModal toEditCharData={charStats} />
             <CustomCaracOverload toEditCharData={charStats} />

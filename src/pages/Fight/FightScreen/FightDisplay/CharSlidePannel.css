@@ -3,4 +3,21 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;
+    cursor: pointer;
+}
+
+.close_button {
+    position: absolute;
+    top: 10px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all ease 0.3s;
+}
+.close_button:hover {
+    background-color: white;
+    color: red;
 }

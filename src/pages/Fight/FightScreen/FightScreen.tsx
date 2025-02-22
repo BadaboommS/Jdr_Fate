@@ -103,9 +103,9 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                     {(displayActorAData !== null) &&
                         <>
                             <CharSlidePannel side="Left" charStats={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                            <CharacterStatsDisplay charStats={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} showVariant={false} />
+                            <CharacterStatsDisplay charStats={displayActorAData} showVariant={false} />
                             {Array.from({ length: displayActorAData?.MaxFightStyleAmount }).map((_, index) => (
-                                <div className="input_group w-50 mx-auto py-2">
+                                <div key={`actorA_stance_${index}`} className="input_group w-50 mx-auto py-2">
                                     <h3 className="input_label">Position de combat:</h3>
                                     <select key={index} className="input_field" id={`${displayActorAData.Name}_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorAData?.Id, e.currentTarget.value, index)} defaultValue={displayActorAData?.FightStyleList[index]?.Name || "None"}>
                                         <option value="None">None</option>
@@ -161,11 +161,11 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                     {(displayActorBData !== null) && 
                         <>
                             <CharSlidePannel side="Right" charStats={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                            <CharacterStatsDisplay charStats={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} showVariant={false} />
+                            <CharacterStatsDisplay charStats={displayActorBData} showVariant={false} />
                             {Array.from({ length: displayActorBData?.MaxFightStyleAmount }).map((_, index) => (
-                                <div className="input_group w-50 mx-auto py-2">
+                                <div key={`actorB_stance_${index}`} className="input_group w-50 mx-auto py-2">
                                     <h3 className="input_label">Position de combat:</h3>
-                                    <select key={index} className="input_field" id={`${displayActorBData.Name}_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value, index)} defaultValue={displayActorAData?.FightStyleList[index]?.Name || "None"}>
+                                    <select key={index} className="input_field" id={`${displayActorBData.Name}_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value, index)} defaultValue={displayActorBData?.FightStyleList[index]?.Name || "None"}>
                                         <option value="None">None</option>
                                         {FightStanceArray.map((stance) => {
                                             return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>

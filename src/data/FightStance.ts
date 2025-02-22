@@ -16,6 +16,7 @@ export const StanceBaseEffect = {
 export const StanceBaseEffectArray = [
     { 
         Name: "Stance Offensive",
+        Type: "Offensif",
         Desc: `Vous êtes en position de combat.
 --------------------------
 # Ce buff est du à la selection de stance de combat et se retirera automatiquement au changement de celle-ci.`,
@@ -23,6 +24,7 @@ export const StanceBaseEffectArray = [
     },
     { 
         Name: "Stance Defensive",
+        Type: "Defensif",
         Desc: `Vous êtes sur la defensive.
 --------------------------
 # Ce buff est du à la selection de stance de combat et se retirera automatiquement au changement de celle-ci.`,
@@ -30,6 +32,7 @@ export const StanceBaseEffectArray = [
     },
     { 
         Name: "Stance Neutre",
+        Type: "Neutre",
         Desc: `Vous êtes prêt pour le combat.
 --------------------------
 # Ce buff est du à la selection de stance de combat et se retirera automatiquement au changement de celle-ci.`,
@@ -37,12 +40,12 @@ export const StanceBaseEffectArray = [
     }
 ]
 
-export function findStance ( Name: string ){
+export function findStance( Name: string ){
     return FightStanceArray.find(s => s.Name === Name);
 }
 
-export function findStanceBase (Name: string){
-    return StanceBaseEffectArray.find(s => s.Name === Name);
+export function findStanceBase(Name: string){
+    return StanceBaseEffectArray.find(s => s.Type === Name);
 }
 
 export const FightStanceArray: FightStanceInterface[] = [
@@ -85,9 +88,9 @@ Pour ce tour ci, -15 SD, -1 AD. Au prochain tour +30 SA, +2 AA, +20 DMG. La posi
     },
     {
         Name: "Position de la Panthère",
-        Desc: `Position de combat Offensive: +10 SD, +1 AD, -1 AA.
+        Desc: `Position de combat Offensive: +10 SA, +1 AA, -1 AD.
 --------------------------
-+1 AA, +10 SA, -1 AD.`,
++10 SA, +1 AA, -1 AD.`,
         Type: "Offensif",
         Effect: {
             CombatStats: { AA: 1, SA: 10, AD: -1 }
@@ -127,7 +130,7 @@ Gagne un bonus de +3 SPD pour protéger quelqu’un. Si réussi, il gagne un bon
 --------------------------
 # L'effet est a rajouter par le MJ dans la liste des presets d'effets (Protection du Gorille).`,
         Type: "Defensif",
-        Effect: {}
+        Effect: { CaracteristicsBuff: { SPD: 3 }}
     },
     {
         Name: "Position du Roseau",
