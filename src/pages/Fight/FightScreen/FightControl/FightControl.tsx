@@ -3,9 +3,8 @@ import { DataContext } from "../../../../context/DataContext";
 import { Terminal } from "../FightDisplay/Terminal";
 import { FightListInterface } from "../../../../types/fightType";
 import { CharStatsInterface } from "../../../../types/statsType";
-import { applyAllStance, applyTurnEffect, handleFightAtk, handleIniCalc, handleTurn, handleTurnManaCost, unapplyAllStance } from "../../../../function/FightCalc";
+import { applyTurnEffect, handleFightAtk, handleIniCalc, handleTurn, handleTurnManaCost } from "../../../../function/FightCalc";
 import { updateCharData } from "../../../../function/GlobalFunction";
-import { FightStanceArray, findStance } from "../../../../data/FightStance";
 
 interface FightControlProps {
     activeData: FightListInterface;
@@ -52,25 +51,6 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
         setCharData(newData);
     }
 
-    function handleFightStanceChange(actorId: number | undefined, stanceName: string, stanceNumber: number) {
-        const actorData = charData.find((char) => char.Id === actorId);
-        if(!actorData){ return; }
-        const currentData = [ ...charData ];
-        const newStanceData = findStance(stanceName);
-        const removedStanceBuffData = unapplyAllStance(actorData);
-        
-        if(newStanceData){
-            if(newStanceData.Name === "Position du Golem" && newStanceData.Effect.CombatStats){ newStanceData.Effect.CombatStats.AA = -(Math.floor(actorData.CombatStats.AA / 2)); };
-            removedStanceBuffData.FightStyleList[stanceNumber] = newStanceData;
-        }else{
-            removedStanceBuffData.FightStyleList[stanceNumber] = null;
-        }
-        const appliedStanceBuffData = applyAllStance(removedStanceBuffData);
-        const finalData = currentData.map((char) => char.Id === actorId ? appliedStanceBuffData : char);
-
-        setCharData(finalData);
-    }
-
     function handleSingleTurnEffectCalc(actorData: CharStatsInterface | null): void {
         if(!actorData){ return; };
         const newActordata = applyTurnEffect(actorData, handleHistoryEventAdd);
@@ -103,33 +83,6 @@ export function FightControl({ activeData, displayActorAData, displayActorBData,
                 <div className="flex gap-2 items-center">
                     <h3 className="text-xl font-bold">Calcul Ini: </h3>
                     <button onClick={() => handleSingleInitCalc(displayActorAData, displayActorBData)} disabled={!displayActorAData || !displayActorBData} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">Calcul</button>
-                </div>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-                <h2 className="input_label">Choix Position de combat :</h2>
-                <div className="grid grid-cols-2 gap-2 w-full">
-                    <div className="flex flex-col">
-                        <h2 className="text-center input_label">Acteur A :</h2>
-                        {displayActorAData && Array.from({ length: displayActorAData?.MaxFightStyleAmount }).map((_, index) => {
-                            return <select key={index} className="input_field" id={`actorA_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorAData?.Id, e.currentTarget.value, index)} defaultValue={displayActorAData?.FightStyleList[index]?.Name || "None"}>
-                                        <option value="None">None</option>
-                                        {FightStanceArray.map((stance) => {
-                                            return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
-                                        })}
-                                    </select>
-                        })}
-                    </div>
-                    <div className="flex flex-col">
-                        <h2 className="text-center input_label">Acteur B :</h2>
-                        {displayActorBData && Array.from({ length: displayActorBData?.MaxFightStyleAmount }).map((_, index) => {
-                            return <select key={index} className="input_field" id={`actorB_stance_select_${index}`} onChange={(e) => handleFightStanceChange(displayActorBData?.Id, e.currentTarget.value, index)} defaultValue={displayActorAData?.FightStyleList[index]?.Name || "None"}>
-                                        <option value="None">None</option>
-                                        {FightStanceArray.map((stance) => {
-                                            return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
-                                        })}
-                                    </select>
-                        })}
-                    </div>
                 </div>
             </div>
             <div className="flex flex-col items-center">

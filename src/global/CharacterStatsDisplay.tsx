@@ -1,17 +1,19 @@
 import { RxCross1 } from "react-icons/rx";
 import { CustomEffectFormModal } from "../pages/Fight/FightScreen/FightCustomControl/CustomEffectFormModal";
 import { CharStatsInterface, CharBuffInterface, CharDebuffInterface, CombatStatsTitle } from "../types/statsType";
+import { FightStanceArray } from "../data/FightStance";
 
 interface CharacterStatsDisplayProps {
     charStats: CharStatsInterface;
     handleHistoryEventAdd?: (msg: string, type: string, title?: string) => void,
     handleRemoveEffect?: (charD: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: "Buff" | "Debuff") => void;
+    handleFightStanceChange?: (actorId: number | undefined, stanceName: string, stanceNumber: number) => void;
     showVariant?: boolean;
     showEditButtons?: boolean;
     extraButtons?: React.ReactNode;
 }
 
-export function CharacterStatsDisplay({ charStats, handleRemoveEffect, showVariant, showEditButtons = false, extraButtons }: CharacterStatsDisplayProps) {
+export function CharacterStatsDisplay({ charStats, handleRemoveEffect, handleFightStanceChange, showVariant, showEditButtons = false, extraButtons }: CharacterStatsDisplayProps) {
     const charCarOverloadCapacity = charStats.CaracteristicsOverload.capacity;
     const charCarOverloadActive = charStats.CaracteristicsOverload.active;
     const charCarBuff = charStats.CaracteristicsBuff;
@@ -71,24 +73,39 @@ export function CharacterStatsDisplay({ charStats, handleRemoveEffect, showVaria
                             <span className={`input_field ${value < charStats.InitCombatStats[key as keyof typeof charStats.CombatStats] ? '!text-red-500' : ''} ${value > charStats.InitCombatStats[key as keyof typeof charStats.CombatStats] ? '!text-blue-500' : ''}`}>{value}</span>
                         </div>
                     ))}
-                    {charStats.BuffsList.length > 0 && <h3 className="input_label">Buffs List :</h3>}
-                    {charStats.BuffsList.map((buff, index) => (
-                        <div key={index} className="input_entry">
-                            <span className="input_field cursor-help" title={buff.Desc}>{buff.Name}</span>
-                            <CustomEffectFormModal toUpdateCharData={charStats} toEdit={buff} toEditEffectType='Buff' />
-                            {handleRemoveEffect && <button onClick={() => handleRemoveEffect(charStats, buff, "Buff")} className="bg-red-900 text-white hover:text-red-900 hover:bg-white transition-all p-1 cursor-pointer" title="Supprimer Effet"><RxCross1 size={20} /></button>}
-                        </div>
-                    ))}
-                    {charStats.DebuffsList.length > 0 && <h3 className="input_label">Debuffs List :</h3>}
-                    {charStats.DebuffsList.map((debuff, index) => (
-                        <div key={index} className="input_entry">
-                            <span className="input_field cursor-help" title={debuff.Desc}>{debuff.Name}</span>
-                            <CustomEffectFormModal toUpdateCharData={charStats} toEdit={debuff} toEditEffectType='Debuff' />
-                            {handleRemoveEffect && <button onClick={() => handleRemoveEffect(charStats, debuff, "Debuff")} className="bg-red-900 text-white hover:text-red-900 hover:bg-white transition-all p-1 cursor-pointer" title="Supprimer Effet"><RxCross1 size={20} /></button>}
-                        </div>
-                    ))}
+                    {handleRemoveEffect &&
+                        <>
+                            {charStats.BuffsList.length > 0 && <h3 className="input_label">Buffs List :</h3>}
+                            {charStats.BuffsList.map((buff, index) => (
+                                <div key={index} className="input_entry">
+                                    <span className="input_field cursor-help" title={buff.Desc}>{buff.Name}</span>
+                                    <CustomEffectFormModal toEditCharData={charStats} toEdit={buff} toEditEffectType='Buff' />
+                                    {handleRemoveEffect && <button onClick={() => handleRemoveEffect(charStats, buff, "Buff")} className="bg-red-900 text-white hover:text-red-900 hover:bg-white transition-all p-1 cursor-pointer" title="Supprimer Effet"><RxCross1 size={20} /></button>}
+                                </div>
+                            ))}
+                            {charStats.DebuffsList.length > 0 && <h3 className="input_label">Debuffs List :</h3>}
+                            {charStats.DebuffsList.map((debuff, index) => (
+                                <div key={index} className="input_entry">
+                                    <span className="input_field cursor-help" title={debuff.Desc}>{debuff.Name}</span>
+                                    <CustomEffectFormModal toEditCharData={charStats} toEdit={debuff} toEditEffectType='Debuff' />
+                                    {handleRemoveEffect && <button onClick={() => handleRemoveEffect(charStats, debuff, "Debuff")} className="bg-red-900 text-white hover:text-red-900 hover:bg-white transition-all p-1 cursor-pointer" title="Supprimer Effet"><RxCross1 size={20} /></button>}
+                                </div>
+                            ))}
+                        </>
+                    }
                 </div>
             </div>
+            {handleFightStanceChange && Array.from({ length: charStats?.MaxFightStyleAmount }).map((_, index) => (
+                <div className="input_group w-50 mx-auto">
+                    <h3 className="input_label">Position de combat:</h3>
+                    <select key={index} className="input_field" id={`${charStats.Name}_stance_select_${index}`} onChange={(e) => handleFightStanceChange(charStats?.Id, e.currentTarget.value, index)} defaultValue={charStats?.FightStyleList[index]?.Name || "None"}>
+                        <option value="None">None</option>
+                        {FightStanceArray.map((stance) => {
+                            return <option key={stance.Name} value={stance.Name} title={stance.Desc} className={`stance_${stance.Type}`}>{stance.Name}</option>
+                        })} 
+                    </select>
+                </div>
+            ))}
             {showEditButtons && (
                 <div className="flex justify-center py-5">
                     <div className="min-w-80 flex justify-around">

@@ -9,13 +9,13 @@ import { addEffect, removeEffect } from '../../../../function/FightCalc';
 import { EffectPresetArray } from '../../../../data/EffectPreset';
 
 interface AddCustomEffectFormProps {
-    toUpdateCharData: CharStatsInterface;
+    toEditCharData: CharStatsInterface;
     handleHistoryEventAdd?: (msg: string, type: string, title?: string) => void,
     toEdit?: CharBuffInterface;
     toEditEffectType?: "Buff" | "Debuff";
 }
 
-export function CustomEffectFormModal ({ toUpdateCharData, handleHistoryEventAdd, toEdit, toEditEffectType }: AddCustomEffectFormProps) {
+export function CustomEffectFormModal ({ toEditCharData, handleHistoryEventAdd, toEdit, toEditEffectType }: AddCustomEffectFormProps) {
     const { charData, setCharData } = useContext(DataContext);
     const [showCustomEffectModal, setShowCustomEffectModal] = useState(false);
     const [effectType, setEffectType] = useState<"Buff" | "Debuff">('Buff');
@@ -51,8 +51,8 @@ export function CustomEffectFormModal ({ toUpdateCharData, handleHistoryEventAdd
         
         // Remove effect if edit
         let effectRemovedCharData = null;
-        if(toEdit && toEditEffectType){ effectRemovedCharData = removeEffect(toUpdateCharData, toEdit, toEditEffectType); };
-        const toUpdateData = effectRemovedCharData !== null? effectRemovedCharData : toUpdateCharData;
+        if(toEdit && toEditEffectType){ effectRemovedCharData = removeEffect(toEditCharData, toEdit, toEditEffectType); };
+        const toUpdateData = effectRemovedCharData !== null? effectRemovedCharData : toEditCharData;
         
         const effectList = (effectType === "Buff")? toUpdateData.BuffsList : toUpdateData.DebuffsList;
         const newEffect: CharBuffInterface = {
@@ -77,7 +77,7 @@ export function CustomEffectFormModal ({ toUpdateCharData, handleHistoryEventAdd
                 ...(turnEffectStock !== null && { TurnEffect: turnEffectStock })
             };
         }
-        if(handleHistoryEventAdd) handleHistoryEventAdd(`${toUpdateCharData.Name} a reçu l'effet ${newEffect.Name}.`, 'Text');
+        if(handleHistoryEventAdd) handleHistoryEventAdd(`${toEditCharData.Name} a reçu l'effet ${newEffect.Name}.`, 'Text');
         const updatedCharData = addEffect(toUpdateData, newEffect, effectType);
         setCharData(charData.map((char) => char.Id === toUpdateData.Id ? updatedCharData : char));
         handleModalClose();
@@ -108,14 +108,14 @@ export function CustomEffectFormModal ({ toUpdateCharData, handleHistoryEventAdd
 
     return (
         <>
-            <button onClick={() => setShowCustomEffectModal(true)} title={toEdit? "Edit effect" : "Add Effect"} className={toEdit? 'text-white bg-green-500 hover:text-green-500 hover:bg-white cursor-pointer transition-all border border-black' : 'text-green-500 hover:bg-green-500 hover:text-white cursor-pointer rounded transition-all'}>
+            <button onClick={() => setShowCustomEffectModal(true)} title={toEdit? "Edit effect" : "Add Effect"} className={`transition-all cursor-pointer rounded p-1 ${toEdit? 'text-white bg-green-500 hover:text-green-500 hover:bg-white' : 'text-green-500 hover:bg-green-500 hover:text-white'}`}>
                 {(toEdit? <FaEdit size={24} className='m-1'/> : <BsBookmarkPlusFill size={32} />)}
                 </button>
             {
                 (showCustomEffectModal)
                     ?   <Modal isOpen={showCustomEffectModal} onClose={() => handleModalClose()}>
                             <div className='flex flex-col gap-2 min-w-full>'>
-                                <h2 className='text-xl text-center'>{toEdit ? `Edit effect: ${toEdit.Name}` : `Add new effect to: ${toUpdateCharData.Name}`}</h2>
+                                <h2 className='text-xl text-center'>{toEdit ? `Edit effect: ${toEdit.Name}` : `Add new effect to: ${toEditCharData.Name}`}</h2>
                                 <div className='input_entry'>
                                     <label htmlFor="preset_select" className='input_label'>Effect Preset: </label>
                                     <div className='w-full'>

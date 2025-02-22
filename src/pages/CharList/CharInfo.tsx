@@ -6,6 +6,8 @@ import { CharBuffInterface, CharDebuffInterface } from "../../types/statsType";
 import { removeEffect } from "../../function/FightCalc";
 import { CustomEffectFormModal } from "../Fight/FightScreen/FightCustomControl/CustomEffectFormModal";
 import { CustomCaracOverload } from "../Fight/FightScreen/FightCustomControl/CustomCaracOverload";
+import { FightANModal } from "../Fight/FightScreen/FightCustomControl/FightANModal";
+import { FightStatsEdit } from "../Fight/FightScreen/FightCustomControl/FightStatsEdit";
 
 interface CharInfoPropsInterface {
     charStats: CharStatsInterface;
@@ -29,8 +31,10 @@ export function CharInfo ({ charStats, handleSetEdit, handleCloseModal }: CharIn
             showVariant={true}
             extraButtons={
                 <>
-                    <CustomEffectFormModal toUpdateCharData={charStats} />
-                    <CustomCaracOverload toUpdateCharData={charStats} />
+                    <CustomEffectFormModal toEditCharData={charStats} />
+                    <CustomCaracOverload toEditCharData={charStats} />
+                    <FightStatsEdit toEditCharData={charStats} />
+                    <FightANModal toEditCharData={charStats} />
                     <button onClick={handleSetEdit} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Edit</button>
                     <button onClick={handleCloseModal} className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer">Cancel</button>
                 </>

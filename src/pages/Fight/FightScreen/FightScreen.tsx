@@ -2,19 +2,18 @@ import { useContext, useEffect, useState } from "react";
 import { MdSettings } from "react-icons/md";
 import { DataContext } from "../../../context/DataContext";
 import { CharacterStatsDisplay } from "../../../global/CharacterStatsDisplay";
+import { CharSlidePannel } from "./FightDisplay/CharSlidePannel";
 import { Modal } from "../../../global/Modal";
 import { FightSettingsModal } from "./FightSettingsModal";
 import { FightEditCharModal } from "./FightCustomControl/FightEditCharModal";
 import { FightControl } from "./FightControl/FightControl";
 import { FightANModal } from "./FightCustomControl/FightANModal";
 import { FightStatsEdit } from "./FightCustomControl/FightStatsEdit";
-import { CharBuffInterface, CharDebuffInterface, CharStatsInterface } from "../../../types/statsType";
+import { CharStatsInterface } from "../../../types/statsType";
 import { FightListInterface } from "../../../types/fightType";
-import { removeEffect } from "../../../function/FightCalc";
 import './fightScreen.css';
-import { CustomEffectFormModal } from "./FightCustomControl/CustomEffectFormModal";
-import { CustomCaracOverload } from "./FightCustomControl/CustomCaracOverload";
-
+import { findStance } from "../../../data/FightStance";
+import { applyAllStance, unapplyAllStance } from "../../../function/FightCalc";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -35,10 +34,6 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         if (actorType === 'B') { setDisplayActorBData(selectedChar); setActiveData(prevState => ({ ...prevState, activeActorB: charName })); };
     };
 
-    function handleRemoveEffect(charD: CharStatsInterface, effect: CharBuffInterface | CharDebuffInterface, effectType: "Buff" | "Debuff"){
-        setCharData(charData.map((char) => char.Id === charD.Id? removeEffect(charD, effect, effectType) : char));
-    }
-
     function handleFightStateChange(): void {
         setActiveData(prevState => ({...prevState, fightState: !prevState.fightState}));
         handleHistoryEventAdd(`Le combat ${activeData.fightState ? 'est en fini / en pause.' : 'reprends.'}`, 'Info');
@@ -52,6 +47,25 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                 : [...prevState.fightMembers, name]
         }));
         handleHistoryEventAdd(`${name} ${memberListChangeMsg}`, 'Info');
+    }
+
+    function handleFightStanceChange(actorId: number | undefined, stanceName: string, stanceNumber: number): void {
+        const actorData = charData.find((char) => char.Id === actorId);
+        if(!actorData){ return; }
+        const currentData = [ ...charData ];
+        const newStanceData = findStance(stanceName);
+        const removedStanceBuffData = unapplyAllStance(actorData);
+        
+        if(newStanceData){
+            if(newStanceData.Name === "Position du Golem" && newStanceData.Effect.CombatStats){ newStanceData.Effect.CombatStats.AA = -(Math.floor(actorData.CombatStats.AA / 2)); };
+            removedStanceBuffData.FightStyleList[stanceNumber] = newStanceData;
+        }else{
+            removedStanceBuffData.FightStyleList[stanceNumber] = null;
+        }
+        const appliedStanceBuffData = applyAllStance(removedStanceBuffData);
+        const finalData = currentData.map((char) => char.Id === actorId ? appliedStanceBuffData : char);
+
+        setCharData(finalData);
     }
 
     function handleHistoryEventAdd(newHistoryEntry: string, newMsgType: string, msgTitle: string = ''): void { 
@@ -86,23 +100,24 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                                 }))
                         }
                     </select>
-                    {(displayActorAData !== null) && 
-                        <CharacterStatsDisplay 
-                            charStats={displayActorAData}
-                            handleHistoryEventAdd={handleHistoryEventAdd}
-                            handleRemoveEffect={handleRemoveEffect}
-                            showVariant={false}
-                            showEditButtons={true} 
-                            extraButtons={
-                                <>
-                                    <CustomEffectFormModal toUpdateCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                    <CustomCaracOverload toUpdateCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd}/>
-                                    <FightEditCharModal toEditCharData={displayActorAData} />
-                                    <FightStatsEdit toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                    <FightANModal toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                </>
-                            }
-                        />
+                    {(displayActorAData !== null) &&
+                        <>
+                            <CharSlidePannel side="Left" charStats={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                            <CharacterStatsDisplay 
+                                charStats={displayActorAData}
+                                handleHistoryEventAdd={handleHistoryEventAdd}
+                                handleFightStanceChange={handleFightStanceChange}
+                                showVariant={false}
+                                showEditButtons={true} 
+                                extraButtons={
+                                    <>
+                                        <FightEditCharModal toEditCharData={displayActorAData} />
+                                        <FightStatsEdit toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                        <FightANModal toEditCharData={displayActorAData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    </>
+                                }
+                            />
+                        </>
                     }
                 </div>
                 <div className="flex flex-col gap-2">
@@ -139,22 +154,23 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
                         }
                     </select>
                     {(displayActorBData !== null) && 
-                        <CharacterStatsDisplay 
-                            charStats={displayActorBData}
-                            handleHistoryEventAdd={handleHistoryEventAdd}
-                            handleRemoveEffect={handleRemoveEffect}
-                            showVariant={false}
-                            showEditButtons={true} 
-                            extraButtons={
-                                <>
-                                    <CustomEffectFormModal toUpdateCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                    <CustomCaracOverload toUpdateCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                    <FightEditCharModal toEditCharData={displayActorBData} />
-                                    <FightStatsEdit toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                    <FightANModal toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
-                                </>
-                            }
-                        />
+                        <>
+                            <CharSlidePannel side="Right" charStats={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                            <CharacterStatsDisplay 
+                                charStats={displayActorBData}
+                                handleHistoryEventAdd={handleHistoryEventAdd}
+                                handleFightStanceChange={handleFightStanceChange}
+                                showVariant={false}
+                                showEditButtons={true} 
+                                extraButtons={
+                                    <>
+                                        <FightEditCharModal toEditCharData={displayActorBData} />
+                                        <FightStatsEdit toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                        <FightANModal toEditCharData={displayActorBData} handleHistoryEventAdd={handleHistoryEventAdd} />
+                                    </>
+                                }
+                            />
+                        </>
                     }
                 </div>
             </div>

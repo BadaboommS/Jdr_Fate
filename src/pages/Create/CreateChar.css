@@ -2,15 +2,11 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    border-collapse: collapse;
 }
 .input_entry {
     width: 100%;
-    border: solid 1px black;
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    border-collapse: collapse;
+    margin-bottom: -1px;
 }
 .input_label {
     width: 100%;
@@ -18,7 +14,6 @@
     color: #F8EED6;
     border: solid 1px black;
     padding: 0.25em;
-    border-collapse: collapse;
 }
 .input_field {
     width: 100%;
@@ -27,6 +22,9 @@
     color: black;
     padding: 0.25em;
     border-collapse: collapse;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .variant_img{
     border: 5px #4B626E solid;

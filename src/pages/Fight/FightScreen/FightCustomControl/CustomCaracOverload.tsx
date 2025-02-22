@@ -6,26 +6,26 @@ import { DataContext } from '../../../../context/DataContext';
 import { updateCombatStatsCalc } from '../../../../function/BaseStatsCalc';
 
 interface CustomCaracOverloadProps {
-    toUpdateCharData: CharStatsInterface;
+    toEditCharData: CharStatsInterface;
     handleHistoryEventAdd?: (msg: string, type: string, title?: string) => void,
 }
 
-export function CustomCaracOverload ({ toUpdateCharData, handleHistoryEventAdd }: CustomCaracOverloadProps) {
+export function CustomCaracOverload ({ toEditCharData, handleHistoryEventAdd }: CustomCaracOverloadProps) {
     const { charData, setCharData } = useContext(DataContext);
     const [showCustomEffectModal, setShowCustomEffectModal] = useState(false);
-    const charCarOverloadCapacity = toUpdateCharData.CaracteristicsOverload.capacity;
-    const charCarOverloadActive = toUpdateCharData.CaracteristicsOverload.active;
+    const charCarOverloadCapacity = toEditCharData.CaracteristicsOverload.capacity;
+    const charCarOverloadActive = toEditCharData.CaracteristicsOverload.active;
 
     const { register, handleSubmit, setValue } = useForm<CharStatsCaracteristicsValueInterface>();
     
     const onSubmit: SubmitHandler<CharStatsCaracteristicsValueInterface> = (data) => {
         if(!window.confirm(`Confirmer l'overload de Mana ?`)){ return; };
 
-        let newCharData = { ...toUpdateCharData };
+        let newCharData = { ...toEditCharData };
         const manaCost = Object.values(data).reduce((acc, num) => acc + num, 0) * 5;
         if(manaCost > 0){ 
             newCharData.Mana -= manaCost;
-            if(handleHistoryEventAdd) handleHistoryEventAdd(`${toUpdateCharData.Name} a overload ses caractéristiques pour ${manaCost} Mana.`, 'Text');
+            if(handleHistoryEventAdd) handleHistoryEventAdd(`${toEditCharData.Name} a overload ses caractéristiques pour ${manaCost} Mana.`, 'Text');
         };
         newCharData.CaracteristicsOverload.active = data;
         newCharData = updateCombatStatsCalc(newCharData);
@@ -52,27 +52,29 @@ export function CustomCaracOverload ({ toUpdateCharData, handleHistoryEventAdd }
                                 <div className='flex flex-col gap-2'>
                                     <h2 className='text-center text-xl'>Caracteristics Overload : </h2>
                                     <div className='input_group'>
-                                        {(Object.keys(toUpdateCharData.CaracteristicsOverload.capacity) as (keyof CharStatsCaracteristicsValueInterface)[])
-                                            .filter(stat => toUpdateCharData.CaracteristicsOverload.capacity[stat] !== 0)
-                                            .map(stat => (
-                                                <div key={stat} className='input_entry'>
-                                                    <label className='input_label' htmlFor={stat.toLowerCase()}>
-                                                    <span> {stat} : </span>
-                                                    <span className={`${charCarOverloadActive[stat as keyof typeof charCarOverloadActive] > 0? "text-blue-500 font-bold": ""}`}>
-                                                        {toUpdateCharData.Caracteristics[stat as keyof typeof toUpdateCharData.Caracteristics]}
-                                                    </span>
-                                                    {charCarOverloadCapacity[stat as keyof typeof charCarOverloadCapacity] !== 0 &&
-                                                        [...Array(Math.abs(charCarOverloadCapacity[stat as keyof typeof charCarOverloadCapacity]))].map((_, index) => (
-                                                            <span key={index} className={index < (charCarOverloadActive[stat as keyof typeof charCarOverloadActive] || 0)
-                                                                ? "text-blue-500 font-bold"
-                                                                : ""
-                                                            }>{charCarOverloadCapacity[stat as keyof typeof charCarOverloadCapacity] > 0 ? "+" : "-"}</span>
-                                                        ))
-                                                    }
-                                                    </label>
-                                                    <input type='number' {...register(stat as keyof CharStatsCaracteristicsValueInterface, { min: 0, valueAsNumber: true })} className='input_field' defaultValue={toUpdateCharData.CaracteristicsOverload.active[stat as keyof CharStatsCaracteristicsValueInterface]} id={stat.toLowerCase()} />
-                                                </div>
-                                            ))
+                                        {Object.values(toEditCharData.CaracteristicsOverload.capacity).some(value => value !== 0)
+                                            ?   (Object.keys(toEditCharData.CaracteristicsOverload.capacity) as (keyof CharStatsCaracteristicsValueInterface)[])
+                                                    .filter(stat => toEditCharData.CaracteristicsOverload.capacity[stat] !== 0)
+                                                    .map(stat => (
+                                                        <div key={stat} className='input_entry'>
+                                                            <label className='input_label' htmlFor={stat.toLowerCase()}>
+                                                            <span> {stat} : </span>
+                                                            <span className={`${charCarOverloadActive[stat as keyof typeof charCarOverloadActive] > 0? "text-blue-500 font-bold": ""}`}>
+                                                                {toEditCharData.Caracteristics[stat as keyof typeof toEditCharData.Caracteristics]}
+                                                            </span>
+                                                            {charCarOverloadCapacity[stat as keyof typeof charCarOverloadCapacity] !== 0 &&
+                                                                [...Array(Math.abs(charCarOverloadCapacity[stat as keyof typeof charCarOverloadCapacity]))].map((_, index) => (
+                                                                    <span key={index} className={index < (charCarOverloadActive[stat as keyof typeof charCarOverloadActive] || 0)
+                                                                        ? "text-blue-500 font-bold"
+                                                                        : ""
+                                                                    }>{charCarOverloadCapacity[stat as keyof typeof charCarOverloadCapacity] > 0 ? "+" : "-"}</span>
+                                                                ))
+                                                            }
+                                                            </label>
+                                                            <input type='number' {...register(stat as keyof CharStatsCaracteristicsValueInterface, { min: 0, valueAsNumber: true })} className='input_field' defaultValue={toEditCharData.CaracteristicsOverload.active[stat as keyof CharStatsCaracteristicsValueInterface]} id={stat.toLowerCase()} />
+                                                        </div>
+                                                    ))
+                                            : <p>Pas de caracteristiques a Overload.</p>
                                         }
                                     </div>
                                 </div>
