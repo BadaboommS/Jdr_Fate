@@ -68,13 +68,13 @@ export function CustomEffectFormModal ({ toUpdateCharData, handleHistoryEventAdd
         const combatStatsStock = Object.fromEntries(Object.entries(newEffectCombatStats).filter(([, value]) => value !== 0));
         const dotStock = Number(Dot) !== 0 ? Number(Dot) : null;
         const hotStock = Number(Hot) !== 0 ? Number(Hot) : null;
+        const turnEffectStock = (dotStock !== null || hotStock !== null) ? { ...(dotStock !== null && { Dot: dotStock }), ...(hotStock !== null && { Hot: hotStock }) } : null;
 
         if (Object.keys(charCaracStock).length > 0 || Object.keys(combatStatsStock).length > 0 || dotStock !== null || hotStock !== null) {
             newEffect.Effect = {
                 ...(Object.keys(charCaracStock).length > 0 && { CaracteristicsBuff: charCaracStock }),
                 ...(Object.keys(combatStatsStock).length > 0 && { CombatStats: combatStatsStock }),
-                ...(dotStock !== null && { Dot: dotStock }),
-                ...(hotStock !== null && { Hot: hotStock })
+                ...(turnEffectStock !== null && { TurnEffect: turnEffectStock })
             };
         }
         if(handleHistoryEventAdd) handleHistoryEventAdd(`${toUpdateCharData.Name} a reçu l'effet ${newEffect.Name}.`, 'Text');
