@@ -43,7 +43,7 @@ export function Modal ({ isOpen, onClose, children }: ModalProps) {
             <div ref={modalRef} className="modal-content" onClick={(e) => e.stopPropagation()}>
                 { children }
             </div>
-        </div>,
-        modalRoot
+        </div>
+        ,modalRoot
     )
 }

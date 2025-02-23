@@ -1,4 +1,4 @@
-import { CharStatsInterface, CharBuffInterface, CharDebuffInterface, CombatStatsTitle, CharStatsCombatStatsInterface } from "../types/statsType";
+import { CharStatsInterface, CharBuffInterface, CharDebuffInterface, CombatStatsTitle, CharStatsCombatStatsInterface, TurnEffectInterface, CharTurnEffectArray } from "../types/statsType";
 
 interface CharacterStatsDisplayProps {
     charStats: CharStatsInterface;
@@ -66,6 +66,14 @@ export function CharacterStatsDisplay({ charStats, showVariant }: CharacterStats
                             <span className={`input_field cursor-help ${value < charStats.InitCombatStats[key as keyof typeof charStats.CombatStats] ? '!text-red-500' : ''} ${value > charStats.InitCombatStats[key as keyof typeof charStats.CombatStats] ? '!text-blue-500' : ''}`} title={`Base value: ${charStats.InitCombatStats[key as keyof CharStatsCombatStatsInterface]}`}>{value}</span>
                         </div>
                     ))}
+                    {CharTurnEffectArray.map((effect) =>
+                        charStats.TurnEffect[effect as keyof TurnEffectInterface] !== 0 ? (
+                            <div key={effect} className="input_entry">
+                            <span className="input_label">{effect}: </span>
+                            <span className="input_field">{charStats.TurnEffect[effect as keyof TurnEffectInterface]}</span>
+                            </div>
+                        ) : <></>
+                    )}
                 </div>
             </div>
         </div>

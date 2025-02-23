@@ -7,6 +7,7 @@ export const CharCombatStatsArray = ["Ini", "SA", "AA", "DMG", "PA", "SD", "AD",
 export const CharTypeArray = ["Master", "Servant", "PNJ"];
 export const ServantVariantArray = ["Archer", "Assassin", "Berserker", "Caster", "Lancer", "Rider", "Saber", "Slayer", "Shielder", "Outsider", "Monster", "Launcher", "Avenger", "Elder"];
 export const WeaponTypeArray = ["Contondant", "Perçant", "Tranchant"];
+export const CharTurnEffectArray = ["Dot", "Hot"];
 
 export interface CharStatsInterface {
     Id: number;
@@ -46,6 +47,7 @@ export interface DebuffInterface {
 export interface BuffInterface {
     Name: string;
     Desc: string;
+    Heal?: number;
     Effect?: EffectInterface;
 }
 
