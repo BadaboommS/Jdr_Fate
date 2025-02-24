@@ -13,7 +13,7 @@ import { CharStatsInterface } from "../../../types/statsType";
 import { FightListInterface } from "../../../types/fightType";
 import './fightScreen.css';
 import { FightStanceArray, findStance } from "../../../data/FightStance";
-import { applyAllStance, unapplyAllStance } from "../../../function/FightCalc";
+import { applyAllEffect, applyAllStance, unapplyAllStance } from "../../../function/FightCalc";
 
 interface FightScreenPropsInterface {
     activeFightData: FightListInterface;
@@ -54,16 +54,20 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
         if(!actorData){ return; }
         const currentData = [ ...charData ];
         const newStanceData = findStance(stanceName);
+        
         const removedStanceBuffData = unapplyAllStance(actorData);
+        const removedAllEffectData = applyAllEffect(removedStanceBuffData, false);
         
         if(newStanceData){
             if(newStanceData.Name === "Position du Golem" && newStanceData.Effect.CombatStats){ newStanceData.Effect.CombatStats.AA = -(Math.floor(actorData.CombatStats.AA / 2)); };
-            removedStanceBuffData.FightStyleList[stanceNumber] = newStanceData;
+            removedAllEffectData.FightStyleList[stanceNumber] = newStanceData;
         }else{
-            removedStanceBuffData.FightStyleList[stanceNumber] = null;
+            removedAllEffectData.FightStyleList[stanceNumber] = null;
         }
-        const appliedStanceBuffData = applyAllStance(removedStanceBuffData);
-        const finalData = currentData.map((char) => char.Id === actorId ? appliedStanceBuffData : char);
+        const appliedStanceBuffData = applyAllStance(removedAllEffectData);
+        const appliedAllEffectData = applyAllEffect(appliedStanceBuffData, true);
+
+        const finalData = currentData.map((char) => char.Id === appliedAllEffectData.Id ? appliedAllEffectData : char);
 
         setCharData(finalData);
     }
