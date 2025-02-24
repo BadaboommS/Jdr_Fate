@@ -50,21 +50,22 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     }
 
     function handleFightStanceChange(actorId: number | undefined, stanceName: string, stanceNumber: number): void {
+        const currentData = [ ...charData ];
         const actorData = charData.find((char) => char.Id === actorId);
         if(!actorData){ return; }
-        const currentData = [ ...charData ];
+        const removedAllEffectData = applyAllEffect(actorData, false);
+
         const newStanceData = findStance(stanceName);
-        
-        const removedStanceBuffData = unapplyAllStance(actorData);
-        const removedAllEffectData = applyAllEffect(removedStanceBuffData, false);
+        const removedStanceBuffData = unapplyAllStance(removedAllEffectData);
         
         if(newStanceData){
             if(newStanceData.Name === "Position du Golem" && newStanceData.Effect.CombatStats){ newStanceData.Effect.CombatStats.AA = -(Math.floor(actorData.CombatStats.AA / 2)); };
-            removedAllEffectData.FightStyleList[stanceNumber] = newStanceData;
+            removedStanceBuffData.FightStyleList[stanceNumber] = newStanceData;
         }else{
-            removedAllEffectData.FightStyleList[stanceNumber] = null;
+            removedStanceBuffData.FightStyleList[stanceNumber] = null;
         }
-        const appliedStanceBuffData = applyAllStance(removedAllEffectData);
+        
+        const appliedStanceBuffData = applyAllStance(removedStanceBuffData);
         const appliedAllEffectData = applyAllEffect(appliedStanceBuffData, true);
 
         const finalData = currentData.map((char) => char.Id === appliedAllEffectData.Id ? appliedAllEffectData : char);
