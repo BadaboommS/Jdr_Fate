@@ -249,16 +249,27 @@ export function applyAllEffect(charData: CharStatsInterface, apply: boolean): Ch
         const listData = lists[list];
         if(listData) listData.forEach((effect) => { 
             if(effect.Effect){ 
-                caracBuffedData = apply? applyCaracStatsEffect(caracBuffedData, effect.Effect) : unapplyCaracStatsEffect(caracBuffedData, effect.Effect);
+                caracBuffedData = apply
+                    ? applyCaracStatsEffect(caracBuffedData, effect.Effect) 
+                    : unapplyCaracStatsEffect(caracBuffedData, effect.Effect);
             };
         });
     });
+    for(const stance of currentData.FightStyleList){
+        if(stance && stance.Effect.CaracteristicsBuff){
+            caracBuffedData = apply
+                ? applyEffect(caracBuffedData, stance.Effect, "CaracteristicsBuff", true) 
+                : applyEffect(caracBuffedData, stance.Effect, "CaracteristicsBuff", false);
+        }
+    }
 
     // Refresh Combat Stat values
     const updatedCurrentData = updateCombatStatsCalc(caracBuffedData);
     
     // Stance
-    const appliedStanceData = apply? applyAllStance(updatedCurrentData) : unapplyAllStance(updatedCurrentData);
+    const appliedStanceData = apply
+        ? applyAllStance(updatedCurrentData) 
+        : unapplyAllStance(updatedCurrentData);
 
     // CombatStat Buff
     let combatStatBuffedData = { ...appliedStanceData };
@@ -266,10 +277,14 @@ export function applyAllEffect(charData: CharStatsInterface, apply: boolean): Ch
         const listData = lists[list];
         if(listData) listData.forEach((effect) => { 
             if(effect.Effect){ 
-                combatStatBuffedData = apply? applyCombatStatsEffect(combatStatBuffedData, effect.Effect) : unapplyCombatStatsEffect(combatStatBuffedData, effect.Effect) ;
+                combatStatBuffedData = apply
+                    ? applyCombatStatsEffect(combatStatBuffedData, effect.Effect) 
+                    : unapplyCombatStatsEffect(combatStatBuffedData, effect.Effect) ;
 
                 const turnEffect = effect.Effect.TurnEffect || null; // Turn effect
-                if(turnEffect) combatStatBuffedData = applyDotHotEffect(combatStatBuffedData, effect.Effect);
+                if(turnEffect) combatStatBuffedData = apply
+                    ? applyDotHotEffect(combatStatBuffedData, effect.Effect)
+                    : unapplyDotHotEffect(combatStatBuffedData, effect.Effect);
             };
         });
     });
@@ -335,30 +350,19 @@ export function unapplyDotHotEffect(charData: CharStatsInterface, effect: Effect
 export function applyAllStance(charData: CharStatsInterface): CharStatsInterface{
     let newData = { ...charData };
     const stanceBuffArray = newData.FightStyleList;
-    if(stanceBuffArray){
-        for(const stance in stanceBuffArray){
-            const stanceData = stanceBuffArray[stance];
-            if(stanceData){
-                const stanceCaracBuff = stanceData.Effect.CaracteristicsBuff;
-                if (stanceCaracBuff) {
-                    newData = applyEffect(newData, stanceData.Effect, "CaracteristicsBuff", true);
-                    newData = updateCombatStatsCalc(newData);
-                }
-                const stanceCombatBuff = stanceData.Effect.CombatStats;
-                const stanceTypeBuff = findStanceBase(stanceData.Type)?.Effect;
-                if(stanceCombatBuff && stanceTypeBuff){
-                    const mergedStanceBuff = [stanceCombatBuff, stanceTypeBuff].reduce((a, obj) => 
-                        Object.entries(obj).reduce((a, [key, val]) => {
-                            a[key as keyof typeof a] = (a[key as keyof typeof a] || 0) + val;
-                          return a;
-                        }, a)
-                    , {});
-                    newData = applyEffect(newData, { CombatStats: mergedStanceBuff }, "CombatStats", true);
-                }else if(stanceTypeBuff){
-                    newData = applyEffect(newData, { CombatStats: stanceTypeBuff }, "CombatStats", true);
-                }
-            }
+    if(!stanceBuffArray) return newData;
+
+    for(const stance of stanceBuffArray){
+        if(!stance) continue;
+
+        const stanceCombatBuff = stance.Effect.CombatStats || {};
+        const stanceTypeBuff = findStanceBase(stance.Type)?.Effect || {};
+
+        const mergedStanceBuff = { ...stanceCombatBuff };
+        for (const [key, val] of Object.entries(stanceTypeBuff)){
+            mergedStanceBuff[key as keyof typeof mergedStanceBuff] = (mergedStanceBuff[key as keyof typeof mergedStanceBuff] as number || 0) + (val as number);
         }
+        newData = applyEffect(newData, { CombatStats: mergedStanceBuff }, "CombatStats", true);
     }
     return newData;
 }
@@ -366,30 +370,19 @@ export function applyAllStance(charData: CharStatsInterface): CharStatsInterface
 export function unapplyAllStance(charData: CharStatsInterface): CharStatsInterface{
     let newData = { ...charData };
     const stanceBuffArray = newData.FightStyleList;
-    if(stanceBuffArray){
-        for(const stance in stanceBuffArray){
-            const stanceData = stanceBuffArray[stance];
-            if(stanceData){
-                const stanceCaracBuff = stanceData.Effect.CaracteristicsBuff;
-                if (stanceCaracBuff) {
-                    newData = applyEffect(newData, stanceData.Effect, "CaracteristicsBuff", false);
-                    newData = updateCombatStatsCalc(newData);
-                }
-                const stanceCombatBuff = stanceData.Effect.CombatStats || {};
-                const stanceTypeBuff = findStanceBase(stanceData.Type)?.Effect;
-                if(stanceCombatBuff && stanceTypeBuff){
-                    const mergedStanceBuff = [stanceCombatBuff, stanceTypeBuff].reduce((a, obj) => 
-                        Object.entries(obj).reduce((a, [key, val]) => {
-                            a[key as keyof typeof a] = (a[key as keyof typeof a] || 0) + val;
-                          return a;
-                        }, a)
-                    , {});
-                    newData = applyEffect(newData, { CombatStats: mergedStanceBuff }, "CombatStats", false);
-                }else if(stanceTypeBuff){
-                    newData = applyEffect(newData, { CombatStats: stanceTypeBuff }, "CombatStats", false);
-                }
-            }
+    if(!stanceBuffArray) return newData;
+
+    for(const stance of stanceBuffArray){
+        if(!stance) continue;
+
+        const stanceCombatBuff = stance.Effect.CombatStats || {};
+        const stanceTypeBuff = findStanceBase(stance.Type)?.Effect || {};
+
+        const mergedStanceBuff = { ...stanceCombatBuff };
+        for (const [key, val] of Object.entries(stanceTypeBuff)){
+            mergedStanceBuff[key as keyof typeof mergedStanceBuff] = (mergedStanceBuff[key as keyof typeof mergedStanceBuff] as number || 0) + (val as number);
         }
+        newData = applyEffect(newData, { CombatStats: mergedStanceBuff }, "CombatStats", false);
     }
     return newData;
 }

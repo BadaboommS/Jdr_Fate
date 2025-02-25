@@ -52,7 +52,7 @@ export function FightScreen ({ activeFightData, handleModalClose, saveFightData 
     function handleFightStanceChange(actorId: number | undefined, stanceName: string, stanceNumber: number): void {
         const currentData = [ ...charData ];
         const actorData = charData.find((char) => char.Id === actorId);
-        if(!actorData){ return; }
+        if(!actorData){ return; };
         const removedAllEffectData = applyAllEffect(actorData, false);
         
         const newStanceData = findStance(stanceName);
