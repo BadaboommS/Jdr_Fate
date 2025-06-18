@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fightHistoryType } from "../../../../types/fightType";
-import "./terminal.css";
+import "./Terminal.css";
 
 interface TerminalPropsInterface{
     fightHistory: fightHistoryType[];

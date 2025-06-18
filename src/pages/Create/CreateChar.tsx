@@ -3,7 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { DataContext } from "../../context/DataContext";
 import { CreateCharFormInputInterface, CombatStatsTitle, CharCaracteristicsKeyArray, CharCaracteristicsArray, CharCombatStatsArray, CharTypeArray, ServantVariantArray, WeaponTypeArray } from "../../types/statsType";
 import { caracToStatsCalc } from "../../function/BaseStatsCalc";
-import './createChar.css';
+import './CreateChar.css';
 
 
 export function CreateChar() {

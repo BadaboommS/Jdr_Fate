@@ -4,7 +4,7 @@ import { Modal } from "../../global/Modal";
 import { EditChar } from './EditChar';
 import { CharInfo } from "./CharInfo";
 import { CharStatsInterface } from "../../types/statsType";
-import './charItem.css';
+import './CharItem.css';
 
 interface CharItemPropsInterface {
     charStats: CharStatsInterface;

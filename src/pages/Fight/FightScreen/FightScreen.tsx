@@ -11,7 +11,7 @@ import { FightANModal } from "./FightCustomControl/FightANModal";
 import { FightStatsEdit } from "./FightCustomControl/FightStatsEdit";
 import { CharStatsInterface } from "../../../types/statsType";
 import { FightListInterface } from "../../../types/fightType";
-import './fightScreen.css';
+import './FightScreen.css';
 import { FightStanceArray, findStance } from "../../../data/FightStance";
 import { applyAllEffect } from "../../../function/FightCalc";
 
