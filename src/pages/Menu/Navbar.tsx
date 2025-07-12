@@ -8,34 +8,34 @@ import { PlayerListControl } from './PlayerListControls';
 import './Navbar.css';
 
 export function Navbar () {
-  return (
-    <div className='fixed top-0 left-0 w-screen h-16 md:w-16 md:h-screen m-0 bg-gray-900 text-white-shadow-lg flex flex-row justify-evenly md:justify-start md:flex-col z-50'>
-      <Link to='/file'>
+  return <>
+    <div className='fixed left-0 w-screen h-16 md:w-16 md:h-screen m-0 text-white-shadow-lg flex flex-row justify-evenly md:justify-start md:flex-col z-50' style={{backgroundColor: '#050505'}}>
         <div className='navbar-icon group'>
+      <Link to='/file'>
           <MdFileOpen size="32" />
           <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>File</p></span>
-        </div>
       </Link>
-      <Link to='/create'>
+        </div>
         <div className='navbar-icon group'>
+      <Link to='/create'>
           <IoIosCreate size="32"/>
           <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>Create Character</p></span>
-        </div>
       </Link>
-      <Link to='/list'>
-        <div className='navbar-icon group'>
+        </div>
+      <div className='navbar-icon group'>
+        <Link to='/list'>
           <FaList size="32"/>
           <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>Character List</p></span>
-        </div>
-      </Link>
-      <Link to='/fight'>
-        <div className='navbar-icon group'>
+        </Link>
+      </div>
+      <div className='navbar-icon group'>
+        <Link to='/fight'>
           <LuSwords size="32"/>
           <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>Combat</p></span>
-        </div>
-      </Link>
+        </Link>
+      </div>
       <PlayerListControl />
       <SaveFileControl />
     </div>
-  )
+  </>
 }

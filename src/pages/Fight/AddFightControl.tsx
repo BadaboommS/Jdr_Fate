@@ -47,8 +47,8 @@ export function AddFightControl() {
     }
 
     return (
-        <div>
-            <button onClick={() => setShowAddModal(true)} title="Add Fight" className='text-green-500 hover:text-white cursor-pointer transition-all'><BsBookmarkPlusFill size={32}/></button>
+        <div style={{margin:'2em', marginTop: '3em'}}>
+            <button onClick={() => setShowAddModal(true)} title="Add Fight" className='hover:text-white cursor-pointer transition-all' style={{color: '#f2e7e3', display: 'flex', backgroundColor: '#fd4a4a', padding: '0.8em', borderRadius: '0.8em'}}><BsBookmarkPlusFill size={32}/><p style={{margin: 'auto', marginLeft: '0.8em'}}>Créer un combat</p></button>
             {
                 (showAddModal)
                 ?   <Modal isOpen={showAddModal} onClose={() => handleModalClose()}>

@@ -1,24 +1,34 @@
-import { useContext, useState } from "react";
-import { MdSave } from "react-icons/md";
-import { DataContext } from "../../context/DataContext";
+import { useState } from 'react';
+import { MdSave } from 'react-icons/md';
 
-export function SaveFileControl () {
-    const { charData } = useContext(DataContext);
+export function SaveFileControl() {
     const [downloadTimeout, setDownloadTimeout] = useState(false);
 
     const handleDownload = () => {
-        if(downloadTimeout){
-            return;
+        if (downloadTimeout) return;
+
+        if (!window.confirm(`Télécharger La partie ?`)) return;
+
+        const allLocalStorage: Record<string, any> = {};
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key) {
+                try {
+                    allLocalStorage[key] = JSON.parse(localStorage.getItem(key) as string);
+                } catch {
+                    allLocalStorage[key] = localStorage.getItem(key);
+                }
+            }
         }
 
-        if(!window.confirm(`Download le fichier des personnages ?`)){
-            return;
-        }
+        console.log("allLocalStorage");
+        console.log(allLocalStorage);
 
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(charData));
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allLocalStorage, null, 2));
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "Fate_JDR_CharData.json");
+        downloadAnchorNode.setAttribute("download", "Fate_JDR_GameBackup.json");
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
@@ -33,8 +43,10 @@ export function SaveFileControl () {
 
     return (
         <div className='navbar-icon group' onClick={handleDownload}>
-            <MdSave size="32"/>
-            <span className='navbar-tooltip group-hover:scale-100 scale-0'><p>Download File</p></span>
+            <MdSave size={32} />
+            <span className='navbar-tooltip group-hover:scale-100 scale-0'>
+                <p>Download Cache</p>
+            </span>
         </div>
     );
-};
+}

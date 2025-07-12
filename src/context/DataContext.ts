@@ -3,26 +3,26 @@ import { CharStatsInterface } from '../types/statsType';
 import { FilterSettingsInterface } from '../types/filterType';
 import { FightListInterface } from "../types/fightType";
 
-interface DataContextInterface {
+export interface DataContextInterface {
     charData: CharStatsInterface[];
-    setCharData: (newData: CharStatsInterface[]) => void;
+    setCharData: (data: CharStatsInterface[]) => void;
     filterData: FilterSettingsInterface[];
-    setFilterData: (newFilterArray: FilterSettingsInterface[]) => void;
+    setFilterData: (data: FilterSettingsInterface[]) => void;
     fightData: FightListInterface[];
-    setFightData: (newFightData: FightListInterface[]) => void;
+    setFightData: (data: FightListInterface[]) => void;
     playerData: string[];
-    setPlayerData: (newPlayerData: string[]) => void;
+    setPlayerData: (data: string[]) => void;
 }
 
-const DEFAULT_CONTEXT_VALUE: DataContextInterface = {
+export const DataContext = createContext<DataContextInterface>({
     charData: [],
     setCharData: () => {},
     filterData: [],
-    setFilterData: () => [],
+    setFilterData: () => {},
     fightData: [],
-    setFightData: () => [],
+    setFightData: () => {},
     playerData: [],
-    setPlayerData: () => [],
-};
+    setPlayerData: () => {},
+});
 
-export const DataContext = createContext<DataContextInterface>(DEFAULT_CONTEXT_VALUE);
+DataContext.displayName = "DataContext";

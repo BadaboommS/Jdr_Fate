@@ -37,6 +37,8 @@ export function CreateChar() {
         };
 
         setCharData([...charData, newCharacterData]);
+
+        console.log(charData);
     }
     
     function handleCalculStats(){

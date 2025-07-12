@@ -72,6 +72,7 @@ export function handleFightAtk(
     const atkCount = (nbAtk) ? nbAtk : attackerData.CombatStats.AA;
 
     handleHistoryEventAdd(`-- ${attackerData.Name} attaque ${defenderData.Name} --`, 'Text');
+    console.log("\n\n:: New round ::\n")
 
     let critCounter = 0;
     let dmgCounter = 0;
@@ -109,13 +110,14 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
 
     // Calcul malus AD
     const maxMalus = Defender.FightStyleList.some(stance => stance?.Name === "Position du Lézard") ? 45 : 90;
-    const malusAD = (atkNumber - Defender.CombatStats.AD) > 0 ? Math.min((atkNumber - Defender.CombatStats.AD) * -15, -maxMalus) : 0;
+    const malusAD = (atkNumber - Defender.CombatStats.AD) > 0 ? Math.min((atkNumber - Defender.CombatStats.AD) * 15, maxMalus) : 0;
 
     // Calcul succès atk
-    const atkSuccess = (defJet + malusAD) - atkJet;
-    if(atkSuccess > 0){ //Echec atk
+    const atkSuccess = atkJet - (defJet + malusAD);
+    if(atkSuccess <= 0){ //Echec atk
         const dmg = 0;
         const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: Echec`, msgType: 'Def', msgTitle: `${Attacker.Name}: ${atkJet - Attacker.CombatStats.SA} + ${Attacker.CombatStats.SA} SA | ${Defender.Name}: ${defJet - Defender.CombatStats.SD} + ${Defender.CombatStats.SD} SD`}];
+        console.log("Roll : "+atkJet+" VS "+defJet+" - "+malusAD+" Malus -> Echec");
         return({ Defender: Defender, dmg: dmg, msg: msgArray });
     }
 
@@ -128,13 +130,16 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
     }
 
     // Ecart (%) * DMG stat
-    const Dmg = (ecartDmg / 100) * Attacker.CombatStats.DMG;
+    const Dmg = (ecartDmg / 100) * Math.max(Attacker.CombatStats.DMG,0);
 
     // Calcul ArmorPierce
-    const armorPierce = (Defender.CombatStats.ReD - Attacker.CombatStats.PA) < 0 ? 0 : (Defender.CombatStats.ReD - Attacker.CombatStats.PA);
+    const ReD = Math.max(Defender.CombatStats.ReD,0)
+    const dmgReduc = (ReD - Attacker.CombatStats.PA) < 0 ? 0 : ReD - Attacker.CombatStats.PA;
 
     // Calcul Dmg Final
-    let finalDmg = Math.floor(Dmg + armorPierce);
+    let finalDmg = Math.floor(Dmg - dmgReduc);
+    console.log("Atk "+(atkNumber + 1)+" : "+atkJet+" VS "+defJet+" - "+malusAD+" Malus : Ecart "+ecartDmg+" % -> Sucess");
+    console.log("   DMG => "+finalDmg+" ,"+Dmg+" ,"+Attacker.CombatStats.DMG+" : "+Defender.CombatStats.ReD+" ReD VS "+Attacker.CombatStats.PA+" PA  => -"+dmgReduc+"");
     const msgArray = [{ historyMsg: `Atk N°${atkNumber + 1}: ${finalDmg} Dmg`, msgType: 'Atk', msgTitle: `${Attacker.Name}: ${atkJet - Attacker.CombatStats.SA} + ${Attacker.CombatStats.SA} SA | ${Defender.Name}: ${defJet - Defender.CombatStats.SD} + ${Defender.CombatStats.SD} SD`}];
 
     // Calcul CC
@@ -142,8 +147,10 @@ function handleDmgCalc(Attacker: CharStatsInterface, Defender: CharStatsInterfac
 
     // Check CC
     const enableCC = (critCounter < Attacker.CombatStats.CC);
-    if(CCDiceRoll < Attacker.CombatStats.CdC && Attacker.FightStyleList.some(stance => stance?.Name !== "Position du Flamant Rose")){
+    const minCrit = Math.min(50 - Attacker.CombatStats.CdC + 1,50)
+    if(CCDiceRoll >= minCrit && Attacker.FightStyleList.some(stance => stance?.Name !== "Position du Flamant Rose")){
         if(enableCC){
+            console.log("   + Crit Roll : '"+CCDiceRoll+ "' : 50 et "+minCrit+" -> Sucess");
             msgArray.push({ historyMsg: `Critical Hit! ⭐`, msgType: 'CC', msgTitle: ''});
             if(!(Defender.FightStyleList.some(stance => stance?.Name === "Position de la Pieuvre"))){
                 const allDebuffs = getAllDebbuffs(Attacker.Weapon.WeaponType);

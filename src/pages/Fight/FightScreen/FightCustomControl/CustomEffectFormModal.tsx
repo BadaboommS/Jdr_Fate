@@ -109,7 +109,7 @@ export function CustomEffectFormModal ({ toEditCharData, handleHistoryEventAdd, 
     return (
         <>
             <button onClick={() => setShowCustomEffectModal(true)} title={toEdit? "Edit effect" : "Add Effect"} className={`transition-all cursor-pointer rounded p-1 ${toEdit? 'text-white bg-green-500 hover:text-green-500 hover:bg-white' : 'text-green-500 hover:bg-green-500 hover:text-white'}`}>
-                {(toEdit? <FaEdit size={18} className='m-1'/> : <BsBookmarkPlusFill size={32} />)}
+                {(toEdit? <FaEdit size={18} className='m-1'/> : <BsBookmarkPlusFill style={{color: '#fd4a4a'}} size={32} />)}
                 </button>
             {
                 (showCustomEffectModal)

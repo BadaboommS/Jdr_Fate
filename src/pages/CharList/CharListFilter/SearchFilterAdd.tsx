@@ -26,7 +26,7 @@ export function SearchFilterAdd() {
 
     return (
         <div>
-            <button onClick={() => setShowAddModal(true)} title="Add Filtre" className='text-green-500 hover:text-white cursor-pointer transition-all'><BsBookmarkPlusFill size={32}/></button>
+            <button onClick={() => setShowAddModal(true)} title="Add Filtre" className='text-red-500 hover:text-white cursor-pointer transition-all'><BsBookmarkPlusFill size={32}/></button>
             {
                 (showAddModal)
                 ?   <Modal isOpen={showAddModal} onClose={() => handleModalClose()}>

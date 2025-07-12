@@ -3,12 +3,13 @@ import { DataContext } from '../../context/DataContext';
 import { CharStatsInterface } from '../../types/statsType';
 import { FilterSettingsInterface } from '../../types/filterType';
 import { FightListInterface } from '../../types/fightType';
+import { BsFiles } from "react-icons/bs";
 
 interface FileDataInterface {
-    filter_data: FilterSettingsInterface[];
-    characters_data: CharStatsInterface[];
-    fight_data: FightListInterface[];
-    player_data: string[];
+    filterData: FilterSettingsInterface[];
+    charData: CharStatsInterface[];
+    fightData: FightListInterface[];
+    playerData: string[];
 }
 
 export function FileMenu () {
@@ -16,6 +17,7 @@ export function FileMenu () {
     const { setCharData, setFilterData, setFightData, setPlayerData } = useContext(DataContext);
 
     function handleFileImport(event: React.ChangeEvent<HTMLInputElement>) {
+
         const file = event.target.files?.[0];
         if (file) {
             const reader = new FileReader();
@@ -25,10 +27,16 @@ export function FileMenu () {
                     try {
                         const json: FileDataInterface = JSON.parse(content as string);
 
-                        const char_data = json.characters_data;
-                        const filter_data = json.filter_data;
-                        const fight_data = json.fight_data;
-                        const player_data = json.player_data;
+                        const char_data = json.charData;
+                        const filter_data = json.filterData;
+                        const fight_data = json.fightData;
+                        const player_data = json.playerData;
+
+                        console.log("FION");
+                        console.log(player_data);
+                        console.log(char_data);
+                        console.log(fight_data);
+                        console.log(filter_data);
 
                         setCharData(char_data);
                         setFilterData(filter_data);
@@ -44,7 +52,7 @@ export function FileMenu () {
     }
 
     return (
-        <div>
+        <div style={{margin: 'auto', marginTop: '4em'}}>
             <input
                 type="file"
                 accept=".json"
@@ -52,7 +60,7 @@ export function FileMenu () {
                 onChange={handleFileImport}
                 style={{ display: 'none' }}
             />
-            <button className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow cursor-pointer" onClick={() => fileInputRef.current?.click()}>Import JSON File</button>
+            <button className="font-semibold py-2 px-4 shadow cursor-pointer" style={{color: '#f2e7e3', display: 'flex', backgroundColor: '#fd4a4a', padding: '1em', borderRadius: '1em'}} onClick={() => fileInputRef.current?.click()}><BsFiles size={32}/><p style={{marginLeft: '0.6em', fontSize: '1.4em'}}>Importer une partie</p></button>
         </div>
     );
 };

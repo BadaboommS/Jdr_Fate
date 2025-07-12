@@ -30,7 +30,7 @@ export function FightList() {
     return (
         <div>
             <AddFightControl />
-            <div className="p-5 w-full h-full flex gap-2 flex-wrap">
+            <div className="p-5 h-full flex gap-2 flex-wrap" style={{margin:'1.2em'}}>
                 {
                     (fightData[0])
                     ?   fightData.map((fight: FightListInterface) => {
@@ -38,7 +38,7 @@ export function FightList() {
                         })
                     : <p>No Fight Data available.</p>
                 }
-            </div>
+            </div >
             {
                 (showFightModal && activeFightData)
                     ?   <Modal isOpen={showFightModal} onClose={() => handleModalClose()}>
